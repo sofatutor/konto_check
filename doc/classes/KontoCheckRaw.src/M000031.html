@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>generate_lutfile (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])&lt;/tt&gt;
+ *
+ * Diese Funktion generiert eine neue LUT-Datei aus der BLZ-Datei der Deutschen Bundesbank. Die folgenden
+ * Parameter werden unterstützt:
+ * * inputfile: Eingabedatei (Textdatei) der Bundesbank
+ * * outputfile: Name der Ausgabedatei
+ * * user_info: Info-String der in die LUT-Datei geschrieben wird (frei wählbar; wird in den Info-Block aufgenommen)
+ * * gueltigkeit: Gültigkeit des Datensatzes im Format JJJJMMTT-JJJJMMTT. Diese Angabe wird benutzt, um festzustellen, ob ein Datensatz aktuell noch gültig ist.
+ * * felder: (0-9) Welche Daten aufgenommmen werden sollen (PZ steht in der folgenden Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der sowohl den Namen als auch den Kurznamen der Bank enthält; dieser läßt sich besser komprimieren als wenn beide Blocks getrennt sind):
+ *    0. BLZ,PZ
+ *    1. BLZ,PZ,NAME_KURZ
+ *    2. BLZ,PZ,NAME_KURZ,BIC
+ *    3. BLZ,PZ,NAME,PLZ,ORT
+ *    4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ *    5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ *    6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ *    7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ *    8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ *    9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+ * * filialen: (0 oder 1) Flag, ob nur die Daten der Hauptstellen (0) oder auch die der Filialen aufgenommen werden sollen
+ * * set (0, 1 oder 2): Datensatz-Nummer. Jede LUT-Datei kann zwei Datensätze enthalten. Falls bei der Initialisierung nicht ein bestimmter Datensatz ausgewählt wird, wird derjenige genommen, der (laut Gültigkeitsstring) aktuell gültig ist.
+ * * iban_file: Datei der Banken, die einer Selbstberechnung des IBAN nicht zugestimmt haben. Näheres dazu (inklusive Weblink) findet sich bei der Funktion KontoCheckRaw::iban_gen(blz,kto).
+ * 
+ * Mögliche Rückgabewerte:
+ * 
+ *    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+ *     -57  (LUT2_GUELTIGKEIT_SWAPPED)   &quot;Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht&quot;
+ *     -56  (LUT2_INVALID_GUELTIGKEIT)   &quot;Das angegebene Gültigkeitsdatum ist ungültig (Soll: JJJJMMTT-JJJJMMTT)&quot;
+ *     -32  (LUT2_COMPRESS_ERROR)        &quot;Fehler beim Komprimieren eines LUT-Blocks&quot;
+ *     -31  (LUT2_FILE_CORRUPTED)        &quot;Die LUT-Datei ist korrumpiert&quot;
+ *     -30  (LUT2_NO_SLOT_FREE)          &quot;Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei&quot;
+ *     -15  (INVALID_BLZ_FILE)           &quot;Fehler in der blz.txt Datei (falsche Zeilenlänge)&quot;
+ *     -11  (FILE_WRITE_ERROR)           &quot;kann Datei nicht schreiben&quot;
+ *     -10  (FILE_READ_ERROR)            &quot;kann Datei nicht lesen&quot;
+ *      -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+ *      -7  (INVALID_LUT_FILE)           &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ *       7  (LUT1_FILE_GENERATED)        &quot;ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert&quot;
+ */
+static VALUE generate_lutfile_rb(int argc,VALUE* argv,VALUE self)
+{
+   char input_name[FILENAME_MAX+1],output_name[FILENAME_MAX+1],iban_file[FILENAME_MAX+1];
+   char user_info[256],gueltigkeit[20],buffer[16],error_msg[512];
+   int retval,felder,filialen,set,len;
+   VALUE input_name_rb,output_name_rb,user_info_rb,
+         gueltigkeit_rb,felder_rb,filialen_rb,set_rb,iban_file_rb;
+
+   rb_scan_args(argc,argv,&quot;26&quot;,&amp;input_name_rb,&amp;output_name_rb,
+         &amp;user_info_rb,&amp;gueltigkeit_rb,&amp;felder_rb,&amp;filialen_rb,&amp;set_rb,&amp;iban_file_rb);
+
+   if(TYPE(input_name_rb)==RUBY_T_STRING){
+      strncpy(input_name,RSTRING_PTR(input_name_rb),FILENAME_MAX);
+      if((len=RSTRING_LEN(input_name_rb))&gt;FILENAME_MAX)len=FILENAME_MAX;
+      *(input_name+len)=0;
+   }
+   else
+      rb_raise(rb_eTypeError,&quot;Unable to convert given input filename.&quot;);
+
+   if(TYPE(output_name_rb)==RUBY_T_STRING){
+      strncpy(output_name,RSTRING_PTR(output_name_rb),FILENAME_MAX);
+      if((len=RSTRING_LEN(output_name_rb))&gt;FILENAME_MAX)len=FILENAME_MAX;
+      *(output_name+len)=0;
+   }
+   else
+      rb_raise(rb_eTypeError,&quot;Unable to convert given output filename.&quot;);
+
+   if(NIL_P(user_info_rb)){
+      *user_info=0;
+   }
+   else if(TYPE(user_info_rb)==RUBY_T_STRING){
+      strncpy(user_info,RSTRING_PTR(user_info_rb),255);
+      if((len=RSTRING_LEN(user_info_rb))&gt;255)len=255;
+      *(user_info+len)=0;
+   }
+   else
+      rb_raise(rb_eTypeError,&quot;Unable to convert given user_info string.&quot;);
+
+   if(NIL_P(gueltigkeit_rb)){
+      *gueltigkeit=0;
+   }
+   else if(TYPE(gueltigkeit_rb)==RUBY_T_STRING){
+      strncpy(gueltigkeit,RSTRING_PTR(gueltigkeit_rb),19);
+      if((len=RSTRING_LEN(gueltigkeit_rb))&gt;19)len=19;
+      *(gueltigkeit+len)=0;
+   }
+   else
+      rb_raise(rb_eTypeError,&quot;Unable to convert given gueltigkeit string.&quot;);
+
+   if(NIL_P(felder_rb))
+      felder=DEFAULT_LUT_FIELDS_NUM;
+   else if(TYPE(felder_rb)==RUBY_T_STRING){
+      strncpy(buffer,RSTRING_PTR(felder_rb),15);
+      if((len=RSTRING_LEN(felder_rb))&gt;15)len=15;
+      *(buffer+len)=0;
+      felder=atoi(buffer);
+   }
+   else
+      felder=NUM2INT(felder_rb);
+
+   if(NIL_P(filialen_rb))
+      filialen=0;
+   else if(TYPE(filialen_rb)==RUBY_T_STRING){
+      strncpy(buffer,RSTRING_PTR(filialen_rb),15);
+      if((len=RSTRING_LEN(felder_rb))&gt;15)len=15;
+      *(buffer+len)=0;
+      filialen=atoi(buffer);
+   }
+   else
+      filialen=NUM2INT(filialen_rb);
+
+   if(NIL_P(set_rb))
+      set=0;
+   else if(TYPE(set_rb)==RUBY_T_STRING){
+      strncpy(buffer,RSTRING_PTR(set_rb),15);
+      if((len=RSTRING_LEN(set_rb))&gt;15)len=15;
+      *(buffer+len)=0;
+      set=atoi(buffer);
+   }
+   else
+      set=NUM2INT(set_rb);
+
+   if(NIL_P(iban_file_rb)){
+      *iban_file=0;
+   }
+   else if(TYPE(iban_file_rb)==RUBY_T_STRING){
+      strncpy(iban_file,RSTRING_PTR(iban_file_rb),FILENAME_MAX);
+      if((len=RSTRING_LEN(iban_file_rb))&gt;FILENAME_MAX)len=FILENAME_MAX;
+      *(iban_file+len)=0;
+   }
+   else
+      rb_raise(rb_eTypeError,&quot;Unable to convert given iban file name to string.&quot;);
+
+   retval=generate_lut2_p(input_name,output_name,user_info,gueltigkeit,felder,filialen,0,0,set);
+   if(retval&lt;0)RUNTIME_ERROR(retval);
+   if(*iban_file)lut_keine_iban_berechnung(iban_file,output_name,0);
+   return INT2FIX(retval);
+}</pre>
+</body>
+</html>

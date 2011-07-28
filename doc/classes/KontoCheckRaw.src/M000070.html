@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>dump_lutfile (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::dump_lutfile(lutfile)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::dump_lutfile(lutfile)&lt;/tt&gt;
+ *
+ * Diese Funktion liefert detaillierte Informationen über alle Blocks, die in
+ * der LUT-Datei gespeichert sind, sowie noch einige Internas der LUT-Datei.
+ * Der Rückgabewert ist ein Array mit zwei Elementen: im ersten steht ein
+ * String mit den Infos, im zweiten ein Statuscode. Im Fehlerfall wird für den
+ * Infostring nil zurückgegeben.
+ *
+ * Mögliche Werte für den Statuscode sind:
+ *
+ *    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+ *     -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+ *     -36  (LUT2_Z_MEM_ERROR)           &quot;Memory error in den ZLIB-Routinen&quot;
+ *     -35  (LUT2_Z_DATA_ERROR)          &quot;Datenfehler im komprimierten LUT-Block&quot;
+ *     -33  (LUT2_DECOMPRESS_ERROR)      &quot;Fehler beim Dekomprimieren eines LUT-Blocks&quot;
+ *     -31  (LUT2_FILE_CORRUPTED)        &quot;Die LUT-Datei ist korrumpiert&quot;
+ *     -20  (LUT_CRC_ERROR)              &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+ *     -10  (FILE_READ_ERROR)            &quot;kann Datei nicht lesen&quot;
+ *      -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+ *      -7  (INVALID_LUT_FILE)           &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE dump_lutfile_rb(int argc,VALUE* argv,VALUE self)
+{
+   char lut_name[FILENAME_MAX+1],*ptr;
+   int retval;
+   VALUE dump;
+
+   get_params_file(argc,argv,lut_name,NULL,NULL,2);
+   retval=lut_dir_dump_str(lut_name,&amp;ptr);
+   if(retval&lt;=0)
+      dump=Qnil;
+   else
+      dump=rb_str_new2(ptr);
+   kc_free(ptr);  /* die C-Funktion allokiert Speicher, der muß wieder freigegeben werden */
+   return rb_ary_new3(2,dump,INT2FIX(retval));
+}</pre>
+</body>
+</html>

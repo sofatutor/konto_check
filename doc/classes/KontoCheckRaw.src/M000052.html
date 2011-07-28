@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>current_lutfile_name (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::current_lutfile_name()&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::current_lutfile_name()&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::current_lutfile_set()&lt;/tt&gt;
+ *
+ * Diese Funktion bestimmt den Dateinamen der zur Initialisierung benutzen
+ * LUT-Datei, das benutzte Set und den Initialisierungslevel der aktuellen
+ * Initialisierung. Rückgabewert ist ein Array mit vier Elementen: das erste
+ * ist der Dateiname der LUT-Datei, das zweite  das benutzte Set (0, falls
+ * nicht initialisiert wurde, sonst 1 oder 2), das dritte der
+ * Initialisierungslevel und das vierte der Statuscode.
+ * 
+ * Mögliche Statuscodes:
+ * 
+ *     -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE current_lutfile_name_rb(VALUE self)
+{
+   char *lut_filename;
+   int set,level,retval;
+   VALUE lut_filename_rb;
+
+   if(!(lut_filename=current_lutfile_name(&amp;set,&amp;level,&amp;retval)))
+      lut_filename_rb=Qnil;
+   else
+      lut_filename_rb=rb_str_new2(lut_filename);
+   return rb_ary_new3(4,lut_filename_rb,INT2FIX(set),INT2FIX(level),INT2FIX(retval));
+}</pre>
+</body>
+</html>

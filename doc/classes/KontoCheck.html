@@ -1,0 +1,1818 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Module: KontoCheck</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Module</strong></td>
+          <td class="class-name-in-header">KontoCheck</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/lib/konto_check_rb.html">
+                lib/konto_check.rb
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This is a C/Ruby library to check the validity of German Bank Account
+Numbers. All currently defined test methods by Deutsche Bundesbank (April
+2011: 00 to D8) are implemented.
+</p>
+<p>
+<b>ATTENTION:</b> There are a few important changes in the API between <a
+href="KontoCheck.html#M000050">version</a> 0.0.2 (<a
+href="KontoCheck.html#M000050">version</a> by Peter Horn/Provideal), <a
+href="KontoCheck.html#M000050">version</a> 0.0.6 (jeanmartin) and this <a
+href="KontoCheck.html#M000050">version</a>:
+</p>
+<ul>
+<li>The function KontoCheck::load_bank_data() is no longer used; it is replaced
+by KontoCheck::init() and KontoCheck::generate_lutfile().
+
+</li>
+<li>The function KontoCheck::konto_check(blz,kto) changed the order of
+parameters from (kto,blz) to (blz,kto)
+
+</li>
+</ul>
+<p>
+Another change affects only the <a
+href="KontoCheck.html#M000050">version</a> 0.0.6 by jeanmartin:
+</p>
+<ul>
+<li>In KontoCheck::init(level,name,set) the order of the two first parameters
+is now <a href="KontoCheck.html#M000020">free</a>; the order is determined
+by the type of the variable (level is integer, filename string).
+
+</li>
+</ul>
+<p>
+Because this class is inteded for german bank accounts, the rest of the
+documentation is in german too.
+</p>
+<p>
+Diese Bibliothek implementiert die Prüfziffertests für deutsche
+Bankkonten. Die meisten Konten enthalten eine Prüfziffer; mit dieser kann
+getestet werden, ob eine Bankleitzahl plausibel ist oder nicht. Auf diese
+Weise können Zahlendreher oder Zifferverdopplungen oft festgestellt
+werden. Es ist natürlich nicht möglich, zu bestimmen, ob ein Konto
+wirklich existiert; dazu müßte jeweils eine Anfrage bei der Bank gemacht
+werden ;-).
+</p>
+<p>
+Die Bibliothek ist in zwei Teile gesplittet: <a
+href="KontoCheckRaw.html">KontoCheckRaw</a> bildet die direkte
+Schnittstelle zur C-Bibliothek und ist daher manchmal etwas sperrig; <a
+href="KontoCheck.html">KontoCheck</a> ist dagegen mehr Ruby-artig
+ausgelegt. <a href="KontoCheck.html">KontoCheck</a> gibt meist nur eine
+Teilmenge von <a href="KontoCheckRaw.html">KontoCheckRaw</a> zurück, aber
+(hoffentlich) die Teile, die man unmittelbar von den jeweiligen Funktionen
+erwartet. Eine Reihe einfacher Funktionen sind auch in beiden Versionen
+identisch.
+</p>
+<p>
+Die Bankleitzahldaten werden in einem eigenen (komprimierten) Format in
+einer sogenannten LUT-Datei gespeichert. Diese Datei läßt sich mit der
+Funktion KontoCheck::generate_lutfile bzw. KontoCheckRaw::generate_lutfile
+aus der Datei der Deutschen Bundesbank (online erhältlich unter <a
+href="http://www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php">www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php</a>)
+erzeugen. Die LUT-Datei hat den großen Vorteil, daß die Datenblocks (BLZ,
+Prüfziffer, Bankname, Ort, &#8230;) unabhängig voneinander gespeichert
+sind; jeder Block kann für sich geladen werden. In einer Datei können
+zwei Datensätze der Bundesbank mit unterschiedlichem Gültigkeitsdatum
+enthalten sein. Wenn bei der Initialisierung kein bestimmter Datensatz
+ausgewählt wird, prüft die Bibliothek aufgrund des mit jedem Datensatz
+gespeicherten Gültigkeitszeitraums welcher Satz aktuell gültig ist und
+lädt diesen dann in den Speicher.
+</p>
+<p>
+Numerische Werte (z.B. Bankleitzahlen, Kontonummern, PLZ,&#8230;) können
+als Zahlwerte oder als String angegeben werden; sie werden automatisch
+konvertiert. Prüfziffermethoden können ebenfalls als Zahl oder String
+angegeben werden; die Angabe als Zahl ist allerdings nicht immer eindeutig.
+So kann z.B. 131 sowohl für D1 als auch 13a stehen; daher ist es besser,
+die Prüfziffermethode als String anzugeben (in diesem Beispiel würde 131
+als 13a interpretiert).
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000038">bank_aenderung</a>&nbsp;&nbsp;
+      <a href="#M000043">bank_alles</a>&nbsp;&nbsp;
+      <a href="#M000037">bank_bic</a>&nbsp;&nbsp;
+      <a href="#M000031">bank_filialen</a>&nbsp;&nbsp;
+      <a href="#M000039">bank_loeschung</a>&nbsp;&nbsp;
+      <a href="#M000040">bank_nachfolge_blz</a>&nbsp;&nbsp;
+      <a href="#M000032">bank_name</a>&nbsp;&nbsp;
+      <a href="#M000033">bank_name_kurz</a>&nbsp;&nbsp;
+      <a href="#M000042">bank_nr</a>&nbsp;&nbsp;
+      <a href="#M000034">bank_ort</a>&nbsp;&nbsp;
+      <a href="#M000041">bank_pan</a>&nbsp;&nbsp;
+      <a href="#M000035">bank_plz</a>&nbsp;&nbsp;
+      <a href="#M000036">bank_pz</a>&nbsp;&nbsp;
+      <a href="#M000029">bank_valid</a>&nbsp;&nbsp;
+      <a href="#M000030">bank_valid?</a>&nbsp;&nbsp;
+      <a href="#M000019">current_init_level</a>&nbsp;&nbsp;
+      <a href="#M000017">current_lutfile_name</a>&nbsp;&nbsp;
+      <a href="#M000018">current_lutfile_set</a>&nbsp;&nbsp;
+      <a href="#M000004">dump_lutfile</a>&nbsp;&nbsp;
+      <a href="#M000005">encoding</a>&nbsp;&nbsp;
+      <a href="#M000006">encoding_str</a>&nbsp;&nbsp;
+      <a href="#M000020">free</a>&nbsp;&nbsp;
+      <a href="#M000014">generate_lutfile</a>&nbsp;&nbsp;
+      <a href="#M000044">iban2bic</a>&nbsp;&nbsp;
+      <a href="#M000045">iban_check</a>&nbsp;&nbsp;
+      <a href="#M000046">iban_gen</a>&nbsp;&nbsp;
+      <a href="#M000015">init</a>&nbsp;&nbsp;
+      <a href="#M000048">ipi_check</a>&nbsp;&nbsp;
+      <a href="#M000047">ipi_gen</a>&nbsp;&nbsp;
+      <a href="#M000021">konto_check</a>&nbsp;&nbsp;
+      <a href="#M000023">konto_check?</a>&nbsp;&nbsp;
+      <a href="#M000025">konto_check_pz</a>&nbsp;&nbsp;
+      <a href="#M000026">konto_check_pz?</a>&nbsp;&nbsp;
+      <a href="#M000016">load_bank_data</a>&nbsp;&nbsp;
+      <a href="#M000001">lut_info</a>&nbsp;&nbsp;
+      <a href="#M000002">lut_info1</a>&nbsp;&nbsp;
+      <a href="#M000003">lut_info2</a>&nbsp;&nbsp;
+      <a href="#M000011">retval2dos</a>&nbsp;&nbsp;
+      <a href="#M000012">retval2html</a>&nbsp;&nbsp;
+      <a href="#M000008">retval2iso</a>&nbsp;&nbsp;
+      <a href="#M000007">retval2txt</a>&nbsp;&nbsp;
+      <a href="#M000010">retval2txt_kurz</a>&nbsp;&nbsp;
+      <a href="#M000009">retval2txt_short</a>&nbsp;&nbsp;
+      <a href="#M000013">retval2utf8</a>&nbsp;&nbsp;
+      <a href="#M000049">suche</a>&nbsp;&nbsp;
+      <a href="#M000022">valid</a>&nbsp;&nbsp;
+      <a href="#M000024">valid?</a>&nbsp;&nbsp;
+      <a href="#M000027">valid_pz</a>&nbsp;&nbsp;
+      <a href="#M000028">valid_pz?</a>&nbsp;&nbsp;
+      <a href="#M000050">version</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SEARCH_KEYS</td>
+          <td>=</td>
+          <td class="context-item-value">[:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz]</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+mögliche Suchschlüssel für die Funktion KontoCheck::suche()
+
+<p>
+:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz
+</p>
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">SEARCH_KEY_MAPPINGS</td>
+          <td>=</td>
+          <td class="context-item-value">{     :bankleitzahl =&gt; :blz,     :city         =&gt; :ort,     :zip          =&gt; :plz,     :name         =&gt; :namen,     :kurzname     =&gt; :namen_kurz,     :shortname    =&gt; :namen_kurz,     :pruefziffer  =&gt; :pz</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+Aliasnamen für einige Suchschlüssel der Funktion KontoCheck::suche()
+
+<p>
+:bankleitzahl, :city, :zip, :name, :kurzname, :shortname, :pruefziffer
+</p>
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+    <div id="aliases-list">
+      <h3 class="section-bar">External Aliases</h3>
+
+      <div class="name-list">
+                        <table summary="aliases">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">retval2txt_short</td>
+          <td>-&gt;</td>
+          <td class="context-item-value">retval2txt_kurz</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">suche</td>
+          <td>-&gt;</td>
+          <td class="context-item-value">search</td>
+        </tr>
+                        </table>
+      </div>
+    </div>
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000038" class="method-detail">
+        <a name="M000038"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000038.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000038.html');return false;">
+          <span class="method-name">bank_aenderung</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_aenderung(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_aenderung(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert das &#8217;Änderung&#8217; Flag einer Bank (als
+string). Mögliche Werte sind: A (Addition), M (Modified), U (Unchanged), D
+(Deletion).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000043" class="method-detail">
+        <a name="M000043"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000043.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000043.html');return false;">
+          <span class="method-name">bank_alles</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_alles(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_alles(blz [,filiale])</tt></h5>
+<p>
+Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
+Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden
+Komponenten:
+</p>
+<pre>
+   0:  Statuscode
+   1:  Anzahl Filialen
+   2:  Name
+   3:  Kurzname
+   4:  PLZ
+   5:  Ort
+   6:  PAN
+   7:  BIC
+   8:  Prüfziffer
+   9:  Laufende Nr.
+   10: Änderungs-Flag
+   11: Löeschung-Flag
+   12: Nachfolge-BLZ
+</pre>
+<p>
+Der Statuscode (Element 0) kann folgende Werte annehmen:
+</p>
+<pre>
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -38  (LUT2_PARTIAL_OK)            &quot;es wurden nicht alle Blocks geladen&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+<p>
+Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, wurden bei der
+Initialisierung nicht alle Blocks geladen (oder es sind nicht alle
+verfügbar); die entsprechenden Elemente haben dann den Wert nil.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000037" class="method-detail">
+        <a name="M000037"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000037.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000037.html');return false;">
+          <span class="method-name">bank_bic</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_bic(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_bic(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den BIC (Bank Identifier Code) einer Bank. Im
+Fehlerfall wird nil zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000031" class="method-detail">
+        <a name="M000031"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000031.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000031.html');return false;">
+          <span class="method-name">bank_filialen</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_filialen(blz)</tt></h3>
+<h5><tt>KontoCheckRaw::bank_filialen(blz)</tt></h5>
+<p>
+Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive
+Hauptstelle). Die LUT-Datei muß dazu natürlich mit den Filialdaten
+generiert sein, sonst wird für alle Banken nur 1 zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000039" class="method-detail">
+        <a name="M000039"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000039.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000039.html');return false;">
+          <span class="method-name">bank_loeschung</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_loeschung(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_loeschung(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert das Lösch-Flag für eine Bank zurück (als Integer;
+mögliche Werte sind 0 und 1); im Fehlerfall wird nil zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000040" class="method-detail">
+        <a name="M000040"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000040.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000040.html');return false;">
+          <span class="method-name">bank_nachfolge_blz</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_nachfolge_blz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die Nachfolge-BLZ für eine Bank, die gelöscht
+werden soll (bei der das &#8216;Löschung&#8217; Flag 1 ist).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000032" class="method-detail">
+        <a name="M000032"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000032.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000032.html');return false;">
+          <span class="method-name">bank_name</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_name(blz[,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_name(blz[,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Namen einer Bank, oder nil im Fehlerfall.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000033" class="method-detail">
+        <a name="M000033"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000033.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000033.html');return false;">
+          <span class="method-name">bank_name_kurz</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_name_kurz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_name_kurz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Kurznamen einer Bank, oder nil im Fehlerfall.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000042" class="method-detail">
+        <a name="M000042"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000042.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000042.html');return false;">
+          <span class="method-name">bank_nr</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_nr(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_nr(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die laufende Nummer einer Bank (internes Feld der
+BLZ-Datei). Der Wert wird wahrscheinlich nicht oft benötigt, ist aber der
+Vollständigkeit halber enthalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000034" class="method-detail">
+        <a name="M000034"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000034.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000034.html');return false;">
+          <span class="method-name">bank_ort</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_ort(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_ort(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Ort einer Bank. Falls der Parameter filiale
+nicht angegeben ist, wird der Sitz der Hauptstelle ausgegeben. Im
+Fehlerfall wird für den Ort nil zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000041" class="method-detail">
+        <a name="M000041"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000041.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000041.html');return false;">
+          <span class="method-name">bank_pan</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_pan(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_pan(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den PAN (Primary Account Number) einer Bank.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000035" class="method-detail">
+        <a name="M000035"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000035.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000035.html');return false;">
+          <span class="method-name">bank_plz</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_plz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_plz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die Postleitzahl einer Bank. Falls der Parameter
+filiale nicht angegeben ist, wird die PLZ der Hauptstelle ausgegeben. Im
+Fehlerfall wird für die PLZ nil zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000036" class="method-detail">
+        <a name="M000036"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000036.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000036.html');return false;">
+          <span class="method-name">bank_pz</span><span class="method-args">(blz)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_pz(blz)</tt></h3>
+<h5><tt>KontoCheckRaw::bank_pz(blz)</tt></h5>
+<p>
+Diese Funktion liefert die Prüfziffer einer Bank. Die Funktion
+unterstützt keine Filialen; zu jeder BLZ kann es in der LUT-Datei nur eine
+Prüfziffermethode geben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000029" class="method-detail">
+        <a name="M000029"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000029.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000029.html');return false;">
+          <span class="method-name">bank_valid</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h4><tt>KontoCheck::bank_valid(blz [,filiale])</tt></h4>
+<h6><tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt></h6>
+<h6><tt>KontoCheck::bank_valid?(blz [,filiale])</tt></h6>
+<p>
+Diese Funktion testet, ob eine gegebene BLZ gültig ist. Der Rückgabewert
+ist ein Statuscode mit den unten angegebenen Werten. Falls das Argument
+filiale auch angegeben ist, wird zusätzlich noch getestet, ob eine Filiale
+mit dem gegebenen Index existiert.
+</p>
+<p>
+Mögliche Rückgabewerte sind:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)    &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000030" class="method-detail">
+        <a name="M000030"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000030.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000030.html');return false;">
+          <span class="method-name">bank_valid?</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h4><tt>KontoCheck::bank_valid?(blz [,filiale])</tt></h4>
+<h6><tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt></h6>
+<h6><tt>KontoCheck::bank_valid(blz [,filiale])</tt></h6>
+<p>
+Dies ist eine convenience function zu KontoCheck::bank_valid(). Es wird
+getestet, ob die gegebene BLZ (und evl. noch der Filialindex) gültig ist.
+Der Rückgabewert ist nur true oder false.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000019.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000019.html');return false;">
+          <span class="method-name">current_init_level</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::current_init_level()</tt></h3>
+<h5><tt>KontoCheckRaw::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheckRaw::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheck::current_lutfile_set()</tt></h5>
+<p>
+Diese Funktion bestimmt das Set der LUT-Datei, das bei der Initialisierung
+benutzt wurde.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000017.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000017.html');return false;">
+          <span class="method-name">current_lutfile_name</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::current_lutfile_name()</tt></h3>
+<h5><tt>KontoCheckRaw::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheck::current_lutfile_set()</tt></h5>
+<h5><tt>KontoCheck::current_init_level()</tt></h5>
+<p>
+Diese Funktion bestimmt den Dateinamen der zur Initialisierung benutzten
+LUT-Datei.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000018.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000018.html');return false;">
+          <span class="method-name">current_lutfile_set</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::current_lutfile_set()</tt></h3>
+<h5><tt>KontoCheckRaw::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheck::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheck::current_init_level()</tt></h5>
+<p>
+Diese Funktion bestimmt das Set der LUT-Datei, das bei der Initialisierung
+benutzt wurde.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000004.html');return false;">
+          <span class="method-name">dump_lutfile</span><span class="method-args">(filename)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::dump_lutfile(lutfile)</tt></h3>
+<h5><tt>KontoCheckRaw::dump_lutfile(lutfile)</tt></h5>
+<p>
+Diese Funktion liefert detaillierte Informationen über alle Blocks, die in
+der LUT-Datei gespeichert sind, sowie noch einige Internas der LUT-Datei.
+Im Fehlerfall wird nil zurückgegeben.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000005.html');return false;">
+          <span class="method-name">encoding</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::encoding([mode])</tt></h3>
+<h5><tt>KontoCheckRaw::encoding([mode])</tt></h5>
+<h5><tt>KontoCheck::encoding_str([mode])</tt></h5>
+<h5><tt>KontoCheckRaw::keep_raw_data(mode)</tt></h5>
+<p>
+Diese Funktion legt den benutzten Zeichensatz für Fehlermeldungen durch
+die Funktion KontoCheck::retval2txt() und einige Felder der LUT-Datei
+(Name, Kurzname, Ort) fest. Wenn die Funktion nicht aufgerufen wird, wird
+der Wert DEFAULT_ENCODING aus konto_check.h benutzt.
+</p>
+<p>
+<em>Achtung</em>: Das Verhalten der Funktion hängt von dem Flag
+keep_raw_data der C-Bibliothek ab. Falls das Flag gesetzt ist, werden die
+Rohdaten der Blocks Name, Kurzname und Ort im Speicher gehalten; bei einem
+Wechsel der Kodierung wird auch für diese Blocks die Kodierung umgesetzt.
+Falls das Flag nicht gesetzt ist, sollte die Funktion <b>vor</b> der
+Initialisierung aufgerufen werden, da in dem Fall die Daten der LUT-Datei
+nur bei der Initialisierung konvertiert werden. Mit der Funktion
+KontoCheckRaw::keep_raw_data() kann das Flag gesetzt oder gelöscht werden.
+</p>
+<p>
+Für den Parameter mode werden die folgenden Werte akzeptiert (die Strings
+sind nicht case sensitiv; Mi oder mI oder MI ist z.B. auch möglich; wird
+der Parameter nicht angegeben, wird die aktuelle Kodierung ausgegeben):
+</p>
+<pre>
+   0:            aktuelle Kodierung ausgeben
+   1,  'i', 'I': ISO-8859-1
+   2,  'u', 'U': UTF-8
+   3,  'h', 'H': HTML
+   4,  'd', 'D': DOS CP 850
+   51, 'mi':     ISO-8859-1, Makro für Fehlermeldungen
+   52, 'mu':     UTF-8, Makro für Fehlermeldungen
+   53, 'mh':     HTML, Makro für Fehlermeldungen
+   54, 'md':     DOS CP 850, Makro für Fehlermeldungen
+</pre>
+<p>
+Rückgabewert ist die aktuelle Kodierung als Integer (falls zwei
+Kodierungen angegeben sind, ist die erste die der Statusmeldungen, die
+zweite die der LUT-Blocks):
+</p>
+<pre>
+    0:  &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+    1:  &quot;ISO-8859-1&quot;;
+    2:  &quot;UTF-8&quot;;
+    3:  &quot;HTML entities&quot;;
+    4:  &quot;DOS CP 850&quot;;
+    12: &quot;ISO-8859-1/UTF-8&quot;;
+    13: &quot;ISO-8859-1/HTML&quot;;
+    14: &quot;ISO-8859-1/DOS CP 850&quot;;
+    21: &quot;UTF-8/ISO-8859-1&quot;;
+    23: &quot;UTF-8/HTML&quot;;
+    24: &quot;UTF-8/DOS CP-850&quot;;
+    31: &quot;HTML entities/ISO-8859-1&quot;;
+    32: &quot;HTML entities/UTF-8&quot;;
+    34: &quot;HTML entities/DOS CP-850&quot;;
+    41: &quot;DOS CP-850/ISO-8859-1&quot;;
+    42: &quot;DOS CP-850/UTF-8&quot;;
+    43: &quot;DOS CP-850/HTML&quot;;
+    51: &quot;Makro/ISO-8859-1&quot;;
+    52: &quot;Makro/UTF-8&quot;;
+    53: &quot;Makro/HTML&quot;;
+    54: &quot;Makro/DOS CP 850&quot;;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000006.html');return false;">
+          <span class="method-name">encoding_str</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::encoding_str([mode])</tt></h3>
+<h5><tt>KontoCheckRaw::encoding_str([mode])</tt></h5>
+<h5><tt>KontoCheck::encoding([mode])</tt></h5>
+<h5><tt>KontoCheckRaw::keep_raw_data(mode)</tt></h5>
+<p>
+Diese Funktion entspricht der Funktion KontoCheck::encoding(). Allerdings
+ist der Rückgabewert nicht numerisch, sondern ein String, der die aktuelle
+Kodierung angibt. Die folgenden Rückgabewerte sind möglich (falls zwei
+Kodierungen angegeben sind, ist die erste die der Statusmeldungen, die
+zweite die der LUT-Blocks):
+</p>
+<pre>
+    &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+    &quot;ISO-8859-1&quot;;
+    &quot;UTF-8&quot;;
+    &quot;HTML entities&quot;;
+    &quot;DOS CP 850&quot;;
+    &quot;ISO-8859-1/UTF-8&quot;;
+    &quot;ISO-8859-1/HTML&quot;;
+    &quot;ISO-8859-1/DOS CP 850&quot;;
+    &quot;UTF-8/ISO-8859-1&quot;;
+    &quot;UTF-8/HTML&quot;;
+    &quot;UTF-8/DOS CP-850&quot;;
+    &quot;HTML entities/ISO-8859-1&quot;;
+    &quot;HTML entities/UTF-8&quot;;
+    &quot;HTML entities/DOS CP-850&quot;;
+    &quot;DOS CP-850/ISO-8859-1&quot;;
+    &quot;DOS CP-850/UTF-8&quot;;
+    &quot;DOS CP-850/HTML&quot;;
+    &quot;Makro/ISO-8859-1&quot;;
+    &quot;Makro/UTF-8&quot;;
+    &quot;Makro/HTML&quot;;
+    &quot;Makro/DOS CP 850&quot;;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000020.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000020.html');return false;">
+          <span class="method-name">free</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::free()</tt></h3>
+<h5><tt>KontoCheckRaw::free()</tt></h5>
+<p>
+Diese Funktion gibt allen allokierten Speicher wieder frei.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000014" class="method-detail">
+        <a name="M000014"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000014.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000014.html');return false;">
+          <span class="method-name">generate_lutfile</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt></h3>
+<h5><tt>KontoCheckRaw::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt></h5>
+<p>
+Diese Funktion generiert eine neue LUT-Datei aus der BLZ-Datei der
+Deutschen Bundesbank. Die folgenden Parameter werden unterstützt:
+</p>
+<ul>
+<li>inputfile: Eingabedatei (Textdatei) der Bundesbank
+
+</li>
+<li>outputfile: Name der Ausgabedatei
+
+</li>
+<li>user_info: Info-String der in die LUT-Datei geschrieben wird (frei
+wählbar; wird in den Info-Block aufgenommen)
+
+</li>
+<li>gueltigkeit: Gültigkeit des Datensatzes im Format JJJJMMTT-JJJJMMTT. Diese
+Angabe wird benutzt, um festzustellen, ob ein Datensatz aktuell noch
+gültig ist.
+
+</li>
+<li>felder: (0-9) Welche Daten aufgenommmen werden sollen (PZ steht in der
+folgenden Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der
+sowohl den Namen als auch den Kurznamen der Bank enthält; dieser läßt
+sich besser komprimieren als wenn beide Blocks getrennt sind):
+
+<pre>
+ 0. BLZ,PZ
+ 1. BLZ,PZ,NAME_KURZ
+ 2. BLZ,PZ,NAME_KURZ,BIC
+ 3. BLZ,PZ,NAME,PLZ,ORT
+ 4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ 5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ 6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ 7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ 8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ 9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+</pre>
+</li>
+<li>filialen: (0 oder 1) Flag, ob nur die Daten der Hauptstellen (0) oder auch
+die der Filialen aufgenommen werden sollen
+
+</li>
+<li>set (0, 1 oder 2): Datensatz-Nummer. Jede LUT-Datei kann zwei Datensätze
+enthalten. Falls bei der Initialisierung nicht ein bestimmter Datensatz
+ausgewählt wird, wird derjenige genommen, der (laut Gültigkeitsstring)
+aktuell gültig ist.
+
+</li>
+<li>iban_file: Datei der Banken, die einer Selbstberechnung des IBAN nicht
+zugestimmt haben. Näheres dazu (inklusive Weblink) findet sich bei der
+Funktion KontoCheckRaw::iban_gen(blz,kto).
+
+</li>
+</ul>
+<p>
+Mögliche Rückgabewerte:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -57  (LUT2_GUELTIGKEIT_SWAPPED)   &quot;Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht&quot;
+    -56  (LUT2_INVALID_GUELTIGKEIT)   &quot;Das angegebene Gültigkeitsdatum ist ungültig (Soll: JJJJMMTT-JJJJMMTT)&quot;
+    -32  (LUT2_COMPRESS_ERROR)        &quot;Fehler beim Komprimieren eines LUT-Blocks&quot;
+    -31  (LUT2_FILE_CORRUPTED)        &quot;Die LUT-Datei ist korrumpiert&quot;
+    -30  (LUT2_NO_SLOT_FREE)          &quot;Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei&quot;
+    -15  (INVALID_BLZ_FILE)           &quot;Fehler in der blz.txt Datei (falsche Zeilenlänge)&quot;
+    -11  (FILE_WRITE_ERROR)           &quot;kann Datei nicht schreiben&quot;
+    -10  (FILE_READ_ERROR)            &quot;kann Datei nicht lesen&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)           &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+      7  (LUT1_FILE_GENERATED)        &quot;ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000044" class="method-detail">
+        <a name="M000044"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000044.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000044.html');return false;">
+          <span class="method-name">iban2bic</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::iban2bic(iban)</tt></h3>
+<h5><tt>KontoCheckRaw::iban2bic(iban)</tt></h5>
+<p>
+Diese Funktion bestimmt zu einer (deutschen!) IBAN den zugehörigen BIC
+(Bank Identifier Code). Der BIC wird für eine EU-Standard-Überweisung im
+SEPA-Verfahren (Single Euro Payments Area) benötigt; für die deutschen
+Banken ist er in der BLZ-Datei enthalten. Nähere Infos gibt es z.B. unter
+<a href="http://www.bic-code.de">www.bic-code.de</a>/ .
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000045" class="method-detail">
+        <a name="M000045"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000045.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000045.html');return false;">
+          <span class="method-name">iban_check</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::iban_check(iban)</tt></h3>
+<h5><tt>KontoCheckRaw::iban_check(iban)</tt></h5>
+<p>
+Diese Funktion testet einen IBAN. Dabei wird sowohl die Prüfziffer des
+IBAN getestet als auch (bei deutschen Konten) die Prüfziffer der
+Bankverbindung (aus der Kontonummer). Diese Funktion gibt nur den globalen
+Status zurück; bei der Funktion KontoCheckRaw::iban_check() kann man
+zusätzlich noch den Status der Kontenprüfung abfragen.
+</p>
+<p>
+Mögliche Rückgabewerte sind:
+</p>
+<pre>
+    -67  (IBAN_OK_KTO_NOT)            &quot;Die Prüfziffer der IBAN stimmt, die der Kontonummer nicht&quot;
+    -66  (KTO_OK_IBAN_NOT)            &quot;Die Prüfziffer der Kontonummer stimmt, die der IBAN nicht&quot;
+      0  (FALSE)                      &quot;falsch&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000046" class="method-detail">
+        <a name="M000046"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000046.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000046.html');return false;">
+          <span class="method-name">iban_gen</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::iban_gen(kto,blz)</tt></h3>
+<h5><tt>KontoCheckRaw::iban_gen(kto,blz)</tt></h5>
+<p>
+Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN. Hierbei
+ist zu beachten, daß nicht alle Banken der Selbstberechnung zugestimmt
+haben. Es gibt von den Sparkassen eine Liste dieser Institute; sie ist auch
+in der LUT-Datei mit der ID 22 (1. Eigene IBAN) enthalten. Bei diesen
+Banken wird - falls der Block in der LUT-Datei enthalten ist - keine
+Berechnung durchgeführt, sondern die Status-Variable auf
+NO_OWN_IBAN_CALCULATION gesetzt.
+</p>
+<p>
+Alle Banken der Liste erzeugen eine Statusmeldung mit dem Wert
+OK_UNTERKONTO_ATTACHED, OK_UNTERKONTO_POSSIBLE oder OK_UNTERKONTO_GIVEN.
+Falls einer dieser Stauswerte zurückgegeben wird, ist somit immer Vorsicht
+geboten; der generierte IBAN sollte direkt bei dem zugehörigen Institut
+überprüft werden.
+</p>
+<p>
+Hier ein Auszug aus der Anleitung des SEPA Account Converters:
+</p>
+<p>
+Der SEPA Account Converter ist so eingestellt, dass nur Kontoverbindungen
+in IBAN und BIC umgerechnet werden, bei denen das ausgebende Kreditinstitut
+der Umrechnung zugestimmt hat. Kreditinstitute, welche einer Umrechnung
+nicht zugestimmt haben und welche zum Teil spezielle, dem SEPA Account
+Converter nicht bekannte Umrechnungs- methoden verwenden, sind in der Datei
+&quot;CONFIG.INI&quot; hinterlegt. Durch Löschen der Datei
+&quot;CONFIG.INI&quot; aus dem Programmverzeichnis haben Sie die
+Möglichkeit, eine Umrechnung für alle Konten durchzuführen. Bitte
+beachten Sie dabei, dass die so erhaltenen IBAN und BIC fehlerhaft sein
+können und deshalb mit ihren Kunden zu überprüfen sind.
+</p>
+<p>
+Weblinks:
+</p>
+<pre>
+     https://www.sparkasse-rhein-neckar-nord.de/pdf/content/sepa/kurzanleitung.pdf
+     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/index.php
+     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/sepa_account_converter.msi
+</pre>
+<p>
+Es ist möglich, sowohl die Prüfung auf Stimmigkeit der Kontonummer als
+auch auf Zulässigkeit der Selbstberechnung zu deaktivieren. Falls die IBAN
+trotz fehlender Zustimmung der Bank berechnet werden, ist vor die BLZ ein @
+zu setzen; falls auch bei falscher Bankverbindung ein IBAN berechnet werden
+soll, ist vor die BLZ ein + zu setzen. Um beide Prüfungen zu deaktiviern,
+kann @+ (oder +@) vor die BLZ gesetzt werden. Die so erhaltenen IBANs sind
+dann i.A. allerdings wohl nicht gültig.
+</p>
+<p>
+Rückgabewert ist der generierte IBAN oder nil, falls ein Fehler
+aufgetreten ist. Die genauere Fehlerursache läßt sich mit der Funktion
+KontoCheckRaw::iban_gen() feststellen.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000015" class="method-detail">
+        <a name="M000015"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000015.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000015.html');return false;">
+          <span class="method-name">init</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])</tt></h3>
+<h5><tt>KontoCheckRaw::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])</tt></h5>
+<p>
+Die Variablen p1 und p2 stehen für level und lutfile (in beliebiger
+Reihenfolge); die Zuordnung der beiden Parameter erfolgt on the fly durch
+eine Typüberprüfung.
+</p>
+<p>
+Diese Funktion initialisiert die Bibliothek und lädt die gewünschten
+Datenblocks in den Speicher. Alle Argumente sind optional; in konto_check.h
+werden die Defaultwerte definiert.
+</p>
+<p>
+Die beiden ersten Parameter sind der Dateiname und der
+Initialisierungslevel. Der Dateiname ist immer als String anzugeben, der
+Initialisierungslevel immer als Zahl, ansonsten wird eine TypeError
+Exception geworfen. Auf diese Weise ist es problemlos möglich
+festzustellen, wie die Parameter p1 und p2 den Variablen lutfile und level
+zuzuordnen sind.
+</p>
+<p>
+Für die LUT-Datei ist als Defaultwert sowohl für den Pfad als auch den
+Dateinamen eine Liste möglich, die sequenziell abgearbeitet wird; diese
+wird in konto_check.h spezifiziert (Compilerzeit-Konstante der
+C-Bibliothek). Die folgenden Werte sind in der aktuellen konto_check.h
+definiert:
+</p>
+<pre>
+   DEFAULT_LUT_NAME blz.lut, blz.lut2f, blz.lut2
+   DEFAULT_LUT_PATH ., /usr/local/etc/, /etc/, /usr/local/bin/, /opt/konto_check/ (für nicht-Windows-Systeme)
+   DEFAULT_LUT_PATH ., C:\\, C:\\Programme\\konto_check  (für Windows-Systeme)
+</pre>
+<p>
+Der Defaultwert für level ist ebenfalls in konto_check.h definiert; in der
+aktuellen Version ist er 5. Bei diesem Level werden die Blocks BLZ,
+Prüfziffer, Name, Kurzname, PLZ, Ort und BIC geladen.
+</p>
+<p>
+Falls der Parameter set nicht angegeben ist, wird versucht, das aktuell
+gültige Set aus dem Systemdatum und dem Gültigkeitszeitraum der in der
+LUT-Datei gespeicherten Sets zu bestimmen.
+</p>
+<p>
+Hier noch einmal ein Überblick über die Parameter:
+</p>
+<ul>
+<li>lutfile: die LUT-Datei, mit der initialisiert werden soll
+
+</li>
+<li>level: (0-9) Welche Daten geladen werden sollen (PZ steht in der folgenden
+Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der sowohl den
+Namen als auch den Kurznamen der Bank enthält; dieser läßt sich besser
+komprimieren als wenn beide Blocks getrennt sind):
+
+<pre>
+ 0. BLZ,PZ
+ 1. BLZ,PZ,NAME_KURZ
+ 2. BLZ,PZ,NAME_KURZ,BIC
+ 3. BLZ,PZ,NAME,PLZ,ORT
+ 4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ 5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ 6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ 7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ 8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ 9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+</pre>
+</li>
+<li>set (1 oder 2): Datensatz
+
+</li>
+</ul>
+<p>
+Mögliche Rückgabewerte:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -64  (INIT_FATAL_ERROR)        &quot;Initialisierung fehlgeschlagen (init_wait geblockt)&quot;
+    -63  (INCREMENTAL_INIT_NEEDS_INFO)            &quot;Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei&quot;
+    -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   &quot;Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich&quot;
+    -38  (LUT2_PARTIAL_OK)         &quot;es wurden nicht alle Blocks geladen&quot;
+    -36  (LUT2_Z_MEM_ERROR)        &quot;Memory error in den ZLIB-Routinen&quot;
+    -35  (LUT2_Z_DATA_ERROR)       &quot;Datenfehler im komprimierten LUT-Block&quot;
+    -34  (LUT2_BLOCK_NOT_IN_FILE)  &quot;Der Block ist nicht in der LUT-Datei enthalten&quot;
+    -33  (LUT2_DECOMPRESS_ERROR)   &quot;Fehler beim Dekomprimieren eines LUT-Blocks&quot;
+    -31  (LUT2_FILE_CORRUPTED)     &quot;Die LUT-Datei ist korrumpiert&quot;
+    -20  (LUT_CRC_ERROR)           &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+    -10  (FILE_READ_ERROR)         &quot;kann Datei nicht lesen&quot;
+     -9  (ERROR_MALLOC)            &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)        &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+     -6  (NO_LUT_FILE)             &quot;die blz.lut Datei wurde nicht gefunden&quot;
+
+      1  (OK)                      &quot;ok&quot;
+      6  (LUT1_SET_LOADED)         &quot;Die Datei ist im alten LUT-Format (1.0/1.1)&quot;
+</pre>
+<p>
+Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, waren bei der
+Initialisierung nicht alle Blocks in der LUT-Datei enthalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000048" class="method-detail">
+        <a name="M000048"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000048.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000048.html');return false;">
+          <span class="method-name">ipi_check</span><span class="method-args">(zweck)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::ipi_check(zweck)</tt></h3>
+<h5><tt>KontoCheckRaw::ipi_check(zweck)</tt></h5>
+<p>
+Die Funktion testet, ob ein Strukturierter Verwendungszweck gültig ist
+(Anzahl Zeichen, Prüfziffer). Der Rückgabewert ist true oder false.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000047" class="method-detail">
+        <a name="M000047"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000047.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000047.html');return false;">
+          <span class="method-name">ipi_gen</span><span class="method-args">(zweck)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::ipi_gen(zweck)</tt></h3>
+<h5><tt>KontoCheckRaw::ipi_gen(zweck)</tt></h5>
+<p>
+Diese Funktion generiert einen &quot;Strukturierten Verwendungszweck&quot;
+für SEPA-Überweisungen. Der Rückgabewert ist der Strukturierte
+Verwendungszweck als String oder nil, falls ein Fehler aufgetreten ist.
+</p>
+<p>
+Der String für den Strukturierten Verwendungszweck darf maximal 18 Byte
+lang sein und nur alphanumerische Zeichen enthalten (also auch keine
+Umlaute). Die Funktion KontoCheckRaw::ipi_gen() gibt einen Statuscode
+zurück, der etwas nähere Infos im Fehlerfall enthält.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000021" class="method-detail">
+        <a name="M000021"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000021.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000021.html');return false;">
+          <span class="method-name">konto_check</span><span class="method-args">(blz,kto)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::konto_check(blz,kto)</tt></h3>
+<h5><tt>KontoCheckRaw::konto_check(blz,kto)</tt></h5>
+<h5><tt>KontoCheck::valid(blz,kto)</tt></h5>
+<p>
+Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die
+Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+Prüfung enthält. Mögliche Rückgabewerte sind:
+</p>
+<pre>
+   -69  MISSING_PARAMETER       &quot;Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+   -40  LUT2_NOT_INITIALIZED    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+
+   -77  BAV_FALSE               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+   -29  UNDEFINED_SUBMETHOD     &quot;Die (Unter)Methode ist nicht definiert&quot;
+   -12  INVALID_KTO_LENGTH      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+    -5  INVALID_BLZ_LENGTH      &quot;die Bankleitzahl ist nicht achtstellig&quot;
+    -4  INVALID_BLZ             &quot;die Bankleitzahl ist ungültig&quot;
+    -3  INVALID_KTO             &quot;das Konto ist ungültig&quot;
+    -2  NOT_IMPLEMENTED         &quot;die Methode wurde noch nicht implementiert&quot;
+    -1  NOT_DEFINED             &quot;die Methode ist nicht definiert&quot;
+     0  FALSE                   &quot;falsch&quot;
+     1  OK                      &quot;ok&quot;
+     2  OK_NO_CHK               &quot;ok, ohne Prüfung&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000023" class="method-detail">
+        <a name="M000023"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000023.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000023.html');return false;">
+          <span class="method-name">konto_check?</span><span class="method-args">(blz,kto)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::konto_check?(blz, kto)</tt></h3>
+<h5><tt>KontoCheck::konto_check(blz,kto)</tt></h5>
+<h5><tt>KontoCheckRaw::konto_check(blz,kto)</tt></h5>
+<p>
+Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die
+Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+Prüfung enthält. Mögliche Rückgabewerte sind einfach true und false
+(convenience function für <a
+href="KontoCheck.html#M000021">konto_check</a>()).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000025" class="method-detail">
+        <a name="M000025"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000025.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000025.html');return false;">
+          <span class="method-name">konto_check_pz</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::konto_check_pz(pz,kto[,blz])</tt></h3>
+<h5><tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt></h5>
+<h5><tt>KontoCheck::valid_pz(pz,kto[,blz])</tt></h5>
+<p>
+Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination
+gültig ist.
+</p>
+<p>
+Der zusätzliche Parameter blz ist nur für die Verfahren 52, 53, B6 und C0
+notwendig; bei diesen Verfahren geht die BLZ in die Berechnung der
+Prüfziffer ein. Bei allen anderen Prüfzifferverfahren wird er ignoriert.
+Wird er bei einem dieser Verfahren nicht angegeben, wird stattdessen eine
+Test-BLZ eingesetzt.
+</p>
+<p>
+Die Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+Prüfung enthält. Mögliche Rückgabewerte sind:
+</p>
+<pre>
+   -69  (MISSING_PARAMETER)       &quot;bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+   -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+
+   -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+   -29  (UNDEFINED_SUBMETHOD)     &quot;die (Unter)Methode ist nicht definiert&quot;
+   -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+    -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+    -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+    -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+     0  (FALSE)                   &quot;falsch&quot;
+     1  (OK)                      &quot;ok&quot;
+     2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000026" class="method-detail">
+        <a name="M000026"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000026.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000026.html');return false;">
+          <span class="method-name">konto_check_pz?</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::konto_check_pz?(pz,kto[,blz])</tt></h3>
+<h5><tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt></h5>
+<h5><tt>KontoCheck::valid_pz?(pz,kto[,blz])</tt></h5>
+<p>
+Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination
+gültig ist. Der Rückgabewert dieser Funktion ist true oder false
+(convenience function für KontoCheck::konto_check_pz()).
+</p>
+<p>
+Der zusätzliche Parameter blz ist nur für die Verfahren 52, 53, B6 und C0
+notwendig; bei diesen Verfahren geht die BLZ in die Berechnung der
+Prüfziffer ein. Bei allen anderen Prüfzifferverfahren wird er ignoriert.
+Wird er bei einem dieser Verfahren nicht angegeben, wird stattdessen eine
+Test-BLZ eingesetzt.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000016" class="method-detail">
+        <a name="M000016"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000016.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000016.html');return false;">
+          <span class="method-name">load_bank_data</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::load_bank_data(&lt;datafile&gt;)</tt></h3>
+<h5><tt>KontoCheckRaw::load_bank_data(&lt;datafile&gt;)</tt></h5>
+<p>
+Diese Funktion war die alte Initialisierungsroutine für <a
+href="KontoCheck.html#M000021">konto_check</a>; es ist nun durch die
+Funktionen KontoCheck::init() und KontoCheck::generate_lutfile() ersetzt.
+Zur Initialisierung benutzte sie die Textdatei der Deutschen Bundesbank und
+generiertge daraus eine LUT-Datei, die dann von der Initialisierungsroutine
+der C-Bibliothek benutzt wurde.
+</p>
+<p>
+Die <a href="KontoCheck.html#M000015">init</a>() Funktion ist wesentlich
+schneller (7..20 mal so schnell) und hat eine Reihe weiterer Vorteile. So
+ist es z.B. möglich, zwwei Datensätze mit unterschiedlichem
+Gültigkeitszeitraum in einer Datei zu halten und den jeweils gültigen
+Satz automatisch (nach der Systemzeit) auswählen zu lassen. Die einzelnen
+Datenblocks (Bankleitzahlen, Prüfziffermethoden, PLZ, Ort&#8230;) sind in
+der LUT-Datei in jeweils unabhängigen Blocks gespeichert und können
+einzeln geladen werden; die Bankdatei von der Deutschen Bundesbank enthält
+alle Felder in einem linearen Format, so daß einzelne Blocks nicht
+unabhängig von anderen geladen werden können.
+</p>
+<p>
+Die Funktion <a href="KontoCheck.html#M000016">load_bank_data</a>() wird
+nur noch als ein schibbolet benutzt, um zu testen, ob jemand das alte
+Interface benutzt. Bei der Routine KontoCheck::konto_check() wurde die
+Reihenfolge der Parameter getauscht, so daß man in dem Falle den alten
+Code umstellen muß.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000001.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000001.html');return false;">
+          <span class="method-name">lut_info</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::lut_info()</tt></h3>
+<h5><tt>KontoCheckRaw::lut_info([lutfile])</tt></h5>
+<h5><tt>KontoCheck::lut_info1(lutfile)</tt></h5>
+<h5><tt>KontoCheck::lut_info2(lutfile)</tt></h5>
+<p>
+Diese Funktion liefert den Infoblock des Datensatzes zurück, der mittels
+<a href="KontoCheck.html#M000015">init</a>() in den Speichergeladen wurde.
+Weitere Infos über die LUT-Datei lassen sich mit der Funktion
+KontoCheckRaw::lut_info() sowie KontoCheck::dump_lutfile() erhalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000002.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000002.html');return false;">
+          <span class="method-name">lut_info1</span><span class="method-args">(filename)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::lut_info1(&lt;lutfile&gt;)</tt></h3>
+<h5><tt>KontoCheck::lut_info()</tt></h5>
+<h5><tt>KontoCheck::lut_info2()</tt></h5>
+<h5><tt>KontoCheckRaw::lut_info()</tt></h5>
+<p>
+Diese Funktion liefert den Infoblock des ersten Datensatzes der angegebenen
+LUT-Datei zurück. Weitere Infos über die LUT-Datei lassen sich mit der
+Funktion KontoCheckRaw::lut_info() sowie KontoCheck::dump_lutfile()
+erhalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000003.html');return false;">
+          <span class="method-name">lut_info2</span><span class="method-args">(filename)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::lut_info2(lutfile)</tt></h3>
+<h5><tt>KontoCheck::lut_info()</tt></h5>
+<h5><tt>KontoCheck::lut_info1(lutfile)</tt></h5>
+<h5><tt>KontoCheckRaw::lut_info([lutfile])</tt></h5>
+<p>
+Diese Funktion liefert den Infoblock des zweiten Datensatzes der
+angegebenen LUT-Datei zurück. Weitere Infos über die LUT-Datei lassen
+sich mit der Funktion KontoCheckRaw::lut_info() sowie
+KontoCheck::dump_lutfile() erhalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000011" class="method-detail">
+        <a name="M000011"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000011.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000011.html');return false;">
+          <span class="method-name">retval2dos</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2dos(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2dos(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist cp850 (DOS).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000012" class="method-detail">
+        <a name="M000012"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000012.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000012.html');return false;">
+          <span class="method-name">retval2html</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2html(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2html(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Für Umlaute werden HTML-Entities benutzt.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000008" class="method-detail">
+        <a name="M000008"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000008.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000008.html');return false;">
+          <span class="method-name">retval2iso</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2iso(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2iso(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist ISO 8859-1.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000007" class="method-detail">
+        <a name="M000007"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000007.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000007.html');return false;">
+          <span class="method-name">retval2txt</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2txt(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2txt(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz wird über die Funktion KontoCheck::encoding()
+festgelegt. Falls diese Funktion nicht aufgerufen wurde, wird der Wert des
+Makros DEFAULT_ENCODING aus konto_check.h benutzt.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000010" class="method-detail">
+        <a name="M000010"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000010.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000010.html');return false;">
+          <span class="method-name">retval2txt_kurz</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2txt_kurz(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2txt_short(retval)</tt></h5>
+<h5><tt>KontoCheck::retval2txt_short(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
+String. Die Ausgabe ist der Makroname, wie er in C benutzt wird. Die
+Funktion ist ein Alias zu KontoCheck::retval2txt_short().
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000009" class="method-detail">
+        <a name="M000009"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000009.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000009.html');return false;">
+          <span class="method-name">retval2txt_short</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2txt_short(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2txt_short(retval)</tt></h5>
+<h5><tt>KontoCheck::retval2txt_kurz(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
+String. Die Ausgabe ist der Makroname, wie er in C benutzt wird.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000013" class="method-detail">
+        <a name="M000013"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000013.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000013.html');return false;">
+          <span class="method-name">retval2utf8</span><span class="method-args">(retval)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::retval2utf8(retval)</tt></h3>
+<h5><tt>KontoCheckRaw::retval2utf8(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist UTF-8.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000049" class="method-detail">
+        <a name="M000049"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000049.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000049.html');return false;">
+          <span class="method-name">suche</span><span class="method-args">(options={})</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::suche()</tt></h3>
+<h5><tt>KontoCheck::search()</tt></h5>
+<h5><tt>KontoCheck::SEARCH_KEYS</tt></h5>
+<h5><tt>KontoCheck::SEARCH_KEY_MAPPINGS</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_bic(search_bic)</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_blz(blz1[,blz2])</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_namen(name)</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_namen_kurz(short_name)</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_plz(plz1[,plz2])</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_pz(pz1[,pz2])</tt></h5>
+<h5><tt>KontoCheckRaw::bank_suche_ort(suchort)</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, die auf bestimmte Suchmuster passen.
+Momentan sind nur grundlegende Suchfunktionen eingebaut, und es wird auch
+nur die Suche nach einem Kriterium unterstützt; in einer späteren Version
+werden die Möglichkeiten noch erweitert werden.
+</p>
+<p>
+Eine Suche ist möglich nach den Schlüsseln BIC, Bankleitzahl,
+Postleitzahl, Prüfziffer, Ort, Name oder Kurzname. Bei den
+alphanumerischen Feldern (BIC, Ort, Name, Kurzname) ist der Suchschlüssel
+der Wortanfang des zu suchenden Feldes (ohne Unterscheidung zwischen Groß-
+und Kleinschreibung); bei den numerischen Feldern (BLZ, PLZ, Prüfziffer)
+ist die Suche nach einem bestimmten Wert oder nach einem Wertebereich
+möglich; dieser wird dann angegeben als Array mit zwei Elementen. Der
+Rückgabewert ist jeweils ein Array mit den Bankleitzahlen, oder nil falls
+die Suche fehlschlug. Die Ursache für eine fehlgeschlagene Suche läßt
+sich nur mit den Funktionen der <a
+href="KontoCheckRaw.html">KontoCheckRaw</a> Bibliothek näher lokalisieren.
+</p>
+<p>
+Die Funktion KontoCheck::search() ist ein Alias für die Funktion
+KontoCheck::suche().
+</p>
+<p>
+Die möglichen Suchschlüssel sind in den Variablen KontoCheck::SEARCH_KEYS
+definiert; in der Variablen KontoCheck::SEARCH_KEY_MAPPINGS finden sich
+noch einige Aliasdefinitionen zu den Suchschlüsseln.
+</p>
+<p>
+Hier einige Beispiele möglicher Suchaufrufe:
+</p>
+<pre>
+   s=KontoCheck::suche( :blz =&gt; [13051172,13070172] )        BLZ-Bereich
+   s=KontoCheck::suche( :blz =&gt; [13051172,13070172,333] )    überzählige Array-Elemente werden ignoriert
+   s=KontoCheck::suche( :bic =&gt; 'genodef1wi' )   BIC Teilstring
+   s=KontoCheck::suche( :plz =&gt; [68100,68200] )  PLZ-Bereich
+   s=KontoCheck::suche( :pz =&gt; 90 )              Prüfziffer numerisch
+   s=KontoCheck::suche( :pz =&gt; '90' )            Prüfziffer als String
+   s=KontoCheck::suche( :pz =&gt; ['95',98] )       Prüfzifferbereich gemischt String/numerisch auch möglich
+   s=KontoCheck::suche( :name =&gt; 'postbank' )
+   s=KontoCheck::suche( :ort =&gt; 'lingenfeld' )
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000022" class="method-detail">
+        <a name="M000022"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000022.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000022.html');return false;">
+          <span class="method-name">valid</span><span class="method-args">(blz,kto)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::valid(blz,kto)</tt></h3>
+<h5><tt>KontoCheck::konto_check(blz,kto)</tt></h5>
+<h5><tt>KontoCheckRaw::konto_check(blz,kto)</tt></h5>
+<p>
+Dies ist ein Alias für die Funktion KontoCheck::konto_check()
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000024" class="method-detail">
+        <a name="M000024"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000024.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000024.html');return false;">
+          <span class="method-name">valid?</span><span class="method-args">(blz,kto)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::valid?(blz, kto)</tt></h3>
+<h5><tt>KontoCheck::valid(blz, kto)</tt></h5>
+<h5><tt>KontoCheckRaw::konto_check(blz, kto)</tt></h5>
+<p>
+Dies ist einn Alias für die Funktion KontoCheck::konto_check?. Mögliche
+Rückgabewerte sind true oder false.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000027" class="method-detail">
+        <a name="M000027"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000027.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000027.html');return false;">
+          <span class="method-name">valid_pz</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::valid_pz(pz,kto[,blz])</tt></h3>
+<h5><tt>KontoCheck::konto_check_pz(pz,kto[,blz])</tt></h5>
+<h5><tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt></h5>
+<p>
+Diese Funktion ist ein Alias für KontoCheck::konto_check_pz
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000028" class="method-detail">
+        <a name="M000028"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000028.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000028.html');return false;">
+          <span class="method-name">valid_pz?</span><span class="method-args">(*args)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::valid_pz?(pz,kto[,blz])</tt></h3>
+<h5><tt>KontoCheck::valid_pz(pz,kto[,blz])</tt></h5>
+<h5><tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt></h5>
+<p>
+Diese Funktion ist ein Alias für KontoCheck::konto_check_pz?()
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000050" class="method-detail">
+        <a name="M000050"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheck.src/M000050.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheck.src/M000050.html');return false;">
+          <span class="method-name">version</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::version()</tt></h3>
+<h5><tt>KontoCheckRaw::version()</tt></h5>
+<p>
+Diese Funktion gibt den Versions-String der C-Bibliothek zurück.
+</p>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

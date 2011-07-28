@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>retval2txt (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::retval2txt(retval)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::retval2txt(retval)&lt;/tt&gt;
+ *
+ * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+ * Der benutzte Zeichensatz wird über die Funktion KontoCheckRaw::encoding()
+ * festgelegt. Falls diese Funktion nicht aufgerufen wurde, wird der Wert des
+ * Makros DEFAULT_ENCODING aus konto_check.h benutzt.
+ */
+static VALUE retval2txt_rb(VALUE self, VALUE retval)
+{
+  return rb_str_new2(kto_check_retval2txt(FIX2INT(retval)));
+}</pre>
+</body>
+</html>

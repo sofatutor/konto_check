@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>bank_pan (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::bank_pan(blz[,filiale])&lt;/tt&gt;
+ *
+ * ===&lt;tt&gt;KontoCheckRaw::bank_pan(blz [,filiale])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::bank_pan(blz [,filiale])&lt;/tt&gt;
+ * 
+ * Diese Funktion liefert den PAN (Primary Account Number) einer Bank. Der
+ * Rückgabewert ist ein Array mit zwei Elementen: im ersten steht der PAN, im
+ * zweiten ein Statuscode. Im Fehlerfall wird für den PAN nil zurückgegeben.
+ * 
+ * Mögliche Statuscodes:
+ * 
+ *     -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+ *     -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+ *     -47  (LUT2_PAN_NOT_INITIALIZED)      &quot;Das Feld PAN wurde nicht initialisiert&quot;
+ *      -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+ *      -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+ *       1  (OK)                            &quot;ok&quot;
+ */
+static VALUE bank_pan(int argc,VALUE* argv,VALUE self)
+{
+   char blz[16],error_msg[512];
+   int retval,pan,filiale;
+
+   get_params(argc,argv,blz,NULL,NULL,&amp;filiale,1);
+   pan=lut_pan(blz,filiale,&amp;retval);
+   if(retval==LUT2_BLZ_NOT_INITIALIZED || retval==LUT2_PAN_NOT_INITIALIZED)RUNTIME_ERROR(retval);
+   return rb_ary_new3(2,retval&lt;=0?Qnil:INT2FIX(pan),INT2FIX(retval));
+}</pre>
+</body>
+</html>

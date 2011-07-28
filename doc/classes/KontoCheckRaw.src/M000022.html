@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>keep_raw_data (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::keep_raw_data(mode)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheckRaw::encoding(mode)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::encoding(mode)&lt;/tt&gt;
+ *
+ * Diese Funktion setzt bzw. liest das Flag keep_raw_data in der C-Bibliothek.
+ * Falls es gesetzt ist, werden werden die Rohdaten der Blocks Name, Kurzname
+ * und Ort im Speicher gehalten; bei einem Wechsel der Kodierung werden diese
+ * Blocks dann auch auf die neue Kodierung umgesetzt. Für die Speicherung der
+ * Blocks werden allerdings etwa 900 KB Hauptspeicher benötigt, die andernfalls
+ * wieder freigegeben würden.
+ *
+ * Da diese Funktion etwas exotisch ist, ist sie nur in der KontoCheckRaw
+ * Bibliothek enthalten, nicht in KontoCheck..
+ * 
+ * Parameter:
+ *    -1: Flag keep_raw_data ausschalten
+ *     1: Flag keep_raw_data einschalten
+ *     0: Flag lesen
+ *
+ * Der Rückgabewert ist true oder false.
+ */
+static VALUE keep_raw_data_rb(VALUE self, VALUE mode_rb)
+{
+   int t,mode;
+
+   if(NIL_P(mode_rb))
+      mode=0;
+   else if((t=TYPE(mode_rb))==RUBY_T_STRING)
+      mode=*(RSTRING_PTR(mode_rb))-'0';
+   else if(t==RUBY_T_FLOAT || t==RUBY_T_FIXNUM || t==RUBY_T_BIGNUM)
+      mode=FIX2INT(mode_rb);
+   else  /* nicht unterstützter Typ */
+      mode=0;
+   return keep_raw_data(mode)?Qtrue:Qfalse;
+}</pre>
+</body>
+</html>

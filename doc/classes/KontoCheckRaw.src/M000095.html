@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>load_bank_data (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::load_bank_data(&lt;datafile&gt;)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::load_bank_data(&lt;datafile&gt;)&lt;/tt&gt;
+ *
+ * Diese Funktion war die alte Initialisierungsroutine für konto_check; es ist
+ * nun durch die Funktionen KontoCheck::init() und KontoCheck::generate_lutfile()
+ * ersetzt. Zur Initialisierung  benutzte sie die Textdatei der Deutschen
+ * Bundesbank und generiertge daraus eine LUT-Datei, die dann von der
+ * Initialisierungsroutine der C-Bibliothek benutzt wurde.
+ * 
+ * Die init() Funktion ist wesentlich schneller (7..20 mal so schnell) und hat
+ * eine Reihe weiterer Vorteile. So ist es z.B. möglich, zwwei Datensätze mit
+ * unterschiedlichem Gültigkeitszeitraum in einer Datei zu halten und den jeweils
+ * gültigen Satz automatisch (nach der Systemzeit) auswählen zu lassen. Die
+ * einzelnen Datenblocks (Bankleitzahlen, Prüfziffermethoden, PLZ, Ort...) sind
+ * in der LUT-Datei in jeweils unabhängigen Blocks gespeichert und können einzeln
+ * geladen werden; die Bankdatei von der Deutschen Bundesbank enthält alle Felder
+ * in einem linearen Format, so daß einzelne Blocks nicht unabhängig von anderen
+ * geladen werden können.
+ * 
+ * Die Funktion load_bank_data() wird nur noch als ein schibbolet benutzt, um
+ * zu testen, ob jemand das alte Interface benutzt. Bei der Routine
+ * KontoCheck::konto_check() wurde die Reihenfolge der Parameter getauscht, so
+ * daß man in dem Falle den alten Code umstellen muß.
+ */
+
+static VALUE load_bank_data(VALUE self, VALUE path_rb)
+{
+   rb_raise(rb_eRuntimeError, &quot;Perhaps you used the old interface of konto_check.\n&quot;
+         &quot;Use KontoCheck::init() to initialize the library\n&quot;
+         &quot;and check the order of function arguments for konto_test(blz,kto)&quot;);
+}</pre>
+</body>
+</html>

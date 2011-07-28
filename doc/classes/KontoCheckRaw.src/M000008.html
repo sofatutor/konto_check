@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>bank_alles (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::bank_alles(blz[,filiale])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::bank_alles(blz[,filiale])&lt;/tt&gt;
+ * 
+ * Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
+ * Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden Komponenten:
+ *    0:  Statuscode
+ *    1:  Anzahl Filialen
+ *    2:  Name
+ *    3:  Kurzname
+ *    4:  PLZ
+ *    5:  Ort
+ *    6:  PAN
+ *    7:  BIC
+ *    8:  Prüfziffer
+ *    9:  Laufende Nr.
+ *    10: Änderungs-Flag
+ *    11: Löeschung-Flag
+ *    12: Nachfolge-BLZ
+ * 
+ * Der Statuscode (Element 0) kann folgende Werte annehmen:
+ * 
+ *     -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *     -38  (LUT2_PARTIAL_OK)            &quot;es wurden nicht alle Blocks geladen&quot;
+ *      -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+ *      -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ *
+ * Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, wurden bei der
+ * Initialisierung nicht alle Blocks geladen (oder es sind nicht alle verfügbar);
+ * die entsprechenden Elemente haben dann den Wert nil.
+ */
+
+static VALUE bank_alles(int argc,VALUE* argv,VALUE self)
+{
+   char blz[16],**p_name,**p_name_kurz,**p_ort,**p_bic,*p_aenderung,*p_loeschung,aenderung[2],loeschung[2],error_msg[512];
+   int retval,filiale,cnt,*p_blz,*p_plz,*p_pan,p_pz,*p_nr,*p_nachfolge_blz;
+
+   get_params(argc,argv,blz,NULL,NULL,&amp;filiale,1);
+   retval=lut_multiple(blz,&amp;cnt,&amp;p_blz, &amp;p_name,&amp;p_name_kurz,&amp;p_plz,&amp;p_ort,&amp;p_pan,&amp;p_bic,&amp;p_pz,&amp;p_nr,
+         &amp;p_aenderung,&amp;p_loeschung,&amp;p_nachfolge_blz,NULL,NULL,NULL);
+   if(retval==LUT2_BLZ_NOT_INITIALIZED)RUNTIME_ERROR(retval);
+   if(filiale&lt;0 || (cnt &amp;&amp; filiale&gt;=cnt))return(INT2FIX(LUT2_INDEX_OUT_OF_RANGE));  /* ungültige Filiale */
+
+      /* Fehler; die C-Arrays dürfen in diesem Fall nicht dereferenziert werden */
+   if(retval&lt;=0 &amp;&amp; retval!=LUT2_PARTIAL_OK)return rb_ary_new3(2,INT2FIX(retval),Qnil);
+
+   *aenderung=p_aenderung[filiale];
+   *loeschung=p_loeschung[filiale];
+   *(aenderung+1)=*(loeschung+1)=0;
+
+   /* Makros für StringValue und IntegerValue definieren, damit die Rückgabe
+    * einigermaßen übersichtlich bleibt
+    */
+#define SV(x) *x?rb_str_new2(x):Qnil
+#define IV(x) x&gt;=0?INT2FIX(x):Qnil
+   return rb_ary_new3(13,INT2FIX(retval),IV(cnt),SV(p_name[filiale]),
+         SV(p_name_kurz[filiale]),IV(p_plz[filiale]),SV(p_ort[filiale]),
+         IV(p_pan[filiale]),SV(p_bic[filiale]),IV(p_pz),IV(p_nr[filiale]),
+         SV(aenderung),SV(loeschung),IV(p_nachfolge_blz[filiale]));
+}</pre>
+</body>
+</html>

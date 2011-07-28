@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>encoding_str (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::encoding_str(mode)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::encoding_str(mode)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheckRaw::encoding(mode)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheckRaw::keep_raw_data(mode)&lt;/tt&gt;
+ *
+ * Diese Funktion entspricht der Funktion KontoCheck::encoding(). Allerdings
+ * ist der Rückgabewert nicht numerisch, sondern ein String, der die aktuelle
+ * Kodierung angibt. Die folgenden Rückgabewerte sind möglich (falls zwei
+ * Kodierungen angegeben sind, ist die erste die der Statusmeldungen, die
+ * zweite die der LUT-Blocks):
+ *      
+ *     &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+ *     &quot;ISO-8859-1&quot;;
+ *     &quot;UTF-8&quot;;
+ *     &quot;HTML entities&quot;;
+ *     &quot;DOS CP 850&quot;;
+ *     &quot;ISO-8859-1/UTF-8&quot;;
+ *     &quot;ISO-8859-1/HTML&quot;;
+ *     &quot;ISO-8859-1/DOS CP 850&quot;;
+ *     &quot;UTF-8/ISO-8859-1&quot;;
+ *     &quot;UTF-8/HTML&quot;;
+ *     &quot;UTF-8/DOS CP-850&quot;;
+ *     &quot;HTML entities/ISO-8859-1&quot;;
+ *     &quot;HTML entities/UTF-8&quot;;
+ *     &quot;HTML entities/DOS CP-850&quot;;
+ *     &quot;DOS CP-850/ISO-8859-1&quot;;
+ *     &quot;DOS CP-850/UTF-8&quot;;
+ *     &quot;DOS CP-850/HTML&quot;;
+ *     &quot;Makro/ISO-8859-1&quot;;
+ *     &quot;Makro/UTF-8&quot;;
+ *     &quot;Makro/HTML&quot;;
+ *     &quot;Makro/DOS CP 850&quot;;
+ */
+static VALUE encoding_str_rb(int argc,VALUE* argv,VALUE self)
+{
+   return rb_str_new2((kto_check_encoding_str(enc_mode(argc,argv))));
+}</pre>
+</body>
+</html>

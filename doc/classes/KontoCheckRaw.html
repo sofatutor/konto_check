@@ -1,0 +1,3338 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>Module: KontoCheckRaw</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Script-Type" content="text/javascript" />
+  <link rel="stylesheet" href=".././rdoc-style.css" type="text/css" media="screen" />
+  <script type="text/javascript">
+  // <![CDATA[
+
+  function popupCode( url ) {
+    window.open(url, "Code", "resizable=yes,scrollbars=yes,toolbar=no,status=no,height=150,width=400")
+  }
+
+  function toggleCode( id ) {
+    if ( document.getElementById )
+      elem = document.getElementById( id );
+    else if ( document.all )
+      elem = eval( "document.all." + id );
+    else
+      return false;
+
+    elemStyle = elem.style;
+    
+    if ( elemStyle.display != "block" ) {
+      elemStyle.display = "block"
+    } else {
+      elemStyle.display = "none"
+    }
+
+    return true;
+  }
+  
+  // Make codeblocks hidden by default
+  document.writeln( "<style type=\"text/css\">div.method-source-code { display: none }</style>" )
+  
+  // ]]>
+  </script>
+
+</head>
+<body>
+
+
+
+    <div id="classHeader">
+        <table class="header-table">
+        <tr class="top-aligned-row">
+          <td><strong>Module</strong></td>
+          <td class="class-name-in-header">KontoCheckRaw</td>
+        </tr>
+        <tr class="top-aligned-row">
+            <td><strong>In:</strong></td>
+            <td>
+                <a href="../files/ext/konto_check_raw/konto_check_raw_ruby_c.html">
+                ext/konto_check_raw/konto_check_raw_ruby.c
+                </a>
+        <br />
+            </td>
+        </tr>
+
+        </table>
+    </div>
+  <!-- banner header -->
+
+  <div id="bodyContent">
+
+
+
+  <div id="contextContent">
+
+    <div id="description">
+      <p>
+This is a C/Ruby library to check the validity of German Bank Account
+Numbers. All currently defined test methods by Deutsche Bundesbank (April
+2011: 00 to D8) are implemented.
+</p>
+<p>
+<b>ATTENTION:</b> There are a few important changes in the API between <a
+href="KontoCheckRaw.html#M000044">version</a> 0.0.2 (<a
+href="KontoCheckRaw.html#M000044">version</a> by Peter Horn/Provideal), <a
+href="KontoCheckRaw.html#M000044">version</a> 0.0.6 (jeanmartin) and this
+<a href="KontoCheckRaw.html#M000044">version</a>:
+</p>
+<ul>
+<li>The function KontoCheck::load_bank_data() is no longer used; it is replaced
+by KontoCheck::init() and KontoCheck::generate_lutfile().
+
+</li>
+<li>The function KontoCheck::konto_check(blz,kto) changed the order of
+parameters from (kto,blz) to (blz,kto)
+
+</li>
+</ul>
+<p>
+Another change affects only the <a
+href="KontoCheckRaw.html#M000044">version</a> 0.0.6 by jeanmartin:
+</p>
+<ul>
+<li>In KontoCheck::init(level,name,set) the order of the two first parameters
+is now <a href="KontoCheckRaw.html#M000003">free</a>; the order is
+determined by the type of the variable (level is integer, filename string).
+
+</li>
+</ul>
+<p>
+Because this class is inteded for german bank accounts, the rest of the
+documentation is in german too.
+</p>
+<p>
+Diese Bibliothek implementiert die Prüfziffertests für deutsche
+Bankkonten. Die meisten Konten enthalten eine Prüfziffer; mit dieser kann
+getestet werden, ob eine Bankleitzahl plausibel ist oder nicht. Auf diese
+Weise können Zahlendreher oder Zifferverdopplungen oft festgestellt
+werden. Es ist natürlich nicht möglich, zu bestimmen, ob ein Konto
+wirklich existiert; dazu müßte jeweils eine Anfrage bei der Bank gemacht
+werden ;-).
+</p>
+<p>
+Die Bibliothek ist in zwei Teile gesplittet: <a
+href="KontoCheckRaw.html">KontoCheckRaw</a> bildet die direkte
+Schnittstelle zur C-Bibliothek und ist daher manchmal etwas sperrig;
+KontoCheck ist dagegen mehr Ruby-artig ausgelegt. KontoCheck gibt meist nur
+eine Teilmenge von <a href="KontoCheckRaw.html">KontoCheckRaw</a> zurück,
+aber (hoffentlich) die Teile, die man unmittelbar von den jeweiligen
+Funktionen erwartet. Eine Reihe einfacher Funktionen sind auch in beiden
+Versionen identisch.
+</p>
+<p>
+Die Bankleitzahldaten werden in einem eigenen (komprimierten) Format in
+einer sogenannten LUT-Datei gespeichert. Diese Datei läßt sich mit der
+Funktion KontoCheck::generate_lutfile bzw. KontoCheckRaw::generate_lutfile
+aus der Datei der Deutschen Bundesbank (online erhältlich unter <a
+href="http://www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php">www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php</a>)
+erzeugen. Die LUT-Datei hat den großen Vorteil, daß die Datenblocks (BLZ,
+Prüfziffer, Bankname, Ort, &#8230;) unabhängig voneinander gespeichert
+sind; jeder Block kann für sich geladen werden. In einer Datei können
+zwei Datensätze der Bundesbank mit unterschiedlichem Gültigkeitsdatum
+enthalten sein. Wenn bei der Initialisierung kein bestimmter Datensatz
+ausgewählt wird, prüft die Bibliothek aufgrund des mit jedem Datensatz
+gespeicherten Gültigkeitszeitraums welcher Satz aktuell gültig ist und
+lädt diesen dann in den Speicher.
+</p>
+<p>
+Numerische Werte (z.B. Bankleitzahlen, Kontonummern, PLZ,&#8230;) können
+als Zahlwerte oder als String angegeben werden; sie werden automatisch
+konvertiert. Prüfziffermethoden können ebenfalls als Zahl oder String
+angegeben werden; die Angabe als Zahl ist allerdings nicht immer eindeutig.
+So kann z.B. 131 sowohl für D1 als auch 13a stehen; daher ist es besser,
+die Prüfziffermethode als String anzugeben (in diesem Beispiel würde 131
+als 13a interpretiert).
+</p>
+
+    </div>
+
+
+   </div>
+
+    <div id="method-list">
+      <h3 class="section-bar">Methods</h3>
+
+      <div class="name-list">
+      <a href="#M000017">bank_aenderung</a>&nbsp;&nbsp;
+      <a href="#M000008">bank_alles</a>&nbsp;&nbsp;
+      <a href="#M000014">bank_bic</a>&nbsp;&nbsp;
+      <a href="#M000007">bank_filialen</a>&nbsp;&nbsp;
+      <a href="#M000018">bank_loeschung</a>&nbsp;&nbsp;
+      <a href="#M000019">bank_nachfolge_blz</a>&nbsp;&nbsp;
+      <a href="#M000009">bank_name</a>&nbsp;&nbsp;
+      <a href="#M000010">bank_name_kurz</a>&nbsp;&nbsp;
+      <a href="#M000015">bank_nr</a>&nbsp;&nbsp;
+      <a href="#M000012">bank_ort</a>&nbsp;&nbsp;
+      <a href="#M000013">bank_pan</a>&nbsp;&nbsp;
+      <a href="#M000011">bank_plz</a>&nbsp;&nbsp;
+      <a href="#M000016">bank_pz</a>&nbsp;&nbsp;
+      <a href="#M000037">bank_suche_bic</a>&nbsp;&nbsp;
+      <a href="#M000041">bank_suche_blz</a>&nbsp;&nbsp;
+      <a href="#M000038">bank_suche_namen</a>&nbsp;&nbsp;
+      <a href="#M000039">bank_suche_namen_kurz</a>&nbsp;&nbsp;
+      <a href="#M000040">bank_suche_ort</a>&nbsp;&nbsp;
+      <a href="#M000042">bank_suche_plz</a>&nbsp;&nbsp;
+      <a href="#M000043">bank_suche_pz</a>&nbsp;&nbsp;
+      <a href="#M000006">bank_valid</a>&nbsp;&nbsp;
+      <a href="#M000002">current_lutfile_name</a>&nbsp;&nbsp;
+      <a href="#M000020">dump_lutfile</a>&nbsp;&nbsp;
+      <a href="#M000023">encoding</a>&nbsp;&nbsp;
+      <a href="#M000024">encoding_str</a>&nbsp;&nbsp;
+      <a href="#M000003">free</a>&nbsp;&nbsp;
+      <a href="#M000031">generate_lutfile</a>&nbsp;&nbsp;
+      <a href="#M000033">iban2bic</a>&nbsp;&nbsp;
+      <a href="#M000032">iban_check</a>&nbsp;&nbsp;
+      <a href="#M000034">iban_gen</a>&nbsp;&nbsp;
+      <a href="#M000001">init</a>&nbsp;&nbsp;
+      <a href="#M000036">ipi_check</a>&nbsp;&nbsp;
+      <a href="#M000035">ipi_gen</a>&nbsp;&nbsp;
+      <a href="#M000022">keep_raw_data</a>&nbsp;&nbsp;
+      <a href="#M000004">konto_check</a>&nbsp;&nbsp;
+      <a href="#M000005">konto_check_pz</a>&nbsp;&nbsp;
+      <a href="#M000045">load_bank_data</a>&nbsp;&nbsp;
+      <a href="#M000021">lut_info</a>&nbsp;&nbsp;
+      <a href="#M000028">retval2dos</a>&nbsp;&nbsp;
+      <a href="#M000029">retval2html</a>&nbsp;&nbsp;
+      <a href="#M000026">retval2iso</a>&nbsp;&nbsp;
+      <a href="#M000025">retval2txt</a>&nbsp;&nbsp;
+      <a href="#M000027">retval2txt_short</a>&nbsp;&nbsp;
+      <a href="#M000030">retval2utf8</a>&nbsp;&nbsp;
+      <a href="#M000044">version</a>&nbsp;&nbsp;
+      </div>
+    </div>
+
+  </div>
+
+
+    <!-- if includes -->
+
+    <div id="section">
+
+
+    <div id="constants-list">
+      <h3 class="section-bar">Constants</h3>
+
+      <div class="name-list">
+        <table summary="Constants">
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_OWN_IBAN_CALCULATION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NO_OWN_IBAN_CALCULATION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-113) das Institut erlaubt keine eigene IBAN-Berechnung
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_UNSUPPORTED_COMPRESSION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_UNSUPPORTED_COMPRESSION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-112) die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht
+eingebunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_INVALID_COMPRESSION_LIB</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_INVALID_COMPRESSION_LIB)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-111) der angegebene Wert für die Default-Kompression ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_UNTERKONTO_ATTACHED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_UNTERKONTO_ATTACHED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-110) wahrscheinlich OK; es wurde allerdings ein (weggelassenes)
+Unterkonto angefügt
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_DEFAULT_BLOCK_INVALID</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_DEFAULT_BLOCK_INVALID)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-109) Ungültige Signatur im Default-Block
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_DEFAULT_BLOCK_FULL</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_DEFAULT_BLOCK_FULL)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-108) Die maximale Anzahl Einträge für den Default-Block wurde erreicht
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_NO_DEFAULT_BLOCK</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_NO_DEFAULT_BLOCK)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-107) Es wurde noch kein Default-Block angelegt
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_KEY_NOT_FOUND</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_KEY_NOT_FOUND)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-106) Der angegebene Schlüssel wurde im Default-Block nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NO_LONGER_VALID_BETTER</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NO_LONGER_VALID_BETTER)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-105) Beide Datensätze sind nicht mehr gültig; dieser ist aber jünger
+als der andere
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_SRC_KTO_DIFFERENT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_SRC_KTO_DIFFERENT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-104) Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich
+von der des A-Satzes
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_SRC_BLZ_DIFFERENT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_SRC_BLZ_DIFFERENT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-103) Die Auftraggeber-Bankleitzahl des C-Datensatzes unterscheidet sich
+von der des A-Satzes
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_CR_LF_IN_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_CR_LF_IN_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-102) Die DTA-Datei enthält (unzulässige) Zeilenvorschübe
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_C_EXTENSION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_C_EXTENSION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-101) ungültiger Typ bei einem Erweiterungsblock eines C-Datensatzes
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FOUND_SET_A_NOT_C</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FOUND_SET_A_NOT_C)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-100) Es wurde ein C-Datensatz erwartet, jedoch ein E-Satz gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FOUND_SET_E_NOT_C</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FOUND_SET_E_NOT_C)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-99) Es wurde ein C-Datensatz erwartet, jedoch ein E-Satz gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FOUND_SET_C_NOT_EXTENSION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FOUND_SET_C_NOT_EXTENSION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-98) Es wurde ein C-Datensatzerweiterung erwartet, jedoch ein C-Satz
+gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FOUND_SET_E_NOT_EXTENSION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FOUND_SET_E_NOT_EXTENSION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-97) Es wurde ein C-Datensatzerweiterung erwartet, jedoch ein E-Satz
+gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_EXTENSION_COUNT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_EXTENSION_COUNT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-96) Die Anzahl Erweiterungen paßt nicht zur Blocklänge
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_NUM</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_NUM)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-95) Ungültige Zeichen in numerischem Feld
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_CHARS</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_CHARS)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-94) Ungültige Zeichen im Textfeld
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_CURRENCY_NOT_EURO</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_CURRENCY_NOT_EURO)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-93) Die Währung des DTA-Datensatzes ist nicht Euro
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_EMPTY_AMOUNT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_EMPTY_AMOUNT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-92) In einem DTA-Datensatz wurde kein Betrag angegeben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_TEXT_KEY</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_TEXT_KEY)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-91) Ungültiger Textschlüssel in der DTA-Datei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_EMPTY_STRING</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_EMPTY_STRING)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-90) Für ein (alphanumerisches) Feld wurde kein Wert angegeben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_MARKER_A_NOT_FOUND</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_MARKER_A_NOT_FOUND)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-89) Die Startmarkierung des A-Datensatzes wurde nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_MARKER_C_NOT_FOUND</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_MARKER_C_NOT_FOUND)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-88) Die Startmarkierung des C-Datensatzes wurde nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_MARKER_E_NOT_FOUND</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_MARKER_E_NOT_FOUND)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-87) Die Startmarkierung des E-Datensatzes wurde nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_SET_C_LEN</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_SET_C_LEN)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-86) Die Satzlänge eines C-Datensatzes muß zwischen 187 und 622 Byte
+betragen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_SET_LEN</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_SET_LEN)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-85) Die Satzlänge eines A- bzw. E-Satzes muß 128 Byte betragen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_WAERUNG_NOT_EURO</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_WAERUNG_NOT_EURO)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-84) als Währung in der DTA-Datei ist nicht Euro eingetragen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_ISSUE_DATE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_ISSUE_DATE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-83) das Ausführungsdatum ist zu früh oder zu spät (max. 15 Tage nach
+Dateierstellung)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_INVALID_DATE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_INVALID_DATE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-82) das Datum ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FORMAT_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FORMAT_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-81) Formatfehler in der DTA-Datei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FILE_WITH_ERRORS</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FILE_WITH_ERRORS)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-80) die DTA-Datei enthält Fehler
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_SEARCH_RANGE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_SEARCH_RANGE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-79) ungültiger Suchbereich angegeben (unten&gt;oben)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KEY_NOT_FOUND</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KEY_NOT_FOUND)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-78) Die Suche lieferte kein Ergebnis
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">BAV_FALSE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(BAV_FALSE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-77) BAV denkt, das Konto ist falsch (<a
+href="KontoCheckRaw.html#M000004">konto_check</a> hält es für richtig)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NO_USER_BLOCK</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NO_USER_BLOCK)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-76) User-Blocks müssen einen Typ &gt; 500 haben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_SET</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_SET)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-75) für ein LUT-Set sind nur die Werte 0, 1 oder 2 möglich
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_GERMAN_BIC</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NO_GERMAN_BIC)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-74) Ein Konto kann kann nur für deutsche Banken geprüft werden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IPI_CHECK_INVALID_LENGTH</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(IPI_CHECK_INVALID_LENGTH)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-73) Der zu validierende strukturierete Verwendungszweck muß genau 20
+Zeichen enthalten
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IPI_INVALID_CHARACTER</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(IPI_INVALID_CHARACTER)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-72) Im strukturierten Verwendungszweck dürfen nur alphanumerische
+Zeichen vorkommen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IPI_INVALID_LENGTH</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(IPI_INVALID_LENGTH)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-71) Die Länge des IPI-Verwendungszwecks darf maximal 18 Byte sein
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT1_FILE_USED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT1_FILE_USED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-70) Es wurde eine LUT-Datei im Format 1.0/1.1 geladen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">MISSING_PARAMETER</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(MISSING_PARAMETER)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-69) Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder
+Konto)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IBAN2BIC_ONLY_GERMAN</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(IBAN2BIC_ONLY_GERMAN)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-68) Die Funktion <a href="KontoCheckRaw.html#M000033">iban2bic</a>()
+arbeitet nur mit deutschen Bankleitzahlen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">IBAN_OK_KTO_NOT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(IBAN_OK_KTO_NOT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-67) Die Prüfziffer der IBAN stimmt, die der Kontonummer nicht
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_OK_IBAN_NOT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_OK_IBAN_NOT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-66) Die Prüfziffer der Kontonummer stimmt, die der IBAN nicht
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">TOO_MANY_SLOTS</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(TOO_MANY_SLOTS)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-65) Es sind nur maximal 500 Slots pro LUT-Datei möglich (Neukompilieren
+erforderlich)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INIT_FATAL_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INIT_FATAL_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-64) Initialisierung fehlgeschlagen (init_wait geblockt)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INCREMENTAL_INIT_NEEDS_INFO</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INCREMENTAL_INIT_NEEDS_INFO)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-63) Ein inkrementelles Initialisieren benötigt einen Info-Block in der
+LUT-Datei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INCREMENTAL_INIT_FROM_DIFFERENT_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INCREMENTAL_INIT_FROM_DIFFERENT_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-62) Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist
+nicht möglich
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DEBUG_ONLY_FUNCTION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DEBUG_ONLY_FUNCTION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-61) Die Funktion ist nur in der Debug-Version vorhanden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_INVALID</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_INVALID)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-60) Kein Datensatz der LUT-Datei ist aktuell gültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NOT_YET_VALID</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NOT_YET_VALID)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-59) Der Datensatz ist noch nicht gültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NO_LONGER_VALID</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NO_LONGER_VALID)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-58) Der Datensatz ist nicht mehr gültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_GUELTIGKEIT_SWAPPED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_GUELTIGKEIT_SWAPPED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-57) Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_INVALID_GUELTIGKEIT</td>
+          <td>=</td>
+          <td class="context-item-value">(-56) Das angegebene Gültigkeitsdatum ist ungültig (Soll</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+JJJJMMTT-JJJJMMTT)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_INDEX_OUT_OF_RANGE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_INDEX_OUT_OF_RANGE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-55) Der Index für die Filiale ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_INIT_IN_PROGRESS</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_INIT_IN_PROGRESS)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-54) Die Bibliothek wird gerade neu initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_BLZ_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_BLZ_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-53) Das Feld BLZ wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_FILIALEN_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_FILIALEN_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-52) Das Feld Filialen wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NAME_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NAME_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-51) Das Feld Bankname wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_PLZ_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_PLZ_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-50) Das Feld PLZ wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_ORT_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_ORT_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-49) Das Feld Ort wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NAME_KURZ_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NAME_KURZ_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-48) Das Feld Kurzname wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_PAN_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_PAN_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-47) Das Feld PAN wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_BIC_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_BIC_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-46) Das Feld BIC wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_PZ_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_PZ_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-45) Das Feld Prüfziffer wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NR_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NR_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-44) Das Feld NR wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_AENDERUNG_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_AENDERUNG_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-43) Das Feld Änderung wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_LOESCHUNG_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_LOESCHUNG_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-42) Das Feld Löschung wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-41) Das Feld Nachfolge-BLZ wurde nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NOT_INITIALIZED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NOT_INITIALIZED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-40) die Programmbibliothek wurde noch nicht initialisiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_FILIALEN_MISSING</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_FILIALEN_MISSING)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-39) der Block mit der Filialenanzahl fehlt in der LUT-Datei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_PARTIAL_OK</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_PARTIAL_OK)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-38) es wurden nicht alle Blocks geladen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_Z_BUF_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_Z_BUF_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-37) Buffer error in den ZLIB Routinen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_Z_MEM_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_Z_MEM_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-36) Memory error in den ZLIB-Routinen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_Z_DATA_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_Z_DATA_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-35) Datenfehler im komprimierten LUT-Block
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_BLOCK_NOT_IN_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_BLOCK_NOT_IN_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-34) Der Block ist nicht in der LUT-Datei enthalten
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_DECOMPRESS_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_DECOMPRESS_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-33) Fehler beim Dekomprimieren eines LUT-Blocks
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_COMPRESS_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_COMPRESS_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-32) Fehler beim Komprimieren eines LUT-Blocks
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_FILE_CORRUPTED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_FILE_CORRUPTED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-31) Die LUT-Datei ist korrumpiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NO_SLOT_FREE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NO_SLOT_FREE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-30) Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">UNDEFINED_SUBMETHOD</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(UNDEFINED_SUBMETHOD)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-29) Die (Unter)Methode ist nicht definiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">EXCLUDED_AT_COMPILETIME</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(EXCLUDED_AT_COMPILETIME)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-28) Der benötigte Programmteil wurde beim Kompilieren deaktiviert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_LUT_VERSION</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_LUT_VERSION)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-27) Die Versionsnummer für die LUT-Datei ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_PARAMETER_STELLE1</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_PARAMETER_STELLE1)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-26) ungültiger Prüfparameter (erste zu prüfende Stelle)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_PARAMETER_COUNT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_PARAMETER_COUNT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-25) ungültiger Prüfparameter (Anzahl zu prüfender Stellen)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_PARAMETER_PRUEFZIFFER</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_PARAMETER_PRUEFZIFFER)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-24) ungültiger Prüfparameter (Position der Prüfziffer)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_PARAMETER_WICHTUNG</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_PARAMETER_WICHTUNG)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-23) ungültiger Prüfparameter (Wichtung)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_PARAMETER_METHODE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_PARAMETER_METHODE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-22) ungültiger Prüfparameter (Rechenmethode)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LIBRARY_INIT_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LIBRARY_INIT_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-21) Problem beim Initialisieren der globalen Variablen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT_CRC_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT_CRC_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-20) Prüfsummenfehler in der blz.lut Datei
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FALSE_GELOESCHT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(FALSE_GELOESCHT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-19) falsch (die BLZ wurde außerdem gelöscht)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_NO_CHK_GELOESCHT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_NO_CHK_GELOESCHT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-18) ok, ohne Prüfung (die BLZ wurde allerdings gelöscht)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_GELOESCHT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_GELOESCHT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-17) ok (die BLZ wurde allerdings gelöscht)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">BLZ_GELOESCHT</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(BLZ_GELOESCHT)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-16) die Bankleitzahl wurde gelöscht
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_BLZ_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_BLZ_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-15) Fehler in der blz.txt Datei (falsche Zeilenlänge)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LIBRARY_IS_NOT_THREAD_SAFE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LIBRARY_IS_NOT_THREAD_SAFE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-14) undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FATAL_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(FATAL_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-13) schwerer Fehler im Konto_check-Modul
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_KTO_LENGTH</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_KTO_LENGTH)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-12) ein Konto muß zwischen 1 und 10 Stellen haben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FILE_WRITE_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(FILE_WRITE_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-11) kann Datei nicht schreiben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FILE_READ_ERROR</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(FILE_READ_ERROR)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-10) kann Datei nicht lesen
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">ERROR_MALLOC</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(ERROR_MALLOC)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-9) kann keinen Speicher allokieren
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_BLZ_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NO_BLZ_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-8) die blz.txt Datei wurde nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_LUT_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_LUT_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-7) die blz.lut Datei ist inkosistent/ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NO_LUT_FILE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NO_LUT_FILE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-6) die blz.lut Datei wurde nicht gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_BLZ_LENGTH</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_BLZ_LENGTH)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-5) die Bankleitzahl ist nicht achtstellig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_BLZ</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_BLZ)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-4) die Bankleitzahl ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">INVALID_KTO</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(INVALID_KTO)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-3) das Konto ist ungültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NOT_IMPLEMENTED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NOT_IMPLEMENTED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-2) die Methode wurde noch nicht implementiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">NOT_DEFINED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(NOT_DEFINED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(-1) die Methode ist nicht definiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">FALSE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(FALSE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(0) falsch
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(1) ok
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_NO_CHK</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_NO_CHK)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(2) ok, ohne Prüfung
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_TEST_BLZ_USED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_TEST_BLZ_USED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(3) ok; für den Test wurde eine Test-BLZ verwendet
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_VALID</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_VALID)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(4) Der Datensatz ist aktuell gültig
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT2_NO_VALID_DATE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT2_NO_VALID_DATE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(5) Der Datensatz enthält kein Gültigkeitsdatum
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT1_SET_LOADED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT1_SET_LOADED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(6) Die Datei ist im alten LUT-Format (1.0/1.1)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT1_FILE_GENERATED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT1_FILE_GENERATED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(7) ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1)
+generiert
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">DTA_FILE_WITH_WARNINGS</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(DTA_FILE_WITH_WARNINGS)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(8) In der DTAUS-Datei wurden kleinere Fehler gefunden
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">LUT_V2_FILE_GENERATED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(LUT_V2_FILE_GENERATED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(9) ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert
+(Compilerswitch)
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">KTO_CHECK_VALUE_REPLACED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(KTO_CHECK_VALUE_REPLACED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(10) ok; der Wert für den Schlüssel wurde überschrieben
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_UNTERKONTO_POSSIBLE</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_UNTERKONTO_POSSIBLE)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(11) wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene)
+Unterkonten enthalten
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_UNTERKONTO_GIVEN</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_UNTERKONTO_GIVEN)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(12) wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer
+
+</td>
+        </tr>
+        <tr class="top-aligned-row context-row">
+          <td class="context-item-name">OK_SLOT_CNT_MIN_USED</td>
+          <td>=</td>
+          <td class="context-item-value">INT2FIX(OK_SLOT_CNT_MIN_USED)</td>
+          <td width="3em">&nbsp;</td>
+          <td class="context-item-desc">
+(13) ok; die Anzahl Slots wurde auf SLOT_CNT_MIN hochgesetzt
+
+</td>
+        </tr>
+        </table>
+      </div>
+    </div>
+
+
+
+      
+
+
+    <!-- if method_list -->
+    <div id="methods">
+      <h3 class="section-bar">Public Class methods</h3>
+
+      <div id="method-M000017" class="method-detail">
+        <a name="M000017"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000017.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000017.html');return false;">
+          <span class="method-name">bank_aenderung</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_aenderung(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_aenderung(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert das &#8217;Änderung&#8217; Flag einer Bank (als
+string). Mögliche Werte sind: A (Addition), M (Modified), U (Unchanged), D
+(Deletion). Der Rückgabewert ist ein Array mit zwei Elementen: im ersten
+steht ein String mit dem Änderungsflag, im zweiten ein Statuscode. Im
+Fehlerfall wird für das Flag nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -43  (LUT2_AENDERUNG_NOT_INITIALIZED) &quot;Das Feld Änderung wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000008" class="method-detail">
+        <a name="M000008"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000008.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000008.html');return false;">
+          <span class="method-name">bank_alles</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_alles(blz[,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_alles(blz[,filiale])</tt></h5>
+<p>
+Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
+Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden
+Komponenten:
+</p>
+<pre>
+   0:  Statuscode
+   1:  Anzahl Filialen
+   2:  Name
+   3:  Kurzname
+   4:  PLZ
+   5:  Ort
+   6:  PAN
+   7:  BIC
+   8:  Prüfziffer
+   9:  Laufende Nr.
+   10: Änderungs-Flag
+   11: Löeschung-Flag
+   12: Nachfolge-BLZ
+</pre>
+<p>
+Der Statuscode (Element 0) kann folgende Werte annehmen:
+</p>
+<pre>
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -38  (LUT2_PARTIAL_OK)            &quot;es wurden nicht alle Blocks geladen&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+<p>
+Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, wurden bei der
+Initialisierung nicht alle Blocks geladen (oder es sind nicht alle
+verfügbar); die entsprechenden Elemente haben dann den Wert nil.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000014" class="method-detail">
+        <a name="M000014"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000014.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000014.html');return false;">
+          <span class="method-name">bank_bic</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_bic(blz[,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_bic(blz[,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den BIC (Bank Identifier Code) einer Bank. Der
+Rückgabewert ist ein Array mit zwei Elementen: im ersten steht ein String
+mit dem BIC, im zweiten ein Statuscode. Im Fehlerfall wird für den BIC nil
+zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -46  (LUT2_BIC_NOT_INITIALIZED)      &quot;Das Feld BIC wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000007" class="method-detail">
+        <a name="M000007"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000007.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000007.html');return false;">
+          <span class="method-name">bank_filialen</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_filialen(blz)</tt></h3>
+<h5><tt>KontoCheck::bank_filialen(blz)</tt></h5>
+<p>
+Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive
+Hauptstelle). Die LUT-Datei muß dazu natürlich mit den Filialdaten
+generiert sein, sonst wird für alle Banken nur 1 zurückgegeben. Der
+Rückgabewert ist ein Array mit der Anzahl Filialen im ersten Parameter,
+und einem Statuscode im zwweiten.
+</p>
+<p>
+Mögliche Statuswerte sind:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -52  (LUT2_FILIALEN_NOT_INITIALIZED) &quot;Das Feld Filialen wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000018" class="method-detail">
+        <a name="M000018"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000018.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000018.html');return false;">
+          <span class="method-name">bank_loeschung</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_loeschung(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_loeschung(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert das Lösch-Flag für eine Bank zurück (als Integer;
+mögliche Werte sind 0 und 1). Der Rückgabewert ist ein Array mit zwei
+Elementen: im ersten steht das Flag, im zweiten ein Statuscode. Im
+Fehlerfall wird für das Flag nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -42  (LUT2_LOESCHUNG_NOT_INITIALIZED) &quot;Das Feld Löschung wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000019" class="method-detail">
+        <a name="M000019"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000019.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000019.html');return false;">
+          <span class="method-name">bank_nachfolge_blz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_nachfolge_blz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die Nachfolge-BLZ für eine Bank, die gelöscht
+werden soll (bei der das &#8216;Löschung&#8217; Flag 1 ist). Der
+Rückgabewert ist ein Array mit zwei Elementen: im ersten steht die
+Nachfolge-BLZ, im zweiten ein Statuscode. Im Fehlerfall wird für die
+Nachfolge-BLZ nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -41  (LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED) &quot;Das Feld Nachfolge-BLZ wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000009" class="method-detail">
+        <a name="M000009"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000009.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000009.html');return false;">
+          <span class="method-name">bank_name</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_name(blz[,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_name(blz[,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Namen einer Bank. Der Rückgabewert ist ein
+Array mit zwei Elementen: im ersten steht ein String mit dem Namen, im
+zweiten ein Statuscode. Im Fehlerfall wird für den Namen nil
+zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -51  (LUT2_NAME_NOT_INITIALIZED)     &quot;Das Feld Bankname wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000010" class="method-detail">
+        <a name="M000010"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000010.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000010.html');return false;">
+          <span class="method-name">bank_name_kurz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_name_kurz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_name_kurz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Kurznamen einer Bank. Der Rückgabewert ist ein
+Array mit zwei Elementen: im ersten steht ein String mit dem Namen, im
+zweiten ein Statuscode. Im Fehlerfall wird für den Namen nil
+zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -48  (LUT2_NAME_KURZ_NOT_INITIALIZED) &quot;Das Feld Kurzname wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000015" class="method-detail">
+        <a name="M000015"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000015.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000015.html');return false;">
+          <span class="method-name">bank_nr</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheck::bank_nr(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheckRaw::bank_nr(blz[,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die laufende Nummer einer Bank (internes Feld der
+BLZ-Datei). Der Wert wird wahrscheinlich nicht oft benötigt, ist aber der
+Vollständigkeit halber enthalten. Der Rückgabewert ist ein Array mit zwei
+Elementen: im ersten steht die Nummer, im zweiten ein Statuscode. Im
+Fehlerfall wird für die Nummer nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<p>
+Possible return values (and short description):
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -44  (LUT2_NR_NOT_INITIALIZED)       &quot;Das Feld NR wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000012" class="method-detail">
+        <a name="M000012"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000012.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000012.html');return false;">
+          <span class="method-name">bank_ort</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_ort(blz[,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_ort(blz[,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den Ort einer Bank. Falls der Parameter filiale
+nicht angegeben ist, wird der Sitz der Hauptstelle ausgegeben. Der
+Rückgabewert ist ein Array mit zwei Elementen: im ersten steht ein String
+mit dem Namen, im zweiten ein Statuscode. Im Fehlerfall wird für den Ort
+nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -49  (LUT2_ORT_NOT_INITIALIZED)   &quot;Das Feld Ort wurde nicht initialisiert&quot;
+    -55  (LUT2_INDEX_OUT_OF_RANGE)    &quot;Der Index für die Filiale ist ungültig&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000013" class="method-detail">
+        <a name="M000013"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000013.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000013.html');return false;">
+          <span class="method-name">bank_pan</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_pan(blz[,filiale])</tt></h3>
+<h3><tt>KontoCheckRaw::bank_pan(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_pan(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert den PAN (Primary Account Number) einer Bank. Der
+Rückgabewert ist ein Array mit zwei Elementen: im ersten steht der PAN, im
+zweiten ein Statuscode. Im Fehlerfall wird für den PAN nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -47  (LUT2_PAN_NOT_INITIALIZED)      &quot;Das Feld PAN wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000011" class="method-detail">
+        <a name="M000011"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000011.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000011.html');return false;">
+          <span class="method-name">bank_plz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_plz(blz [,filiale])</tt></h3>
+<h5><tt>KontoCheck::bank_plz(blz [,filiale])</tt></h5>
+<p>
+Diese Funktion liefert die Postleitzahl einer Bank. Falls der Parameter
+filiale nicht angegeben ist, wird die PLZ der Hauptstelle ausgegeben. Der
+Rückgabewert ist ein Array mit zwei Elementen: im ersten steht die PLZ, im
+zweiten ein Statuscode. Im Fehlerfall wird für die PLZ nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -50  (LUT2_PLZ_NOT_INITIALIZED)      &quot;Das Feld PLZ wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000016" class="method-detail">
+        <a name="M000016"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000016.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000016.html');return false;">
+          <span class="method-name">bank_pz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_pz(blz)</tt></h3>
+<h5><tt>KontoCheck::bank_pz(blz)</tt></h5>
+<p>
+Diese Funktion liefert die Prüfziffer einer Bank. Die Funktion
+unterstützt keine Filialen; zu jeder BLZ kann es in der LUT-Datei nur eine
+Prüfziffermethode geben. Der Rückgabewert ist ein Array mit zwei
+Elementen: im ersten steht die Prüfziffer, im zweiten ein Statuscode. Im
+Fehlerfall wird für den Prüfziffer nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -45  (LUT2_PZ_NOT_INITIALIZED)       &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                            &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000037" class="method-detail">
+        <a name="M000037"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000037.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000037.html');return false;">
+          <span class="method-name">bank_suche_bic</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_bic(search_bic)</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren BIC mit dem angegebenen Wert
+&lt;search_bic&gt; beginnen. Die Rückgabe ist ein Array mit fünf
+Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen BIC-Werten
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -46  (LUT2_BIC_NOT_INITIALIZED)   &quot;Das Feld BIC wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000041" class="method-detail">
+        <a name="M000041"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000041.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000041.html');return false;">
+          <span class="method-name">bank_suche_blz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_blz(blz1[,blz2])</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren Bankleitzahl gleich &lt;blz1&gt;
+ist oder (bei Angabe von blz2) die im Bereich zwischen &lt;blz1&gt; und
+&lt;blz2&gt; liegen.. Die Rückgabe ist ein Array mit fünf Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Bankleitzahlen
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen (bei dieser Funktion doppelt gemoppelt :-) )
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<p>
+find all banks with bic between blz1 and blz2
+</p>
+<p>
+possible return values (and short description):
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000038" class="method-detail">
+        <a name="M000038"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000038.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000038.html');return false;">
+          <span class="method-name">bank_suche_namen</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_namen(name)</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert
+&lt;search_bic&gt; beginnen. Die Rückgabe ist ein Array mit fünf
+Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Namenswerten
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -51  (LUT2_NAME_NOT_INITIALIZED)  &quot;Das Feld Bankname wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000039" class="method-detail">
+        <a name="M000039"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000039.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000039.html');return false;">
+          <span class="method-name">bank_suche_namen_kurz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_namen_kurz(short_name)</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren Kurznamen mit dem angegebenen Wert
+&lt;search_bic&gt; beginnen. Die Rückgabe ist ein Array mit fünf
+Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Namenswerten
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -48  (LUT2_NAME_KURZ_NOT_INITIALIZED) &quot;Das Feld Kurzname wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000040" class="method-detail">
+        <a name="M000040"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000040.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000040.html');return false;">
+          <span class="method-name">bank_suche_ort</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_ort(suchort)</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren Sitz mit dem angegebenen Wert
+&lt;suchort&gt; beginnen. Die Rückgabe ist ein Array mit fünf Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Orten
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+   LUT1_FILE_USED             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+   LUT2_NOT_INITIALIZED       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+   LUT2_ORT_NOT_INITIALIZED   &quot;Das Feld Ort wurde nicht initialisiert&quot;
+   ERROR_MALLOC               &quot;kann keinen Speicher allokieren&quot;
+   KEY_NOT_FOUND              &quot;Die Suche lieferte kein Ergebnis&quot;
+   OK                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000042" class="method-detail">
+        <a name="M000042"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000042.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000042.html');return false;">
+          <span class="method-name">bank_suche_plz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_plz(plz1[,plz2])</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren PLZ gleich &lt;plz1&gt; ist oder
+(bei Angabe von plz2) die im Bereich zwischen &lt;plz1&gt; und &lt;plz2&gt;
+liegen.. Die Rückgabe ist ein Array mit fünf Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Namenswerten
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -50  (LUT2_PLZ_NOT_INITIALIZED)   &quot;Das Feld PLZ wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000043" class="method-detail">
+        <a name="M000043"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000043.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000043.html');return false;">
+          <span class="method-name">bank_suche_pz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::bank_suche_pz(pz1[,pz2])</tt></h3>
+<h5><tt>KontoCheck::suche()</tt></h5>
+<p>
+Diese Funktion sucht alle Banken, deren Prüfziffer gleich &lt;pz1&gt; ist
+oder (bei Angabe von pz2) die im Bereich zwischen &lt;pz1&gt; und
+&lt;pz2&gt; liegen.. Die Rückgabe ist ein Array mit fünf Elementen:
+</p>
+<pre>
+   0. Das erste Element ist ein Array mit den gefundenen Prüfziffern
+   1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+   2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+   3. das vierte Element ist der Statuscode (s.u.)
+   4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+</pre>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -45  (LUT2_PZ_NOT_INITIALIZED)    &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000006" class="method-detail">
+        <a name="M000006"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000006.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000006.html');return false;">
+          <span class="method-name">bank_valid</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h4><tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt></h4>
+<h6><tt>KontoCheck::bank_valid(blz [,filiale])</tt></h6>
+<h6><tt>KontoCheck::bank_valid?(blz [,filiale])</tt></h6>
+<p>
+Diese Funktion testet, ob eine gegebene BLZ gültig ist. Der Rückgabewert
+ist ein Statuscode mit den unten angegebenen Werten. Falls das Argument
+filiale auch angegeben ist, wird zusätzlich noch getestet, ob eine Filiale
+mit dem gegebenen Index existiert.
+</p>
+<p>
+Mögliche Rückgabewerte sind:
+</p>
+<pre>
+    -55  (LUT2_INDEX_OUT_OF_RANGE)    &quot;Der Index für die Filiale ist ungültig&quot;
+    -53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000002" class="method-detail">
+        <a name="M000002"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000002.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000002.html');return false;">
+          <span class="method-name">current_lutfile_name</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::current_lutfile_name()</tt></h3>
+<h5><tt>KontoCheck::current_lutfile_name()</tt></h5>
+<h5><tt>KontoCheck::current_lutfile_set()</tt></h5>
+<h5><tt>KontoCheck::current_init_level()</tt></h5>
+<p>
+Diese Funktion bestimmt den Dateinamen der zur Initialisierung benutzen
+LUT-Datei, das benutzte Set und den Initialisierungslevel der aktuellen
+Initialisierung. Rückgabewert ist ein Array mit vier Elementen: das erste
+ist der Dateiname der LUT-Datei, das zweite das benutzte Set (0, falls
+nicht initialisiert wurde, sonst 1 oder 2), das dritte der
+Initialisierungslevel und das vierte der Statuscode.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000020" class="method-detail">
+        <a name="M000020"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000020.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000020.html');return false;">
+          <span class="method-name">dump_lutfile</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::dump_lutfile(lutfile)</tt></h3>
+<h5><tt>KontoCheck::dump_lutfile(lutfile)</tt></h5>
+<p>
+Diese Funktion liefert detaillierte Informationen über alle Blocks, die in
+der LUT-Datei gespeichert sind, sowie noch einige Internas der LUT-Datei.
+Der Rückgabewert ist ein Array mit zwei Elementen: im ersten steht ein
+String mit den Infos, im zweiten ein Statuscode. Im Fehlerfall wird für
+den Infostring nil zurückgegeben.
+</p>
+<p>
+Mögliche Werte für den Statuscode sind:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -36  (LUT2_Z_MEM_ERROR)           &quot;Memory error in den ZLIB-Routinen&quot;
+    -35  (LUT2_Z_DATA_ERROR)          &quot;Datenfehler im komprimierten LUT-Block&quot;
+    -33  (LUT2_DECOMPRESS_ERROR)      &quot;Fehler beim Dekomprimieren eines LUT-Blocks&quot;
+    -31  (LUT2_FILE_CORRUPTED)        &quot;Die LUT-Datei ist korrumpiert&quot;
+    -20  (LUT_CRC_ERROR)              &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+    -10  (FILE_READ_ERROR)            &quot;kann Datei nicht lesen&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)           &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000023" class="method-detail">
+        <a name="M000023"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000023.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000023.html');return false;">
+          <span class="method-name">encoding</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::encoding([mode])</tt></h3>
+<h5><tt>KontoCheck::encoding([mode])</tt></h5>
+<h5><tt>KontoCheckRaw::encoding_str([mode])</tt></h5>
+<h5><tt>KontoCheckRaw::keep_raw_data(mode)</tt></h5>
+<p>
+Diese Funktion legt den benutzten Zeichensatz für Fehlermeldungen durch
+die Funktion KontoCheckRaw::retval2txt() und einige Felder der LUT-Datei
+(Name, Kurzname, Ort) fest. Wenn die Funktion nicht aufgerufen wird, wird
+der Wert DEFAULT_ENCODING aus konto_check.h benutzt.
+</p>
+<p>
+<em>Achtung</em>: Das Verhalten der Funktion hängt von dem Flag <a
+href="KontoCheckRaw.html#M000022">keep_raw_data</a> der C-Bibliothek ab.
+Falls das Flag gesetzt ist, werden die Rohdaten der Blocks Name, Kurzname
+und Ort im Speicher gehalten; bei einem Wechsel der Kodierung wird auch
+für diese Blocks die Kodierung umgesetzt. Falls das Flag nicht gesetzt
+ist, sollte die Funktion <b>vor</b> der Initialisierung aufgerufen werden,
+da in dem Fall die Daten der LUT-Datei nur bei der Initialisierung
+konvertiert werden. Mit der Funktion KontoCheckRaw::keep_raw_data() kann
+das Flag gesetzt oder gelöscht werden.
+</p>
+<p>
+Für den Parameter mode werden die folgenden Werte akzeptiert (die Strings
+sind nicht case sensitiv; Mi oder mI oder MI ist z.B. auch möglich. Wird
+der Parameter nicht angegeben, wird die aktuelle Kodierung ausgegeben):
+</p>
+<pre>
+   0:            aktuelle Kodierung ausgeben
+   1,  'i', 'I': ISO-8859-1
+   2,  'u', 'U': UTF-8
+   3,  'h', 'H': HTML
+   4,  'd', 'D': DOS CP 850
+   51, 'mi':     ISO-8859-1, Makro für Fehlermeldungen
+   52, 'mu':     UTF-8, Makro für Fehlermeldungen
+   53, 'mh':     HTML, Makro für Fehlermeldungen
+   54, 'md':     DOS CP 850, Makro für Fehlermeldungen
+</pre>
+<p>
+Rückgabewert ist die aktuelle Kodierung als Integer (falls zwei
+Kodierungen angegeben sind, ist die erste die der Statusmeldungen, die
+zweite die der LUT-Blocks):
+</p>
+<pre>
+    0:  &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+    1:  &quot;ISO-8859-1&quot;;
+    2:  &quot;UTF-8&quot;;
+    3:  &quot;HTML entities&quot;;
+    4:  &quot;DOS CP 850&quot;;
+    12: &quot;ISO-8859-1/UTF-8&quot;;
+    13: &quot;ISO-8859-1/HTML&quot;;
+    14: &quot;ISO-8859-1/DOS CP 850&quot;;
+    21: &quot;UTF-8/ISO-8859-1&quot;;
+    23: &quot;UTF-8/HTML&quot;;
+    24: &quot;UTF-8/DOS CP-850&quot;;
+    31: &quot;HTML entities/ISO-8859-1&quot;;
+    32: &quot;HTML entities/UTF-8&quot;;
+    34: &quot;HTML entities/DOS CP-850&quot;;
+    41: &quot;DOS CP-850/ISO-8859-1&quot;;
+    42: &quot;DOS CP-850/UTF-8&quot;;
+    43: &quot;DOS CP-850/HTML&quot;;
+    51: &quot;Makro/ISO-8859-1&quot;;
+    52: &quot;Makro/UTF-8&quot;;
+    53: &quot;Makro/HTML&quot;;
+    54: &quot;Makro/DOS CP 850&quot;;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000024" class="method-detail">
+        <a name="M000024"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000024.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000024.html');return false;">
+          <span class="method-name">encoding_str</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::encoding_str(mode)</tt></h3>
+<h5><tt>KontoCheck::encoding_str(mode)</tt></h5>
+<h5><tt>KontoCheckRaw::encoding(mode)</tt></h5>
+<h5><tt>KontoCheckRaw::keep_raw_data(mode)</tt></h5>
+<p>
+Diese Funktion entspricht der Funktion KontoCheck::encoding(). Allerdings
+ist der Rückgabewert nicht numerisch, sondern ein String, der die aktuelle
+Kodierung angibt. Die folgenden Rückgabewerte sind möglich (falls zwei
+Kodierungen angegeben sind, ist die erste die der Statusmeldungen, die
+zweite die der LUT-Blocks):
+</p>
+<pre>
+    &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+    &quot;ISO-8859-1&quot;;
+    &quot;UTF-8&quot;;
+    &quot;HTML entities&quot;;
+    &quot;DOS CP 850&quot;;
+    &quot;ISO-8859-1/UTF-8&quot;;
+    &quot;ISO-8859-1/HTML&quot;;
+    &quot;ISO-8859-1/DOS CP 850&quot;;
+    &quot;UTF-8/ISO-8859-1&quot;;
+    &quot;UTF-8/HTML&quot;;
+    &quot;UTF-8/DOS CP-850&quot;;
+    &quot;HTML entities/ISO-8859-1&quot;;
+    &quot;HTML entities/UTF-8&quot;;
+    &quot;HTML entities/DOS CP-850&quot;;
+    &quot;DOS CP-850/ISO-8859-1&quot;;
+    &quot;DOS CP-850/UTF-8&quot;;
+    &quot;DOS CP-850/HTML&quot;;
+    &quot;Makro/ISO-8859-1&quot;;
+    &quot;Makro/UTF-8&quot;;
+    &quot;Makro/HTML&quot;;
+    &quot;Makro/DOS CP 850&quot;;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000003" class="method-detail">
+        <a name="M000003"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000003.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000003.html');return false;">
+          <span class="method-name">free</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::free()</tt></h3>
+<h5><tt>KontoCheck::free()</tt></h5>
+<p>
+Diese Funktion gibt allen allokierten Speicher wieder frei. Der
+Rückgabewert ist immer true.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000031" class="method-detail">
+        <a name="M000031"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000031.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000031.html');return false;">
+          <span class="method-name">generate_lutfile</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt></h3>
+<h5><tt>KontoCheck::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt></h5>
+<p>
+Diese Funktion generiert eine neue LUT-Datei aus der BLZ-Datei der
+Deutschen Bundesbank. Die folgenden Parameter werden unterstützt:
+</p>
+<ul>
+<li>inputfile: Eingabedatei (Textdatei) der Bundesbank
+
+</li>
+<li>outputfile: Name der Ausgabedatei
+
+</li>
+<li>user_info: Info-String der in die LUT-Datei geschrieben wird (frei
+wählbar; wird in den Info-Block aufgenommen)
+
+</li>
+<li>gueltigkeit: Gültigkeit des Datensatzes im Format JJJJMMTT-JJJJMMTT. Diese
+Angabe wird benutzt, um festzustellen, ob ein Datensatz aktuell noch
+gültig ist.
+
+</li>
+<li>felder: (0-9) Welche Daten aufgenommmen werden sollen (PZ steht in der
+folgenden Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der
+sowohl den Namen als auch den Kurznamen der Bank enthält; dieser läßt
+sich besser komprimieren als wenn beide Blocks getrennt sind):
+
+<pre>
+ 0. BLZ,PZ
+ 1. BLZ,PZ,NAME_KURZ
+ 2. BLZ,PZ,NAME_KURZ,BIC
+ 3. BLZ,PZ,NAME,PLZ,ORT
+ 4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ 5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ 6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ 7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ 8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ 9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+</pre>
+</li>
+<li>filialen: (0 oder 1) Flag, ob nur die Daten der Hauptstellen (0) oder auch
+die der Filialen aufgenommen werden sollen
+
+</li>
+<li>set (0, 1 oder 2): Datensatz-Nummer. Jede LUT-Datei kann zwei Datensätze
+enthalten. Falls bei der Initialisierung nicht ein bestimmter Datensatz
+ausgewählt wird, wird derjenige genommen, der (laut Gültigkeitsstring)
+aktuell gültig ist.
+
+</li>
+<li>iban_file: Datei der Banken, die einer Selbstberechnung des IBAN nicht
+zugestimmt haben. Näheres dazu (inklusive Weblink) findet sich bei der
+Funktion KontoCheckRaw::iban_gen(blz,kto).
+
+</li>
+</ul>
+<p>
+Mögliche Rückgabewerte:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -57  (LUT2_GUELTIGKEIT_SWAPPED)   &quot;Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht&quot;
+    -56  (LUT2_INVALID_GUELTIGKEIT)   &quot;Das angegebene Gültigkeitsdatum ist ungültig (Soll: JJJJMMTT-JJJJMMTT)&quot;
+    -32  (LUT2_COMPRESS_ERROR)        &quot;Fehler beim Komprimieren eines LUT-Blocks&quot;
+    -31  (LUT2_FILE_CORRUPTED)        &quot;Die LUT-Datei ist korrumpiert&quot;
+    -30  (LUT2_NO_SLOT_FREE)          &quot;Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei&quot;
+    -15  (INVALID_BLZ_FILE)           &quot;Fehler in der blz.txt Datei (falsche Zeilenlänge)&quot;
+    -11  (FILE_WRITE_ERROR)           &quot;kann Datei nicht schreiben&quot;
+    -10  (FILE_READ_ERROR)            &quot;kann Datei nicht lesen&quot;
+     -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)           &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+      7  (LUT1_FILE_GENERATED)        &quot;ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000033" class="method-detail">
+        <a name="M000033"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000033.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000033.html');return false;">
+          <span class="method-name">iban2bic</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::iban2bic(iban)</tt></h3>
+<h5><tt>KontoCheck::iban2bic(iban)</tt></h5>
+<p>
+Diese Funktion bestimmt zu einer (deutschen!) IBAN den zugehörigen BIC
+(Bank Identifier Code). Der BIC wird für eine EU-Standard-Überweisung im
+SEPA-Verfahren (Single Euro Payments Area) benötigt; für die deutschen
+Banken ist er in der BLZ-Datei enthalten. Nähere Infos gibt es z.B. unter
+<a href="http://www.bic-code.de">www.bic-code.de</a>/
+</p>
+<p>
+Der Rückgabewert ist ein Array mit vier Elementen: im ersten steht der
+BIC, im zweiten ein Statuscode, im dritten die BLZ und im vierten die
+Kontonummer (die beiden letzteren werden aus der IBAN extrahiert). Im
+Fehlerfall wird für BIC, BLZ und Kontonummer nil zurückgegeben.
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -68  (IBAN2BIC_ONLY_GERMAN)       &quot;Die Funktion iban2bic() arbeitet nur mit deutschen Bankleitzahlen&quot;
+    -46  (LUT2_BIC_NOT_INITIALIZED)   &quot;Das Feld BIC wurde nicht initialisiert&quot;
+    -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+     -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000032" class="method-detail">
+        <a name="M000032"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000032.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000032.html');return false;">
+          <span class="method-name">iban_check</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::iban_check(blz)</tt></h3>
+<h5><tt>KontoCheck::iban_check(iban)</tt></h5>
+<p>
+Diese Funktion testet eine IBAN; bei deutschen Bankverbindungen wird
+zusätzlich noch die Plausibilität der Bankverbindung getestet und im
+Statuswert zurückgegeben. Die Rückgabe ist ein Array mit zwei Elementen:
+im ersten (retval) wird das Testergebnis für die IBAN zurückgegeben, im
+zweiten (bei deutschen Bankverbindungen) das Testergebnis des Kontotests.
+</p>
+<p>
+Mögliche Rückgabewerte für den IBAN-Test:
+</p>
+<pre>
+    -67  (IBAN_OK_KTO_NOT)         &quot;Die Prüfziffer der IBAN stimmt, die der Kontonummer nicht&quot;
+    -66  (KTO_OK_IBAN_NOT)         &quot;Die Prüfziffer der Kontonummer stimmt, die der IBAN nicht&quot;
+      0  (FALSE)                   &quot;falsch&quot;
+      1  (OK)                      &quot;ok&quot;
+</pre>
+<p>
+Mögliche Rückgabewerte für den Kontotest:
+</p>
+<pre>
+    -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+    -74  (NO_GERMAN_BIC)           &quot;Ein Konto kann kann nur für deutsche Banken geprüft werden&quot;
+    -69  (MISSING_PARAMETER)       &quot;Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+    -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -29  (UNDEFINED_SUBMETHOD)     &quot;Die (Unter)Methode ist nicht definiert&quot;
+    -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+     -5  (INVALID_BLZ_LENGTH)      &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)             &quot;Die (Unter)Methode ist nicht definiert&quot;
+     -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+     -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+     -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+      0  (FALSE)                   &quot;falsch&quot;
+      1  (OK)                      &quot;ok&quot;
+      2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000034" class="method-detail">
+        <a name="M000034"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000034.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000034.html');return false;">
+          <span class="method-name">iban_gen</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::iban_gen(blz,kto)</tt></h3>
+<h5><tt>KontoCheck::iban_gen(kto,blz)</tt></h5>
+<p>
+Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN. Hierbei
+ist zu beachten, daß nicht alle Banken der Selbstberechnung zugestimmt
+haben. Es gibt von den Sparkassen eine Liste dieser Institute; sie ist auch
+in der LUT-Datei mit der ID 22 (1. Eigene IBAN) enthalten. Bei diesen
+Banken wird - falls der Block in der LUT-Datei enthalten ist - keine
+Berechnung durchgeführt, sondern die Status-Variable auf
+NO_OWN_IBAN_CALCULATION gesetzt.
+</p>
+<p>
+Alle Banken der Liste erzeugen eine Statusmeldung mit dem Wert
+OK_UNTERKONTO_ATTACHED, OK_UNTERKONTO_POSSIBLE oder OK_UNTERKONTO_GIVEN.
+Falls einer dieser Stauswerte zurückgegeben wird, ist somit immer Vorsicht
+geboten; der generierte IBAN sollte direkt bei dem zugehörigen Institut
+überprüft werden.
+</p>
+<p>
+Hier ein Auszug aus der Anleitung des SEPA Account Converters:
+</p>
+<p>
+Der SEPA Account Converter ist so eingestellt, dass nur Kontoverbindungen
+in IBAN und BIC umgerechnet werden, bei denen das ausgebende Kreditinstitut
+der Umrechnung zugestimmt hat. Kreditinstitute, welche einer Umrechnung
+nicht zugestimmt haben und welche zum Teil spezielle, dem SEPA Account
+Converter nicht bekannte Umrechnungsmethoden verwenden, sind in der Datei
+&quot;CONFIG.INI&quot; hinterlegt. Durch Löschen der Datei
+&quot;CONFIG.INI&quot; aus dem Programmverzeichnis haben Sie die
+Möglichkeit, eine Umrechnung für alle Konten durchzuführen. Bitte
+beachten Sie dabei, dass die so erhaltenen IBAN und BIC fehlerhaft sein
+können und deshalb mit ihren Kunden zu überprüfen sind.
+</p>
+<p>
+Weblinks:
+</p>
+<pre>
+     https://www.sparkasse-rhein-neckar-nord.de/pdf/content/sepa/kurzanleitung.pdf
+     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/index.php
+     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/sepa_account_converter.msi
+</pre>
+<p>
+Es ist möglich, sowohl die Prüfung auf Stimmigkeit der Kontonummer als
+auch auf Zulässigkeit der Selbstberechnung zu deaktivieren. Falls die IBAN
+trotz fehlender Zustimmung der Bank berechnet werden, ist vor die BLZ ein @
+zu setzen; falls auch bei falscher Bankverbindung ein IBAN berechnet werden
+soll, ist vor die BLZ ein + zu setzen. Um beide Prüfungen zu deaktiviern,
+kann @+ (oder +@) vor die BLZ gesetzt werden. Die so erhaltenen IBANs sind
+dann i.A. allerdings wohl nicht gültig.
+</p>
+<p>
+Mögliche Statuscodes sind:
+</p>
+<pre>
+   -110  OK_UNTERKONTO_ATTACHED    &quot;wahrscheinlich OK; es wurde allerdings ein (weggelassenes) Unterkonto angefügt&quot;
+    -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+    -74  (NO_GERMAN_BIC)           &quot;Ein Konto kann kann nur für deutsche Banken geprüft werden&quot;
+    -69  (MISSING_PARAMETER)       &quot;Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+    -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -29  (UNDEFINED_SUBMETHOD)     &quot;Die (Unter)Methode ist nicht definiert&quot;
+    -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+     -5  (INVALID_BLZ_LENGTH)      &quot;die Bankleitzahl ist nicht achtstellig&quot;
+     -4  (INVALID_BLZ)             &quot;Die (Unter)Methode ist nicht definiert&quot;
+     -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+     -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+     -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+      0  (FALSE)                   &quot;falsch&quot;
+      1  (OK)                      &quot;ok&quot;
+      2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+     11  (OK_UNTERKONTO_POSSIBLE)  &quot;wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten&quot;
+     12  (OK_UNTERKONTO_GIVEN)     &quot;wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000001" class="method-detail">
+        <a name="M000001"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000001.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000001.html');return false;">
+          <span class="method-name">init</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])</tt></h3>
+<h5><tt>KontoCheck::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])</tt></h5>
+<p>
+Die Variablen p1 und p2 stehen für level und lutfile (in beliebiger
+Reihenfolge); die Zuordnung der beiden Parameter erfolgt on the fly durch
+eine Typüberprüfung.
+</p>
+<p>
+Diese Funktion initialisiert die Bibliothek und lädt die gewünschten
+Datenblocks in den Speicher. Alle Argumente sind optional; in konto_check.h
+werden die Defaultwerte definiert.
+</p>
+<p>
+Die beiden ersten Parameter sind der Dateiname und der
+Initialisierungslevel. Der Dateiname ist immer als String anzugeben, der
+Initialisierungslevel immer als Zahl, ansonsten wird eine TypeError
+Exception geworfen. Auf diese Weise ist es problemlos möglich
+festzustellen, wie die Parameter p1 und p2 den Variablen lutfile und level
+zuzuordnen sind.
+</p>
+<p>
+Für die LUT-Datei ist als Defaultwert sowohl für den Pfad als auch den
+Dateinamen eine Liste möglich, die sequenziell abgearbeitet wird; diese
+wird in konto_check.h spezifiziert (Compilerzeit-Konstante der
+C-Bibliothek). Die folgenden Werte sind in der aktuellen konto_check.h
+definiert:
+</p>
+<pre>
+   DEFAULT_LUT_NAME blz.lut, blz.lut2f, blz.lut2
+   DEFAULT_LUT_PATH ., /usr/local/etc/, /etc/, /usr/local/bin/, /opt/konto_check/ (für nicht-Windows-Systeme)
+   DEFAULT_LUT_PATH ., C:, C:\\Programme\\konto_check  (für Windows-Systeme)
+</pre>
+<p>
+Der Defaultwert für level ist ebenfalls in konto_check.h definiert; in der
+aktuellen Version ist er 5. Bei diesem Level werden die Blocks BLZ,
+Prüfziffer, Name, Kurzname, PLZ, Ort und BIC geladen.
+</p>
+<p>
+Falls der Parameter set nicht angegeben ist, wird versucht, das aktuell
+gültige Set aus dem Systemdatum und dem Gültigkeitszeitraum der in der
+LUT-Datei gespeicherten Sets zu bestimmen.
+</p>
+<p>
+Hier noch einmal ein Überblick über die Parameter:
+</p>
+<ul>
+<li>lutfile: die LUT-Datei, mit der initialisiert werden soll
+
+</li>
+<li>level: (0-9) Welche Daten geladen werden sollen (PZ steht in der folgenden
+Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der sowohl den
+Namen als auch den Kurznamen der Bank enthält; dieser läßt sich besser
+komprimieren als wenn beide Blocks getrennt sind):
+
+<pre>
+ 0. BLZ,PZ
+ 1. BLZ,PZ,NAME_KURZ
+ 2. BLZ,PZ,NAME_KURZ,BIC
+ 3. BLZ,PZ,NAME,PLZ,ORT
+ 4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ 5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ 6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ 7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ 8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ 9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+</pre>
+</li>
+<li>set (1 oder 2): Datensatz
+
+</li>
+</ul>
+<p>
+Mögliche Rückgabewerte:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -64  (INIT_FATAL_ERROR)        &quot;Initialisierung fehlgeschlagen (init_wait geblockt)&quot;
+    -63  (INCREMENTAL_INIT_NEEDS_INFO)            &quot;Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei&quot;
+    -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   &quot;Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich&quot;
+    -38  (LUT2_PARTIAL_OK)         &quot;es wurden nicht alle Blocks geladen&quot;
+    -36  (LUT2_Z_MEM_ERROR)        &quot;Memory error in den ZLIB-Routinen&quot;
+    -35  (LUT2_Z_DATA_ERROR)       &quot;Datenfehler im komprimierten LUT-Block&quot;
+    -34  (LUT2_BLOCK_NOT_IN_FILE)  &quot;Der Block ist nicht in der LUT-Datei enthalten&quot;
+    -33  (LUT2_DECOMPRESS_ERROR)   &quot;Fehler beim Dekomprimieren eines LUT-Blocks&quot;
+    -31  (LUT2_FILE_CORRUPTED)     &quot;Die LUT-Datei ist korrumpiert&quot;
+    -20  (LUT_CRC_ERROR)           &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+    -10  (FILE_READ_ERROR)         &quot;kann Datei nicht lesen&quot;
+     -9  (ERROR_MALLOC)            &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)        &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+     -6  (NO_LUT_FILE)             &quot;die blz.lut Datei wurde nicht gefunden&quot;
+
+      1  (OK)                      &quot;ok&quot;
+      6  (LUT1_SET_LOADED)         &quot;Die Datei ist im alten LUT-Format (1.0/1.1)&quot;
+</pre>
+<p>
+Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, waren bei der
+Initialisierung nicht alle Blocks in der LUT-Datei enthalten.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000036" class="method-detail">
+        <a name="M000036"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000036.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000036.html');return false;">
+          <span class="method-name">ipi_check</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::ipi_check(&lt;zweck&gt;)</tt></h3>
+<h5><tt>KontoCheck::ipi_check(&lt;zweck&gt;)</tt></h5>
+<p>
+Die Funktion testet, ob ein Strukturierter Verwendungszweck gültig ist
+(Anzahl Zeichen, Prüfziffer). Die Rückgabe ist ein Statuscode, der die
+folgenden Werte annehmen kann:
+</p>
+<pre>
+    -73  (IPI_CHECK_INVALID_LENGTH)   &quot;Der zu validierende strukturierete Verwendungszweck muß genau 20 Zeichen enthalten&quot;
+      0  (FALSE)                      &quot;falsch&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000035" class="method-detail">
+        <a name="M000035"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000035.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000035.html');return false;">
+          <span class="method-name">ipi_gen</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::ipi_gen(&lt;zweck&gt;)</tt></h3>
+<h5><tt>KontoCheck::ipi_gen(&lt;zweck&gt;)</tt></h5>
+<p>
+Diese Funktion generiert einen &quot;Strukturierten Verwendungszweck&quot;
+für SEPA-Überweisungen. Der Rückgabewert ist der Strukturierte
+Verwendungszweck als String oder nil, falls ein Fehler aufgetreten ist.
+</p>
+<p>
+Der String für den Strukturierten Verwendungszweck darf maximal 18 Byte
+lang sein und nur alphanumerische Zeichen enthalten (also auch keine
+Umlaute).
+</p>
+<p>
+Der Rückgabewert ist ein Array mit drei Elementen: im ersten steht der
+Strukturierte Verwendungszweck, im zweiten ein Statuscode und im dritten
+die Papierform (mit eingestreuten Blanks).
+</p>
+<p>
+Mögliche Statuscodes:
+</p>
+<pre>
+    -71  (IPI_INVALID_LENGTH)         &quot;Die Länge des IPI-Verwendungszwecks darf maximal 18 Byte sein&quot;
+    -72  (IPI_INVALID_CHARACTER)      &quot;Im strukturierten Verwendungszweck dürfen nur alphanumerische Zeichen vorkommen&quot;
+      1  (OK)                         &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000022" class="method-detail">
+        <a name="M000022"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000022.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000022.html');return false;">
+          <span class="method-name">keep_raw_data</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::keep_raw_data(mode)</tt></h3>
+<h5><tt>KontoCheckRaw::encoding(mode)</tt></h5>
+<h5><tt>KontoCheck::encoding(mode)</tt></h5>
+<p>
+Diese Funktion setzt bzw. liest das Flag <a
+href="KontoCheckRaw.html#M000022">keep_raw_data</a> in der C-Bibliothek.
+Falls es gesetzt ist, werden werden die Rohdaten der Blocks Name, Kurzname
+und Ort im Speicher gehalten; bei einem Wechsel der Kodierung werden diese
+Blocks dann auch auf die neue Kodierung umgesetzt. Für die Speicherung der
+Blocks werden allerdings etwa 900 KB Hauptspeicher benötigt, die
+andernfalls wieder freigegeben würden.
+</p>
+<p>
+Da diese Funktion etwas exotisch ist, ist sie nur in der <a
+href="KontoCheckRaw.html">KontoCheckRaw</a> Bibliothek enthalten, nicht in
+KontoCheck..
+</p>
+<p>
+Parameter:
+</p>
+<pre>
+   -1: Flag keep_raw_data ausschalten
+    1: Flag keep_raw_data einschalten
+    0: Flag lesen
+</pre>
+<p>
+Der Rückgabewert ist true oder false.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000004" class="method-detail">
+        <a name="M000004"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000004.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000004.html');return false;">
+          <span class="method-name">konto_check</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::konto_check(blz,kto)</tt></h3>
+<h5><tt>KontoCheck::konto_check(blz,kto)</tt></h5>
+<p>
+Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die
+Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+Prüfung enthält. Mögliche Rückgabewerte sind:
+</p>
+<pre>
+   -77  BAV_FALSE               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+   -69  MISSING_PARAMETER       &quot;Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+   -40  LUT2_NOT_INITIALIZED    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+   -29  UNDEFINED_SUBMETHOD     &quot;Die (Unter)Methode ist nicht definiert&quot;
+   -12  INVALID_KTO_LENGTH      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+    -5  INVALID_BLZ_LENGTH      &quot;die Bankleitzahl ist nicht achtstellig&quot;
+    -4  INVALID_BLZ             &quot;die Bankleitzahl ist ungültig&quot;
+    -3  INVALID_KTO             &quot;das Konto ist ungültig&quot;
+    -2  NOT_IMPLEMENTED         &quot;die Methode wurde noch nicht implementiert&quot;
+    -1  NOT_DEFINED             &quot;die Methode ist nicht definiert&quot;
+     0  FALSE                   &quot;falsch&quot;
+     1  OK                      &quot;ok&quot;
+     2  OK_NO_CHK               &quot;ok, ohne Prüfung&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000005" class="method-detail">
+        <a name="M000005"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000005.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000005.html');return false;">
+          <span class="method-name">konto_check_pz</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::konto_check_pz(pz,kto)</tt></h3>
+<h5><tt>KontoCheck::konto_check_pz(pz,kto)</tt></h5>
+<p>
+Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination
+gültig ist.
+</p>
+<p>
+Der zusätzliche Parameter blz ist nur für die Verfahren 52, 53, B6 und C0
+notwendig; bei diesen Verfahren geht die BLZ in die Berechnung der
+Prüfziffer ein. Bei allen anderen Prüfzifferverfahren wird er ignoriert.
+Wird er bei einem dieser Verfahren nicht angegeben, wird stattdessen eine
+Test-BLZ eingesetzt.
+</p>
+<p>
+Die Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+Prüfung enthält. Mögliche Rückgabewerte sind:
+</p>
+<pre>
+    -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+    -69  (MISSING_PARAMETER)       &quot;bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+    -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -29  (UNDEFINED_SUBMETHOD)     &quot;die (Unter)Methode ist nicht definiert&quot;
+    -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+     -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+     -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+     -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+      0  (FALSE)                   &quot;falsch&quot;
+      1  (OK)                      &quot;ok&quot;
+      2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000045" class="method-detail">
+        <a name="M000045"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000045.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000045.html');return false;">
+          <span class="method-name">load_bank_data</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::load_bank_data(&lt;datafile&gt;)</tt></h3>
+<h5><tt>KontoCheck::load_bank_data(&lt;datafile&gt;)</tt></h5>
+<p>
+Diese Funktion war die alte Initialisierungsroutine für <a
+href="KontoCheckRaw.html#M000004">konto_check</a>; es ist nun durch die
+Funktionen KontoCheck::init() und KontoCheck::generate_lutfile() ersetzt.
+Zur Initialisierung benutzte sie die Textdatei der Deutschen Bundesbank und
+generiertge daraus eine LUT-Datei, die dann von der Initialisierungsroutine
+der C-Bibliothek benutzt wurde.
+</p>
+<p>
+Die <a href="KontoCheckRaw.html#M000001">init</a>() Funktion ist wesentlich
+schneller (7..20 mal so schnell) und hat eine Reihe weiterer Vorteile. So
+ist es z.B. möglich, zwwei Datensätze mit unterschiedlichem
+Gültigkeitszeitraum in einer Datei zu halten und den jeweils gültigen
+Satz automatisch (nach der Systemzeit) auswählen zu lassen. Die einzelnen
+Datenblocks (Bankleitzahlen, Prüfziffermethoden, PLZ, Ort&#8230;) sind in
+der LUT-Datei in jeweils unabhängigen Blocks gespeichert und können
+einzeln geladen werden; die Bankdatei von der Deutschen Bundesbank enthält
+alle Felder in einem linearen Format, so daß einzelne Blocks nicht
+unabhängig von anderen geladen werden können.
+</p>
+<p>
+Die Funktion <a href="KontoCheckRaw.html#M000045">load_bank_data</a>() wird
+nur noch als ein schibbolet benutzt, um zu testen, ob jemand das alte
+Interface benutzt. Bei der Routine KontoCheck::konto_check() wurde die
+Reihenfolge der Parameter getauscht, so daß man in dem Falle den alten
+Code umstellen muß.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000021" class="method-detail">
+        <a name="M000021"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000021.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000021.html');return false;">
+          <span class="method-name">lut_info</span><span class="method-args">(...)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::lut_info([lutfile])</tt></h3>
+<h5><tt>KontoCheck::lut_info()</tt></h5>
+<h5><tt>KontoCheck::lut_info1(lutfile)</tt></h5>
+<h5><tt>KontoCheck::lut_info2(lutfile)</tt></h5>
+<p>
+Diese Funktion liefert Informationen über die Datensätze sowie die beiden
+Infoblocks einer LUT-Datei. Falls sie ohne Parameter aufgerufen wird,
+werden Infos über die geladenen Blocks zurückgegeben.
+</p>
+<p>
+Der Rückgabewert ist ein Array mit 5 Elementen:
+</p>
+<pre>
+   0. retval:  Statuscode
+   1. valid1:  Gültigkeitscode für den ersten Block
+   2. valid2:  Gültigkeitscode für den zweiten Block
+   3. info1:   erster Infoblock, oder nil, falls der Block nicht existiert
+   4. info2:   zweiter Infoblock, oder nil, falls der Block nicht existiert
+</pre>
+<p>
+Mögliche Statuscodes für valid1 and valid2 sind:
+</p>
+<pre>
+   -105  (LUT2_NO_LONGER_VALID_BETTER)   &quot;Beide Datensätze sind nicht mehr gültig; dieser ist  aber jünger als der andere&quot;
+    -59  (LUT2_NOT_YET_VALID)            &quot;Der Datenblock ist noch nicht gültig&quot;
+    -58  (LUT2_NO_LONGER_VALID)          &quot;Der Datenblock ist nicht mehr gültig&quot;
+    -34  (LUT2_BLOCK_NOT_IN_FILE)        &quot;Die LUT-Datei enthält den Infoblock nicht&quot;
+      4  (LUT2_VALID)                    &quot;Der Datenblock ist aktuell gültig&quot;
+      5  (LUT2_NO_VALID_DATE)            &quot;Der Datenblock enthält kein Gültigkeitsdatum&quot;
+</pre>
+<p>
+Mögliche Werte für den Statuscode retval:
+</p>
+<pre>
+   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+    -10  (FILE_READ_ERROR)        &quot;kann Datei nicht lesen&quot;
+    -70  (LUT1_FILE_USED)         &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+    -40  (LUT2_NOT_INITIALIZED)   &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+    -37  (LUT2_Z_BUF_ERROR)       &quot;Buffer error in den ZLIB Routinen&quot;
+    -36  (LUT2_Z_MEM_ERROR)       &quot;Memory error in den ZLIB-Routinen&quot;
+    -35  (LUT2_Z_DATA_ERROR)      &quot;Datenfehler im komprimierten LUT-Block&quot;
+    -34  (LUT2_BLOCK_NOT_IN_FILE) &quot;Der Block ist nicht in der LUT-Datei enthalten&quot;
+    -31  (LUT2_FILE_CORRUPTED)    &quot;Die LUT-Datei ist korrumpiert&quot;
+    -20  (LUT_CRC_ERROR)          &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+     -9  (ERROR_MALLOC)           &quot;kann keinen Speicher allokieren&quot;
+     -7  (INVALID_LUT_FILE)       &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+      1  (OK)                     &quot;ok&quot;
+</pre>
+        </div>
+      </div>
+
+      <div id="method-M000028" class="method-detail">
+        <a name="M000028"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000028.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000028.html');return false;">
+          <span class="method-name">retval2dos</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2dos(&lt;retval&gt;)</tt></h3>
+<h5><tt>KontoCheck::retval2dos(&lt;retval&gt;)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist cp850 (DOS).
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000029" class="method-detail">
+        <a name="M000029"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000029.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000029.html');return false;">
+          <span class="method-name">retval2html</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2html(&lt;retval&gt;)</tt></h3>
+<h5><tt>KontoCheck::retval2html(&lt;retval&gt;)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Für Umlaute werden HTML-Entities benutzt.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000026" class="method-detail">
+        <a name="M000026"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000026.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000026.html');return false;">
+          <span class="method-name">retval2iso</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2iso(retval)</tt></h3>
+<h5><tt>KontoCheck::retval2iso(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist ISO 8859-1.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000025" class="method-detail">
+        <a name="M000025"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000025.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000025.html');return false;">
+          <span class="method-name">retval2txt</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2txt(retval)</tt></h3>
+<h5><tt>KontoCheck::retval2txt(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz wird über die Funktion KontoCheckRaw::encoding()
+festgelegt. Falls diese Funktion nicht aufgerufen wurde, wird der Wert des
+Makros DEFAULT_ENCODING aus konto_check.h benutzt.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000027" class="method-detail">
+        <a name="M000027"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000027.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000027.html');return false;">
+          <span class="method-name">retval2txt_short</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2txt_short(retval)</tt></h3>
+<h5><tt>KontoCheck::retval2txt_short(retval)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
+String. Die Ausgabe ist der Makroname, wie er in C benutzt wird.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000030" class="method-detail">
+        <a name="M000030"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000030.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000030.html');return false;">
+          <span class="method-name">retval2utf8</span><span class="method-args">(p1)</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::retval2utf8(&lt;retval&gt;)</tt></h3>
+<h5><tt>KontoCheck::retval2utf8(&lt;retval&gt;)</tt></h5>
+<p>
+Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
+Der benutzte Zeichensatz ist UTF-8.
+</p>
+        </div>
+      </div>
+
+      <div id="method-M000044" class="method-detail">
+        <a name="M000044"></a>
+
+        <div class="method-heading">
+          <a href="KontoCheckRaw.src/M000044.html" target="Code" class="method-signature"
+            onclick="popupCode('KontoCheckRaw.src/M000044.html');return false;">
+          <span class="method-name">version</span><span class="method-args">()</span>
+          </a>
+        </div>
+      
+        <div class="method-description">
+          <h3><tt>KontoCheckRaw::version()</tt></h3>
+<h5><tt>KontoCheck::version()</tt></h5>
+<p>
+Diese Funktion gibt den Versions-String der C-Bibliothek zurück.
+</p>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+<div id="validator-badges">
+  <p><small><a href="http://validator.w3.org/check/referer">[Validate]</a></small></p>
+</div>
+
+</body>
+</html>

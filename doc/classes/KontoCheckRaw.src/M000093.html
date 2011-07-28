@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>bank_suche_pz (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::bank_suche_pz(pz1[,pz2])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::suche()&lt;/tt&gt;
+ *
+ * Diese Funktion sucht alle Banken, deren Prüfziffer gleich &lt;pz1&gt; ist oder (bei
+ * Angabe von pz2) die im Bereich zwischen &lt;pz1&gt; und &lt;pz2&gt; liegen.. Die
+ * Rückgabe ist ein Array mit fünf Elementen:
+ *
+ *    0. Das erste Element ist ein Array mit den gefundenen Prüfziffern
+ *    1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+ *    2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+ *    3. das vierte Element ist der Statuscode (s.u.)
+ *    4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+ *
+ * Mögliche Statuscodes:
+ *
+ *     -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+ *     -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+ *     -45  (LUT2_PZ_NOT_INITIALIZED)    &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
+ *     -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *      -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE bank_suche_pz(int argc,VALUE* argv,VALUE self)
+{
+   char error_msg[512];
+   int i,j,retval,such1,such2,anzahl,*start_idx,*base_name,*zweigstelle,*blz_base;
+   VALUE ret_blz,ret_idx,ret_suche;
+
+   get_params_int(argc,argv,&amp;such1,&amp;such2);
+   retval=lut_suche_pz(such1,such2,&amp;anzahl,&amp;start_idx,&amp;zweigstelle,&amp;base_name,&amp;blz_base);
+   if(retval==KEY_NOT_FOUND)return rb_ary_new3(5,Qnil,Qnil,Qnil,INT2FIX(retval),INT2FIX(0));
+   if(retval&lt;0)RUNTIME_ERROR(retval);
+   ret_suche=rb_ary_new2(anzahl);
+   ret_blz=rb_ary_new2(anzahl);
+   ret_idx=rb_ary_new2(anzahl);
+   for(i=0;i&lt;anzahl;i++){
+      j=start_idx[i];   /* Index innerhalb der BLZ-Datei */
+      rb_ary_store(ret_suche,i,INT2FIX(base_name[j]));
+      rb_ary_store(ret_blz,i,INT2FIX(blz_base[j]));
+      rb_ary_store(ret_idx,i,INT2FIX(zweigstelle[j]));
+   }
+   return rb_ary_new3(5,ret_suche,ret_blz,ret_idx,INT2FIX(retval),INT2FIX(anzahl));
+}</pre>
+</body>
+</html>
