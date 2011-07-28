@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>ipi_gen (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::ipi_gen(&lt;zweck&gt;)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::ipi_gen(&lt;zweck&gt;)&lt;/tt&gt;
+ *
+ * Diese Funktion generiert einen &quot;Strukturierten Verwendungszweck&quot; für SEPA-Überweisungen.
+ * Der Rückgabewert ist der Strukturierte Verwendungszweck als String oder nil, falls ein Fehler
+ * aufgetreten ist.
+ * 
+ * Der String für den Strukturierten Verwendungszweck darf maximal 18 Byte lang sein und nur
+ * alphanumerische Zeichen enthalten (also auch keine Umlaute).
+ *
+ * Der Rückgabewert ist ein Array mit drei Elementen: im ersten steht der Strukturierte Verwendungszweck,
+ * im zweiten ein Statuscode und im dritten die Papierform (mit eingestreuten Blanks).
+ * 
+ * Mögliche Statuscodes:
+ *
+ *     -71  (IPI_INVALID_LENGTH)         &quot;Die Länge des IPI-Verwendungszwecks darf maximal 18 Byte sein&quot;
+ *     -72  (IPI_INVALID_CHARACTER)      &quot;Im strukturierten Verwendungszweck dürfen nur alphanumerische Zeichen vorkommen&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE ipi_gen_rb(int argc,VALUE* argv,VALUE self)
+{
+   char zweck[24],dst[24],papier[30];
+   int retval;
+
+   get_params(argc,argv,zweck,NULL,NULL,NULL,4);
+   retval=ipi_gen(zweck,dst,papier);
+   if(retval==OK)
+      return rb_ary_new3(3,rb_str_new2(dst),INT2FIX(retval),rb_str_new2(papier));
+   else
+      return rb_ary_new3(3,Qnil,INT2FIX(retval),Qnil);
+}</pre>
+</body>
+</html>

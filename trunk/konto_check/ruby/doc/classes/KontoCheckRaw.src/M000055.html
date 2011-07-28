@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>konto_check_pz (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::konto_check_pz(pz,kto)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::konto_check_pz(pz,kto)&lt;/tt&gt;
+ *
+ * Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination gültig ist.
+ * 
+ * Der zusätzliche Parameter blz ist nur für die Verfahren 52, 53, B6 und C0 notwendig; bei
+ * diesen Verfahren geht die BLZ in die Berechnung der Prüfziffer ein. Bei allen anderen
+ * Prüfzifferverfahren wird er ignoriert. Wird er bei einem dieser Verfahren nicht angegeben,
+ * wird stattdessen eine Test-BLZ eingesetzt.
+ * 
+ * Die Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der
+ * Prüfung enthält. Mögliche Rückgabewerte sind:
+ *
+ *     -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+ *     -69  (MISSING_PARAMETER)       &quot;bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+ *     -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *     -29  (UNDEFINED_SUBMETHOD)     &quot;die (Unter)Methode ist nicht definiert&quot;
+ *     -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+ *      -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+ *      -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+ *      -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+ *       0  (FALSE)                   &quot;falsch&quot;
+ *       1  (OK)                      &quot;ok&quot;
+ *       2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+ */
+static VALUE konto_check_pz(int argc,VALUE* argv,VALUE self)
+{
+   char pz[16],blz[16],kto[16],error_msg[512];
+   int retval;
+
+   get_params(argc,argv,pz,kto,blz,NULL,5);
+   if((retval=kto_check_pz(pz,kto,blz))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
+   return INT2FIX(retval);
+}</pre>
+</body>
+</html>

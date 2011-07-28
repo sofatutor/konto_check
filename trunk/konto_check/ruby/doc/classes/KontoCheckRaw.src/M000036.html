@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>ipi_check (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::ipi_check(&lt;zweck&gt;)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::ipi_check(&lt;zweck&gt;)&lt;/tt&gt;
+ * 
+ * Die Funktion testet, ob ein Strukturierter Verwendungszweck gültig ist
+ * (Anzahl Zeichen, Prüfziffer). Die Rückgabe ist ein Statuscode, der die
+ * folgenden Werte annehmen kann:
+ * 
+ *     -73  (IPI_CHECK_INVALID_LENGTH)   &quot;Der zu validierende strukturierete Verwendungszweck muß genau 20 Zeichen enthalten&quot;
+ *       0  (FALSE)                      &quot;falsch&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE ipi_check_rb(int argc,VALUE* argv,VALUE self)
+{
+   char zweck[128];
+
+   get_params(argc,argv,zweck,NULL,NULL,NULL,3);
+   return INT2FIX(ipi_check(zweck));
+}</pre>
+</body>
+</html>

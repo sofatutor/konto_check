@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>version (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::version()&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::version()&lt;/tt&gt;
+ *
+ * Diese Funktion gibt den Versions-String der C-Bibliothek zurück.
+ */
+static VALUE version_rb(int argc,VALUE* argv,VALUE self)
+{
+   return rb_str_new2(get_kto_check_version());
+}</pre>
+</body>
+</html>

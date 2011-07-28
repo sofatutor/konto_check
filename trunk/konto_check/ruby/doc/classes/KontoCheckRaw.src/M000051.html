@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>init (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::init([&lt;p1&gt;[,&lt;p2&gt;[,&lt;set&gt;]]])&lt;/tt&gt;
+ * Die Variablen p1 und p2 stehen für level und lutfile (in beliebiger
+ * Reihenfolge); die Zuordnung der beiden Parameter erfolgt on the fly durch
+ * eine Typüberprüfung.
+ *
+ * Diese Funktion initialisiert die Bibliothek und lädt die gewünschten
+ * Datenblocks in den Speicher. Alle Argumente sind optional; in konto_check.h
+ * werden die Defaultwerte definiert.
+ *
+ * Die beiden ersten Parameter sind der Dateiname und der
+ * Initialisierungslevel. Der Dateiname ist immer als String anzugeben, der
+ * Initialisierungslevel immer als Zahl, ansonsten wird eine TypeError
+ * Exception geworfen. Auf diese Weise ist es problemlos möglich festzustellen,
+ * wie die Parameter p1 und p2 den Variablen lutfile und level zuzuordnen
+ * sind.
+ *
+ * Für die LUT-Datei ist als Defaultwert sowohl für den Pfad als auch den
+ * Dateinamen eine Liste möglich, die sequenziell abgearbeitet wird; diese wird
+ * in konto_check.h spezifiziert (Compilerzeit-Konstante der C-Bibliothek). Die
+ * folgenden Werte sind in der aktuellen konto_check.h definiert:
+ *
+ *    DEFAULT_LUT_NAME blz.lut, blz.lut2f, blz.lut2
+ *    DEFAULT_LUT_PATH ., /usr/local/etc/, /etc/, /usr/local/bin/, /opt/konto_check/ (für nicht-Windows-Systeme)
+ *    DEFAULT_LUT_PATH ., C:, C:\\Programme\\konto_check  (für Windows-Systeme)
+ *
+ * Der Defaultwert für level ist ebenfalls in konto_check.h definiert; in der
+ * aktuellen Version ist er 5. Bei diesem Level werden die Blocks BLZ,
+ * Prüfziffer, Name, Kurzname, PLZ, Ort und BIC geladen.
+ *
+ * Falls der Parameter set nicht angegeben ist, wird versucht, das aktuell
+ * gültige Set aus dem Systemdatum und dem Gültigkeitszeitraum der in der
+ * LUT-Datei gespeicherten Sets zu bestimmen.
+ * 
+ * Hier noch einmal ein Überblick über die Parameter:
+ *
+ * * lutfile: die LUT-Datei, mit der initialisiert werden soll
+ * * level: (0-9) Welche Daten geladen werden sollen (PZ steht in der folgenden Tabelle für Prüfziffer, NAME_NAME_KURZ ist ein Block, der sowohl den Namen als auch den Kurznamen der Bank enthält; dieser läßt sich besser komprimieren als wenn beide Blocks getrennt sind):
+ *    0. BLZ,PZ
+ *    1. BLZ,PZ,NAME_KURZ
+ *    2. BLZ,PZ,NAME_KURZ,BIC
+ *    3. BLZ,PZ,NAME,PLZ,ORT
+ *    4. BLZ,PZ,NAME,PLZ,ORT,BIC
+ *    5. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC
+ *    6. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ
+ *    7. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG
+ *    8. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG
+ *    9. BLZ,PZ,NAME_NAME_KURZ,PLZ,ORT,BIC,NACHFOLGE_BLZ,AENDERUNG,LOESCHUNG,PAN,NR
+ * * set (1 oder 2): Datensatz
+ * 
+ * Mögliche Rückgabewerte:
+ * 
+ *    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+ *     -64  (INIT_FATAL_ERROR)        &quot;Initialisierung fehlgeschlagen (init_wait geblockt)&quot;
+ *     -63  (INCREMENTAL_INIT_NEEDS_INFO)            &quot;Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei&quot;
+ *     -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   &quot;Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich&quot;
+ *     -38  (LUT2_PARTIAL_OK)         &quot;es wurden nicht alle Blocks geladen&quot;
+ *     -36  (LUT2_Z_MEM_ERROR)        &quot;Memory error in den ZLIB-Routinen&quot;
+ *     -35  (LUT2_Z_DATA_ERROR)       &quot;Datenfehler im komprimierten LUT-Block&quot;
+ *     -34  (LUT2_BLOCK_NOT_IN_FILE)  &quot;Der Block ist nicht in der LUT-Datei enthalten&quot;
+ *     -33  (LUT2_DECOMPRESS_ERROR)   &quot;Fehler beim Dekomprimieren eines LUT-Blocks&quot;
+ *     -31  (LUT2_FILE_CORRUPTED)     &quot;Die LUT-Datei ist korrumpiert&quot;
+ *     -20  (LUT_CRC_ERROR)           &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+ *     -10  (FILE_READ_ERROR)         &quot;kann Datei nicht lesen&quot;
+ *      -9  (ERROR_MALLOC)            &quot;kann keinen Speicher allokieren&quot;
+ *      -7  (INVALID_LUT_FILE)        &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+ *      -6  (NO_LUT_FILE)             &quot;die blz.lut Datei wurde nicht gefunden&quot;
+ * 
+ *       1  (OK)                      &quot;ok&quot;
+ *       6  (LUT1_SET_LOADED)         &quot;Die Datei ist im alten LUT-Format (1.0/1.1)&quot;
+ *
+ * Anmerkung: Falls der Statuscode LUT2_PARTIAL_OK ist, waren bei der
+ * Initialisierung nicht alle Blocks in der LUT-Datei enthalten.
+ */
+static VALUE init(int argc,VALUE* argv,VALUE self)
+{
+   char lut_name[FILENAME_MAX+1],error_msg[512];
+   int retval,level,set;
+
+   get_params_file(argc,argv,lut_name,&amp;level,&amp;set,1);
+   retval=lut_init(lut_name,level,set);
+   switch(retval){
+      case OK:
+      case LUT1_SET_LOADED:
+      case LUT2_PARTIAL_OK:
+         break;
+      default:
+         RUNTIME_ERROR(retval);
+   }
+   return INT2FIX(retval);
+}</pre>
+</body>
+</html>

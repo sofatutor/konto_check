@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>bank_nachfolge_blz (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::bank_nachfolge_blz(blz [,filiale])&lt;/tt&gt;
+ * 
+ * Diese Funktion liefert die Nachfolge-BLZ für eine Bank, die gelöscht werden
+ * soll (bei der das 'Löschung' Flag 1 ist). Der Rückgabewert ist ein Array mit
+ * zwei Elementen: im ersten steht die Nachfolge-BLZ, im zweiten ein Statuscode. Im
+ * Fehlerfall wird für die Nachfolge-BLZ nil zurückgegeben.
+ * 
+ * Mögliche Statuscodes:
+ * 
+ *     -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+ *     -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+ *     -41  (LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED) &quot;Das Feld Nachfolge-BLZ wurde nicht initialisiert&quot;
+ *      -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+ *      -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+ *       1  (OK)                            &quot;ok&quot;
+ */
+static VALUE bank_nachfolge_blz(int argc,VALUE* argv,VALUE self)
+{
+   char blz[16],error_msg[512];
+   int retval,n_blz,filiale;
+
+   get_params(argc,argv,blz,NULL,NULL,&amp;filiale,1);
+   n_blz=lut_nachfolge_blz(blz,filiale,&amp;retval);
+   if(retval==LUT2_BLZ_NOT_INITIALIZED || retval==LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED)RUNTIME_ERROR(retval);
+   return rb_ary_new3(2,retval&lt;=0?Qnil:INT2FIX(n_blz),INT2FIX(retval));
+}</pre>
+</body>
+</html>

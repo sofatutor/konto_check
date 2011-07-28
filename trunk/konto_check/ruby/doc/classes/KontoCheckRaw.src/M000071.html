@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>lut_info (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::lut_info([lutfile])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::lut_info()&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::lut_info1(lutfile)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::lut_info2(lutfile)&lt;/tt&gt;
+ *
+ * Diese Funktion liefert Informationen über die Datensätze sowie die beiden
+ * Infoblocks einer LUT-Datei. Falls sie ohne Parameter aufgerufen wird,
+ * werden Infos über die geladenen Blocks zurückgegeben.
+ * 
+ * Der Rückgabewert ist ein Array mit 5 Elementen:
+ *
+ *    0. retval:  Statuscode
+ *    1. valid1:  Gültigkeitscode für den ersten Block
+ *    2. valid2:  Gültigkeitscode für den zweiten Block
+ *    3. info1:   erster Infoblock, oder nil, falls der Block nicht existiert
+ *    4. info2:   zweiter Infoblock, oder nil, falls der Block nicht existiert
+ * 
+ * Mögliche Statuscodes für valid1 and valid2 sind:
+ *
+ *    -105  (LUT2_NO_LONGER_VALID_BETTER)   &quot;Beide Datensätze sind nicht mehr gültig; dieser ist  aber jünger als der andere&quot;
+ *     -59  (LUT2_NOT_YET_VALID)            &quot;Der Datenblock ist noch nicht gültig&quot;
+ *     -58  (LUT2_NO_LONGER_VALID)          &quot;Der Datenblock ist nicht mehr gültig&quot;
+ *     -34  (LUT2_BLOCK_NOT_IN_FILE)        &quot;Die LUT-Datei enthält den Infoblock nicht&quot;
+ *       4  (LUT2_VALID)                    &quot;Der Datenblock ist aktuell gültig&quot;
+ *       5  (LUT2_NO_VALID_DATE)            &quot;Der Datenblock enthält kein Gültigkeitsdatum&quot;
+ *
+ * Mögliche Werte für den Statuscode retval:
+ *
+ *    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) &quot;die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden&quot;
+ *     -10  (FILE_READ_ERROR)        &quot;kann Datei nicht lesen&quot;
+ *     -70  (LUT1_FILE_USED)         &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+ *     -40  (LUT2_NOT_INITIALIZED)   &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *     -37  (LUT2_Z_BUF_ERROR)       &quot;Buffer error in den ZLIB Routinen&quot;
+ *     -36  (LUT2_Z_MEM_ERROR)       &quot;Memory error in den ZLIB-Routinen&quot;
+ *     -35  (LUT2_Z_DATA_ERROR)      &quot;Datenfehler im komprimierten LUT-Block&quot;
+ *     -34  (LUT2_BLOCK_NOT_IN_FILE) &quot;Der Block ist nicht in der LUT-Datei enthalten&quot;
+ *     -31  (LUT2_FILE_CORRUPTED)    &quot;Die LUT-Datei ist korrumpiert&quot;
+ *     -20  (LUT_CRC_ERROR)          &quot;Prüfsummenfehler in der blz.lut Datei&quot;
+ *      -9  (ERROR_MALLOC)           &quot;kann keinen Speicher allokieren&quot;
+ *      -7  (INVALID_LUT_FILE)       &quot;die blz.lut Datei ist inkosistent/ungültig&quot;
+ *       1  (OK)                     &quot;ok&quot;
+ */
+static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
+{
+   char lut_name[FILENAME_MAX+1],*info1,*info2,error_msg[512];
+   int retval,valid1,valid2;
+   VALUE info1_rb,info2_rb;
+
+   get_params_file(argc,argv,lut_name,NULL,NULL,3);
+   retval=lut_info(lut_name,&amp;info1,&amp;info2,&amp;valid1,&amp;valid2);
+   if(!info1)
+      info1_rb=Qnil;
+   else
+      info1_rb=rb_str_new2(info1);
+   if(!info2)
+      info2_rb=Qnil;
+   else
+      info2_rb=rb_str_new2(info2);
+   kc_free(info1);  /* die C-Funktion allokiert Speicher, der muß wieder freigegeben werden */
+   kc_free(info2);
+   if(retval&lt;0)RUNTIME_ERROR(retval);
+   return rb_ary_new3(5,INT2FIX(retval),INT2FIX(valid1),INT2FIX(valid2),info1_rb,info2_rb);
+}</pre>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>encoding (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::encoding([mode])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::encoding([mode])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheckRaw::encoding_str([mode])&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheckRaw::keep_raw_data(mode)&lt;/tt&gt;
+ *
+ * Diese Funktion legt den benutzten Zeichensatz für Fehlermeldungen durch die
+ * Funktion KontoCheckRaw::retval2txt() und einige Felder der LUT-Datei (Name,
+ * Kurzname, Ort) fest. Wenn die Funktion nicht aufgerufen wird, wird der Wert
+ * DEFAULT_ENCODING aus konto_check.h benutzt.
+ *
+ * _Achtung_: Das Verhalten der Funktion hängt von dem Flag keep_raw_data der
+ * C-Bibliothek ab. Falls das Flag gesetzt ist, werden die Rohdaten der Blocks
+ * Name, Kurzname und Ort im Speicher gehalten; bei einem Wechsel der Kodierung
+ * wird auch für diese Blocks die Kodierung umgesetzt. Falls das Flag nicht
+ * gesetzt ist, sollte die Funktion *vor* der Initialisierung aufgerufen werden,
+ * da in dem Fall die Daten der LUT-Datei nur bei der Initialisierung konvertiert
+ * werden. Mit der Funktion KontoCheckRaw::keep_raw_data() kann das Flag gesetzt
+ * oder gelöscht werden.
+ *
+ * Für den Parameter mode werden die folgenden Werte akzeptiert (die Strings
+ * sind nicht case sensitiv; Mi oder mI oder MI ist z.B. auch möglich. Wird der
+ * Parameter nicht angegeben, wird die aktuelle Kodierung ausgegeben):
+ *
+ *    0:            aktuelle Kodierung ausgeben
+ *    1,  'i', 'I': ISO-8859-1
+ *    2,  'u', 'U': UTF-8
+ *    3,  'h', 'H': HTML
+ *    4,  'd', 'D': DOS CP 850
+ *    51, 'mi':     ISO-8859-1, Makro für Fehlermeldungen
+ *    52, 'mu':     UTF-8, Makro für Fehlermeldungen
+ *    53, 'mh':     HTML, Makro für Fehlermeldungen
+ *    54, 'md':     DOS CP 850, Makro für Fehlermeldungen
+ *
+ * Rückgabewert ist die aktuelle Kodierung als Integer (falls zwei Kodierungen
+ * angegeben sind, ist die erste die der Statusmeldungen, die zweite die der
+ * LUT-Blocks):
+ * 
+ *     0:  &quot;noch nicht spezifiziert&quot; (vor der Initialisierung)
+ *     1:  &quot;ISO-8859-1&quot;;
+ *     2:  &quot;UTF-8&quot;;
+ *     3:  &quot;HTML entities&quot;;
+ *     4:  &quot;DOS CP 850&quot;;
+ *     12: &quot;ISO-8859-1/UTF-8&quot;;
+ *     13: &quot;ISO-8859-1/HTML&quot;;
+ *     14: &quot;ISO-8859-1/DOS CP 850&quot;;
+ *     21: &quot;UTF-8/ISO-8859-1&quot;;
+ *     23: &quot;UTF-8/HTML&quot;;
+ *     24: &quot;UTF-8/DOS CP-850&quot;;
+ *     31: &quot;HTML entities/ISO-8859-1&quot;;
+ *     32: &quot;HTML entities/UTF-8&quot;;
+ *     34: &quot;HTML entities/DOS CP-850&quot;;
+ *     41: &quot;DOS CP-850/ISO-8859-1&quot;;
+ *     42: &quot;DOS CP-850/UTF-8&quot;;
+ *     43: &quot;DOS CP-850/HTML&quot;;
+ *     51: &quot;Makro/ISO-8859-1&quot;;
+ *     52: &quot;Makro/UTF-8&quot;;
+ *     53: &quot;Makro/HTML&quot;;
+ *     54: &quot;Makro/DOS CP 850&quot;;
+ */
+static VALUE encoding_rb(int argc,VALUE* argv,VALUE self)
+{
+   return INT2FIX(kto_check_encoding(enc_mode(argc,argv)));
+}</pre>
+</body>
+</html>

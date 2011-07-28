@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>iban_check (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::iban_check(blz)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::iban_check(iban)&lt;/tt&gt;
+ * Diese Funktion testet eine IBAN; bei deutschen Bankverbindungen wird
+ * zusätzlich noch die Plausibilität der Bankverbindung getestet und im
+ * Statuswert zurückgegeben. Die Rückgabe ist ein Array mit zwei Elementen: im
+ * ersten (retval) wird das Testergebnis für die IBAN zurückgegeben, im zweiten
+ * (bei deutschen Bankverbindungen) das Testergebnis des Kontotests.
+ *
+ * Mögliche Rückgabewerte für den IBAN-Test:
+ *
+ *     -67  (IBAN_OK_KTO_NOT)         &quot;Die Prüfziffer der IBAN stimmt, die der Kontonummer nicht&quot;
+ *     -66  (KTO_OK_IBAN_NOT)         &quot;Die Prüfziffer der Kontonummer stimmt, die der IBAN nicht&quot;
+ *       0  (FALSE)                   &quot;falsch&quot;
+ *       1  (OK)                      &quot;ok&quot;
+ *
+ * Mögliche Rückgabewerte für den Kontotest:
+ *     -77  (BAV_FALSE)               &quot;BAV denkt, das Konto ist falsch (konto_check hält es für richtig)&quot;
+ *     -74  (NO_GERMAN_BIC)           &quot;Ein Konto kann kann nur für deutsche Banken geprüft werden&quot;
+ *     -69  (MISSING_PARAMETER)       &quot;Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)&quot;
+ *     -40  (LUT2_NOT_INITIALIZED)    &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *     -29  (UNDEFINED_SUBMETHOD)     &quot;Die (Unter)Methode ist nicht definiert&quot;
+ *     -12  (INVALID_KTO_LENGTH)      &quot;ein Konto muß zwischen 1 und 10 Stellen haben&quot;
+ *      -5  (INVALID_BLZ_LENGTH)      &quot;die Bankleitzahl ist nicht achtstellig&quot;
+ *      -4  (INVALID_BLZ)             &quot;Die (Unter)Methode ist nicht definiert&quot;
+ *      -3  (INVALID_KTO)             &quot;das Konto ist ungültig&quot;
+ *      -2  (NOT_IMPLEMENTED)         &quot;die Methode wurde noch nicht implementiert&quot;
+ *      -1  (NOT_DEFINED)             &quot;die Methode ist nicht definiert&quot;
+ *       0  (FALSE)                   &quot;falsch&quot;
+ *       1  (OK)                      &quot;ok&quot;
+ *       2  (OK_NO_CHK)               &quot;ok, ohne Prüfung&quot;
+ */
+static VALUE iban_check_rb(int argc,VALUE* argv,VALUE self)
+{
+   char iban[128];
+   int retval,retval_kc;
+
+   get_params(argc,argv,iban,NULL,NULL,NULL,3);
+   retval=iban_check(iban,&amp;retval_kc);
+   return rb_ary_new3(2,INT2FIX(retval),INT2FIX(retval_kc));
+}</pre>
+</body>
+</html>

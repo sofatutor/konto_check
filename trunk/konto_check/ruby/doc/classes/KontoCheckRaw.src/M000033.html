@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!DOCTYPE html 
+     PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+<head>
+  <title>iban2bic (KontoCheckRaw)</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <link rel="stylesheet" href="../.././rdoc-style.css" type="text/css" media="screen" />
+</head>
+<body class="standalone-code">
+  <pre>/**
+ * ===&lt;tt&gt;KontoCheckRaw::iban2bic(iban)&lt;/tt&gt;
+ * =====&lt;tt&gt;KontoCheck::iban2bic(iban)&lt;/tt&gt;
+ * 
+ * Diese Funktion bestimmt zu einer (deutschen!) IBAN den zugehörigen BIC (Bank
+ * Identifier Code). Der BIC wird für eine EU-Standard-Überweisung im
+ * SEPA-Verfahren (Single Euro Payments Area) benötigt; für die deutschen
+ * Banken ist er in der BLZ-Datei enthalten. Nähere Infos gibt es z.B. unter
+ * http://www.bic-code.de/
+ *
+ * Der Rückgabewert ist ein Array mit vier Elementen: im ersten steht der BIC,
+ * im zweiten ein Statuscode, im dritten die BLZ und im vierten die Kontonummer
+ * (die beiden letzteren werden aus der IBAN extrahiert). Im Fehlerfall wird
+ * für BIC, BLZ und Kontonummer nil zurückgegeben. 
+ * 
+ * Mögliche Statuscodes:
+ * 
+ *     -68  (IBAN2BIC_ONLY_GERMAN)       &quot;Die Funktion iban2bic() arbeitet nur mit deutschen Bankleitzahlen&quot;
+ *     -46  (LUT2_BIC_NOT_INITIALIZED)   &quot;Das Feld BIC wurde nicht initialisiert&quot;
+ *     -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ *      -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
+ *      -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
+ *       1  (OK)                         &quot;ok&quot;
+ */
+static VALUE iban2bic_rb(int argc,VALUE* argv,VALUE self)
+{
+   char iban[128],error_msg[512],blz[10],kto[16];
+   const char *bic;
+   int retval;
+
+   get_params(argc,argv,iban,NULL,NULL,NULL,3);
+   bic=iban2bic(iban,&amp;retval,blz,kto);
+   if(retval&lt;0 &amp;&amp; retval!=INVALID_BLZ)RUNTIME_ERROR(retval);
+   return rb_ary_new3(4,retval&lt;=0?Qnil:rb_str_new2(bic),INT2FIX(retval),
+         retval&lt;=0?Qnil:rb_str_new2(blz),retval&lt;=0?Qnil:rb_str_new2(kto));
+}</pre>
+</body>
+</html>
