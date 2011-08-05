@@ -57,9 +57,19 @@ static VALUE bank_alles(int argc,VALUE* argv,VALUE self)
       /* Fehler; die C-Arrays dürfen in diesem Fall nicht dereferenziert werden */
    if(retval&lt;=0 &amp;&amp; retval!=LUT2_PARTIAL_OK)return rb_ary_new3(2,INT2FIX(retval),Qnil);
 
-   *aenderung=p_aenderung[filiale];
-   *loeschung=p_loeschung[filiale];
-   *(aenderung+1)=*(loeschung+1)=0;
+   if(p_aenderung){
+      *aenderung=p_aenderung[filiale];
+      *(aenderung+1)=0;
+   }
+   else
+      *aenderung=0;
+
+   if(p_loeschung){
+      *loeschung=p_loeschung[filiale];
+      *(loeschung+1)=0;
+   }
+   else
+      *loeschung=0;
 
    /* Makros für StringValue und IntegerValue definieren, damit die Rückgabe
     * einigermaßen übersichtlich bleibt

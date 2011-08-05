@@ -401,6 +401,9 @@ static VALUE konto_check(int argc,VALUE* argv,VALUE self)
    int retval;
 
    get_params(argc,argv,blz,kto,NULL,NULL,2);
+   if((*blz=='0' || strlen(blz)!=8) && lut_blz(kto+2,0)==OK)   /* BLZ/Kto vertauscht, altes Interface */
+      rb_raise(rb_eRuntimeError, "It seems that you use the old interface of konto_check?\n"
+            "Please check the order of function arguments for konto_test(); should be (blz,kto)");
    if((retval=kto_check_blz(blz,kto))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
    return INT2FIX(retval);
 }
@@ -1049,15 +1052,17 @@ static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
  * Bundesbank und generiertge daraus eine LUT-Datei, die dann von der
  * Initialisierungsroutine der C-Bibliothek benutzt wurde.
  * 
- * Die init() Funktion ist wesentlich schneller (7..20 mal so schnell) und hat
- * eine Reihe weiterer Vorteile. So ist es z.B. möglich, zwwei Datensätze mit
- * unterschiedlichem Gültigkeitszeitraum in einer Datei zu halten und den jeweils
- * gültigen Satz automatisch (nach der Systemzeit) auswählen zu lassen. Die
- * einzelnen Datenblocks (Bankleitzahlen, Prüfziffermethoden, PLZ, Ort...) sind
- * in der LUT-Datei in jeweils unabhängigen Blocks gespeichert und können einzeln
- * geladen werden; die Bankdatei von der Deutschen Bundesbank enthält alle Felder
- * in einem linearen Format, so daß einzelne Blocks nicht unabhängig von anderen
- * geladen werden können.
+ * Die init() Funktion ist wesentlich schneller (7..20 mal so schnell ohne
+ * Generierung der Indexblocks; mit Indexblocks macht es noch wesentlich mehr
+ * aus) und hat eine Reihe weiterer Vorteile. So ist es z.B. möglich, zwwei
+ * Datensätze mit unterschiedlichem Gültigkeitszeitraum in einer Datei zu
+ * halten und den jeweils gültigen Satz automatisch (nach der Systemzeit)
+ * auswählen zu lassen. Die einzelnen Datenblocks (Bankleitzahlen,
+ * Prüfziffermethoden, PLZ, Ort...) sind in der LUT-Datei in jeweils
+ * unabhängigen Blocks gespeichert und können einzeln geladen werden; die
+ * Bankdatei von der Deutschen Bundesbank enthält alle Felder in einem linearen
+ * Format, so daß einzelne Blocks nicht unabhängig von anderen geladen werden
+ * können.
  * 
  * Die Funktion load_bank_data() wird nur noch als ein schibbolet benutzt, um
  * zu testen, ob jemand das alte Interface benutzt. Bei der Routine
@@ -1391,9 +1396,19 @@ static VALUE bank_alles(int argc,VALUE* argv,VALUE self)
       /* Fehler; die C-Arrays dürfen in diesem Fall nicht dereferenziert werden */
    if(retval<=0 && retval!=LUT2_PARTIAL_OK)return rb_ary_new3(2,INT2FIX(retval),Qnil);
 
-   *aenderung=p_aenderung[filiale];
-   *loeschung=p_loeschung[filiale];
-   *(aenderung+1)=*(loeschung+1)=0;
+   if(p_aenderung){
+      *aenderung=p_aenderung[filiale];
+      *(aenderung+1)=0;
+   }
+   else
+      *aenderung=0;
+
+   if(p_loeschung){
+      *loeschung=p_loeschung[filiale];
+      *(loeschung+1)=0;
+   }
+   else
+      *loeschung=0;
 
    /* Makros für StringValue und IntegerValue definieren, damit die Rückgabe
     * einigermaßen übersichtlich bleibt
