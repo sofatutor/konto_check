@@ -36,6 +36,11 @@ static VALUE konto_check(int argc,VALUE* argv,VALUE self)
    int retval;
 
    get_params(argc,argv,blz,kto,NULL,NULL,2);
+   fprintf(stderr,&quot;blz: %d, kto: %d, test: %d\n&quot;,strlen(blz),strlen(kto),lut_blz(kto,0));
+   if(strlen(blz)!=8 &amp;&amp; strlen(kto)==8 &amp;&amp; lut_blz(kto,0)==OK)   /* BLZ/Kto vertauscht, altes Interface */
+      rb_raise(rb_eRuntimeError, &quot;Perhaps you used the old interface of konto_check.\n&quot;
+            &quot;Use KontoCheck::init() to initialize the library\n&quot;
+            &quot;and check the order of function arguments for konto_test(blz,kto)&quot;);
    if((retval=kto_check_blz(blz,kto))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
    return INT2FIX(retval);
 }</pre>

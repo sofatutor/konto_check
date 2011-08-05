@@ -3100,8 +3100,9 @@ der C-Bibliothek benutzt wurde.
 </p>
 <p>
 Die <a href="KontoCheckRaw.html#M000001">init</a>() Funktion ist wesentlich
-schneller (7..20 mal so schnell) und hat eine Reihe weiterer Vorteile. So
-ist es z.B. möglich, zwwei Datensätze mit unterschiedlichem
+schneller (7..20 mal so schnell ohne Generierung der Indexblocks; mit
+Indexblocks macht es noch wesentlich mehr aus) und hat eine Reihe weiterer
+Vorteile. So ist es z.B. möglich, zwwei Datensätze mit unterschiedlichem
 Gültigkeitszeitraum in einer Datei zu halten und den jeweils gültigen
 Satz automatisch (nach der Systemzeit) auswählen zu lassen. Die einzelnen
 Datenblocks (Bankleitzahlen, Prüfziffermethoden, PLZ, Ort&#8230;) sind in
