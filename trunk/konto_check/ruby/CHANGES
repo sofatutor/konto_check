@@ -1,4 +1,4 @@
-important changes in version 4.1:
+important changes in version 4.2:
    - fixed IBAN generation of flessa bank
    - all search routines in KontoCheckRaw support the parameters search and
      uniq; they are also available in KontoCheck::suche()
