@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{konto_check}
-  s.version = "0.2.1"
+  s.version = "4.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Provideal Systems GmbH", "Jan Schwenzien", "Michael Plugge"]
-  s.date = %q{2011-08-05}
+  s.date = %q{2012-10-27}
   s.description = %q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
   s.email = %q{info@provideal.net}
   s.extensions = ["ext/konto_check_raw/extconf.rb"]

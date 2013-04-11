@@ -1,3 +1,5 @@
+# vi: ft=ruby:set si:set fileencoding=UTF-8
+
 # load the c extension
 require 'konto_check_raw'
 
@@ -58,7 +60,7 @@ module KontoCheck
 #mögliche Suchschlüssel für die Funktion KontoCheck::suche()
 #
 #:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz
-  SEARCH_KEYS = [:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz]
+  SEARCH_KEYS = [:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz, :volltext, :multiple]
 #Aliasnamen für einige Suchschlüssel der Funktion KontoCheck::suche()
 #
 #:bankleitzahl, :city, :zip, :name, :kurzname, :shortname, :pruefziffer
@@ -69,7 +71,11 @@ module KontoCheck
     :name         => :namen,
     :kurzname     => :namen_kurz,
     :shortname    => :namen_kurz,
-    :pruefziffer  => :pz
+    :pruefziffer  => :pz,
+    :vt           => :volltext,
+    :fulltext     => :volltext,
+    :m            => :multiple,
+    :x            => :multiple
   }
 
   class << self
@@ -917,21 +923,23 @@ module KontoCheck
 #=====<tt>KontoCheckRaw::bank_suche_plz(plz1[,plz2])</tt>
 #=====<tt>KontoCheckRaw::bank_suche_pz(pz1[,pz2])</tt>
 #=====<tt>KontoCheckRaw::bank_suche_ort(suchort)</tt>
+#=====<tt>KontoCheckRaw::bank_suche_volltext(suchwort)</tt>
+#=====<tt>KontoCheckRaw::bank_suche_multiple(suchworte)</tt>
 #
 #Diese Funktion sucht alle Banken, die auf bestimmte Suchmuster passen.
-#Momentan sind nur grundlegende Suchfunktionen eingebaut, und es wird auch nur
-#die Suche nach einem Kriterium unterstützt; in einer späteren Version werden
-#die Möglichkeiten noch erweitert werden.
+#Mit dem Schlüssel multiple ist auch eine Suche nach mehreren Kriterien
+#möglich; näheres findet sich in der Beschreibung von
+#KontoCheckRaw::bank_suche_multiple().
 #
 #Eine Suche ist möglich nach den Schlüsseln BIC, Bankleitzahl, Postleitzahl,
-#Prüfziffer, Ort, Name oder Kurzname. Bei den alphanumerischen Feldern (BIC,
-#Ort, Name, Kurzname) ist der Suchschlüssel der Wortanfang des zu suchenden
-#Feldes (ohne Unterscheidung zwischen Groß- und Kleinschreibung); bei den
-#numerischen Feldern (BLZ, PLZ, Prüfziffer) ist die Suche nach einem bestimmten
-#Wert oder nach einem Wertebereich möglich; dieser wird dann angegeben als
-#Array mit zwei Elementen. Der Rückgabewert ist jeweils ein Array mit den
-#Bankleitzahlen, oder nil falls die Suche fehlschlug. Die Ursache für eine
-#fehlgeschlagene Suche läßt sich nur mit den Funktionen der KontoCheckRaw
+#Prüfziffer, Ort, Name oder Kurzname oder Volltext. Bei den alphanumerischen
+#Feldern (BIC, Ort, Name, Kurzname) ist der Suchschlüssel der Wortanfang des zu
+#suchenden Feldes (ohne Unterscheidung zwischen Groß- und Kleinschreibung); bei
+#den numerischen Feldern (BLZ, PLZ, Prüfziffer) ist die Suche nach einem
+#bestimmten Wert oder nach einem Wertebereich möglich; dieser wird dann
+#angegeben als Array mit zwei Elementen. Der Rückgabewert ist jeweils ein Array
+#mit den Bankleitzahlen, oder nil falls die Suche fehlschlug. Die Ursache für
+#eine fehlgeschlagene Suche läßt sich nur mit den Funktionen der KontoCheckRaw
 #Bibliothek näher lokalisieren.
 #
 #Die Funktion KontoCheck::search() ist ein Alias für die Funktion
@@ -940,6 +948,14 @@ module KontoCheck
 #Die möglichen Suchschlüssel sind in den Variablen KontoCheck::SEARCH_KEYS
 #definiert; in der Variablen KontoCheck::SEARCH_KEY_MAPPINGS finden sich noch
 #einige Aliasdefinitionen zu den Suchschlüsseln.
+#
+#Für das Suchkommando von KontoCheckRaw::bank_suche_multiple() gibt es die Alias-
+#Varianten cmd, such_cmd und search_cmd.
+#
+#Bei allen Suchfeldern wird noch die Option :uniq=>[01] unterstützt. Bei uniq==0
+#werden alle gefundenen Zweigstellen ausgegeben, bei uniq==1 nur jeweils die
+#erste gefundene Zweigstelle. Das Schlüsselwort ist in allen Suchfunktionen
+#vorhanden; in der C-Bibliothek ist es nur für lut_suche_multiple() implementiert.
 #
 #Hier einige Beispiele möglicher Suchaufrufe:
 #
@@ -952,13 +968,34 @@ module KontoCheck
 #   s=KontoCheck::suche( :pz => ['95',98] )       Prüfzifferbereich gemischt String/numerisch auch möglich
 #   s=KontoCheck::suche( :name => 'postbank' ) 
 #   s=KontoCheck::suche( :ort => 'lingenfeld' )
+#   r=KontoCheck::suche(:volltext=>'südwest',:uniq=>1)      Volltextsuche mit uniq
+#   s=KontoCheck::suche(:multiple=>'deutsche bank mannheim y:sparda x:südwest',:uniq=>1, :cmd=>'ac+xy')
+#        Suche nach mehreren Kriterien: Deutsche Bank in Mannheim oder Sparda Südwest
+#   r=KontoCheck::suche(:multiple=>'deutsche bank mannheim sparda mainz', :cmd=>'abc+de')
+#        nochmal dasselbe, nur Sparda in Mainz
+
 
     def suche(options={})
-      key   = options.keys.first.to_sym
-      value = options[key]
-      key = SEARCH_KEY_MAPPINGS[key] if SEARCH_KEY_MAPPINGS.keys.include?(key)
-      raise 'search key not supported' unless SEARCH_KEYS.include?(key)
-      raw_results = KontoCheckRaw::send("bank_suche_#{key}", value)
+      search_cmd=value=key=""
+      sort=uniq=1
+      options.each{ |k,v|
+         uniq=v if k.to_s=="uniq"
+         sort=v if k.to_s=="sort"
+         search_cmd=v if k.to_s=="such_cmd" or k.to_s=="search_cmd" or k.to_s=="cmd"
+         if  SEARCH_KEYS.include?(k)
+            key=k
+            value=options[k]
+         end
+         if  SEARCH_KEY_MAPPINGS.keys.include?(k)
+            key=SEARCH_KEY_MAPPINGS[k]
+            value=options[k]
+         end
+      }
+      raise 'no valid search key found' if key.length==0
+      uniq=2 if uniq>0              # sortieren und uniq
+      uniq=1 if sort>0 && uniq==0   # nur sortieren
+      printf("key: %s, value: %s, cmd: %s, uniq: %d\n",key,value,search_cmd,uniq)
+      raw_results = KontoCheckRaw::send("bank_suche_#{key}",value,search_cmd,uniq)
       raw_results[1]
     end
     alias_method :search, :suche
