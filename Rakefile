@@ -1,4 +1,4 @@
-# Copyright (c) 2010 Provideal Systems GmbH
+# Copyright (c) 2010 Peter Horn
 # Copyright (c) 2011 Jan Schwenzien, Michael Plugge
 #
 # This program is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ begin
     gem.homepage = "http://github.com/provideal/konto_check"
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.version = "4.2.0"
     gem.extra_rdoc_files = [
       "LICENSE",
       "README.textile",
@@ -69,7 +70,8 @@ task :default => :test
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+#  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+  version = "4.2.0"
 
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "konto_check #{version}"
