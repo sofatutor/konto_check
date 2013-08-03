@@ -1,3 +1,23 @@
+important changes in version 5.0:
+   - implemented changes for IBAN rules, new IBAN rules 48-54
+   - implemented changes for check methods 57 and 95
+   - test in iban_check() if the given IBAN may contain errors due to
+     not considered IBAN rules etc.
+   - various bug fixes
+
+important changes in version 4.6:
+   - implemented IBAN rules for generation of IBAN and BIC
+   - changes in check methods 51 and 84 implemented
+
+(4.5 is a bug fix version only for perl)
+
+important changes in version 4.4:
+   - new check method E0 implemented
+   - changes in check methods C6 and D1 implemented
+   - bug fix in check method C6
+
+(4.3 is a bug fix version only for perl)
+
 important changes in version 4.2:
    - fixed IBAN generation of flessa bank
    - all search routines in KontoCheckRaw support the parameters search and

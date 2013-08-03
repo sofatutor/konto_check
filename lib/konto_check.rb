@@ -4,18 +4,18 @@
 require 'konto_check_raw'
 
 #This is a C/Ruby library to check the validity of German Bank Account
-#Numbers. All currently defined test methods by Deutsche Bundesbank (April
-#2011: 00 to D8) are implemented. 
+#Numbers. All currently defined test methods by Deutsche Bundesbank
+#(April 2013: 00 to E0) are implemented. 
 #
 #<b>ATTENTION:</b> There are a few important changes in the API between version 0.0.2 (version
 #by Peter Horn/Provideal), version 0.0.6 (jeanmartin) and this version:
 #
 #* The function KontoCheck::load_bank_data() is no longer used; it is replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
-#* The function KontoCheck::konto_check(blz,kto) changed the order of parameters from (kto,blz) to (blz,kto)
+#* The function KontoCheck::konto_check( blz,kto) changed the order of parameters from (kto,blz) to (blz,kto)
 #
 #Another change affects only the version 0.0.6 by jeanmartin:
 #
-#* In KontoCheck::init(level,name,set) the order of the two first parameters is now free; the order is determined by the type of the variable (level is integer, filename string). 
+#* In KontoCheck::init( level,name,set) the order of the two first parameters is now free; the order is determined by the type of the variable (level is integer, filename string). 
 #
 #Because this class is inteded for german bank accounts, the rest of the
 #documentation is in german too.
@@ -80,10 +80,10 @@ module KontoCheck
 
   class << self
 
-#===<tt>KontoCheck::lut_info()</tt>
-#=====<tt>KontoCheckRaw::lut_info([lutfile])</tt>
-#=====<tt>KontoCheck::lut_info1(lutfile)</tt>
-#=====<tt>KontoCheck::lut_info2(lutfile)</tt>
+#===KontoCheck::lut_info()
+#=====KontoCheckRaw::lut_info( [lutfile])
+#=====KontoCheck::lut_info1( lutfile)
+#=====KontoCheck::lut_info2( lutfile)
 #
 #Diese Funktion liefert den Infoblock des Datensatzes zurück, der mittels
 #init() in den Speichergeladen wurde. Weitere Infos über die LUT-Datei
@@ -94,10 +94,10 @@ module KontoCheck
       KontoCheckRaw::lut_info()[3]
     end
 
-#===<tt>KontoCheck::lut_info1(<lutfile>)</tt>
-#=====<tt>KontoCheck::lut_info()</tt>
-#=====<tt>KontoCheck::lut_info2()</tt>
-#=====<tt>KontoCheckRaw::lut_info()</tt>
+#===KontoCheck::lut_info1( lutfile)
+#=====KontoCheck::lut_info()
+#=====KontoCheck::lut_info2()
+#=====KontoCheckRaw::lut_info()
 #
 #Diese Funktion liefert den Infoblock des ersten Datensatzes der angegebenen
 #LUT-Datei zurück. Weitere Infos über die LUT-Datei lassen sich mit der
@@ -107,10 +107,10 @@ module KontoCheck
       KontoCheckRaw::lut_info(filename)[3]
     end
 
-#===<tt>KontoCheck::lut_info2(lutfile)</tt>
-#=====<tt>KontoCheck::lut_info()</tt>
-#=====<tt>KontoCheck::lut_info1(lutfile)</tt>
-#=====<tt>KontoCheckRaw::lut_info([lutfile])</tt>
+#===KontoCheck::lut_info2( lutfile)
+#=====KontoCheck::lut_info()
+#=====KontoCheck::lut_info1( lutfile)
+#=====KontoCheckRaw::lut_info( [lutfile])
 #
 #Diese Funktion liefert den Infoblock des zweiten Datensatzes der angegebenen
 #LUT-Datei zurück. Weitere Infos über die LUT-Datei lassen sich mit der
@@ -121,8 +121,8 @@ module KontoCheck
     end
 
 
-#===<tt>KontoCheck::dump_lutfile(lutfile)</tt>
-#=====<tt>KontoCheckRaw::dump_lutfile(lutfile)</tt>
+#===KontoCheck::dump_lutfile( lutfile)
+#=====KontoCheckRaw::dump_lutfile( lutfile)
 #
 #Diese Funktion liefert detaillierte Informationen über alle Blocks, die in der
 #LUT-Datei gespeichert sind, sowie noch einige Internas der LUT-Datei. Im
@@ -132,10 +132,10 @@ module KontoCheck
       KontoCheckRaw::dump_lutfile(filename).first
     end
 
-#===<tt>KontoCheck::encoding([mode])</tt>
-#=====<tt>KontoCheckRaw::encoding([mode])</tt>
-#=====<tt>KontoCheck::encoding_str([mode])</tt>
-#=====<tt>KontoCheckRaw::keep_raw_data(mode)</tt>
+#===KontoCheck::encoding( [mode])
+#=====KontoCheckRaw::encoding( [mode])
+#=====KontoCheck::encoding_str( [mode])
+#=====KontoCheckRaw::keep_raw_data( mode)
 #
 #Diese Funktion legt den benutzten Zeichensatz für Fehlermeldungen durch die
 #Funktion KontoCheck::retval2txt() und einige Felder der LUT-Datei (Name,
@@ -195,10 +195,10 @@ module KontoCheck
       KontoCheckRaw::encoding(*args)
     end
 
-#===<tt>KontoCheck::encoding_str([mode])</tt>
-#=====<tt>KontoCheckRaw::encoding_str([mode])</tt>
-#=====<tt>KontoCheck::encoding([mode])</tt>
-#=====<tt>KontoCheckRaw::keep_raw_data(mode)</tt>
+#===KontoCheck::encoding_str( [mode])
+#=====KontoCheckRaw::encoding_str( [mode])
+#=====KontoCheck::encoding( [mode])
+#=====KontoCheckRaw::keep_raw_data( mode)
 #
 #Diese Funktion entspricht der Funktion KontoCheck::encoding(). Allerdings
 #ist der Rückgabewert nicht numerisch, sondern ein String, der die aktuelle
@@ -232,8 +232,8 @@ module KontoCheck
       KontoCheckRaw::encoding_str(*args)
     end
 
-#===<tt>KontoCheck::retval2txt(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2txt(retval)</tt>
+#===KontoCheck::retval2txt( retval)
+#=====KontoCheckRaw::retval2txt( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen String. Der
 #benutzte Zeichensatz wird über die Funktion KontoCheck::encoding() festgelegt.
@@ -244,8 +244,8 @@ module KontoCheck
       KontoCheckRaw::retval2txt(retval)
     end
 
-#===<tt>KontoCheck::retval2iso(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2iso(retval)</tt>
+#===KontoCheck::retval2iso( retval)
+#=====KontoCheckRaw::retval2iso( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
 #Der benutzte Zeichensatz ist ISO 8859-1. 
@@ -254,9 +254,9 @@ module KontoCheck
       KontoCheckRaw::retval2iso(retval)
     end
 
-#===<tt>KontoCheck::retval2txt_short(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2txt_short(retval)</tt>
-#=====<tt>KontoCheck::retval2txt_kurz(retval)</tt>
+#===KontoCheck::retval2txt_short( retval)
+#=====KontoCheckRaw::retval2txt_short( retval)
+#=====KontoCheck::retval2txt_kurz( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
 #String. Die Ausgabe ist der Makroname, wie er in C benutzt wird.
@@ -266,9 +266,9 @@ module KontoCheck
     end
     alias_method :retval2txt_kurz, :retval2txt_short
 
-#===<tt>KontoCheck::retval2txt_kurz(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2txt_short(retval)</tt>
-#=====<tt>KontoCheck::retval2txt_short(retval)</tt>
+#===KontoCheck::retval2txt_kurz( retval)
+#=====KontoCheckRaw::retval2txt_short( retval)
+#=====KontoCheck::retval2txt_short( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
 #String. Die Ausgabe ist der Makroname, wie er in C benutzt wird. Die Funktion
@@ -278,8 +278,8 @@ module KontoCheck
       KontoCheckRaw::retval2txt_short(retval)
     end
 
-#===<tt>KontoCheck::retval2dos(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2dos(retval)</tt>
+#===KontoCheck::retval2dos( retval)
+#=====KontoCheckRaw::retval2dos( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
 #Der benutzte Zeichensatz ist cp850 (DOS).
@@ -288,8 +288,8 @@ module KontoCheck
       KontoCheckRaw::retval2dos(retval)
     end
 
-#===<tt>KontoCheck::retval2html(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2html(retval)</tt>
+#===KontoCheck::retval2html( retval)
+#=====KontoCheckRaw::retval2html( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
 #Für Umlaute werden HTML-Entities benutzt.
@@ -298,8 +298,8 @@ module KontoCheck
       KontoCheckRaw::retval2html(retval)
     end
 
-#===<tt>KontoCheck::retval2utf8(retval)</tt>
-#=====<tt>KontoCheckRaw::retval2utf8(retval)</tt>
+#===KontoCheck::retval2utf8( retval)
+#=====KontoCheckRaw::retval2utf8( retval)
 #
 #Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
 #Der benutzte Zeichensatz ist UTF-8.
@@ -308,8 +308,8 @@ module KontoCheck
       KontoCheckRaw::retval2utf8(retval)
     end
 
-#===<tt>KontoCheck::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt>
-#=====<tt>KontoCheckRaw::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt>
+#===KontoCheck::generate_lutfile( inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])
+#=====KontoCheckRaw::generate_lutfile( inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])
 #
 #Diese Funktion generiert eine neue LUT-Datei aus der BLZ-Datei der Deutschen Bundesbank. Die folgenden
 #Parameter werden unterstützt:
@@ -352,8 +352,8 @@ module KontoCheck
       KontoCheckRaw::generate_lutfile(*args)
     end
 
-#===<tt>KontoCheck::init([<p1>[,<p2>[,<set>]]])</tt>
-#=====<tt>KontoCheckRaw::init([<p1>[,<p2>[,<set>]]])</tt>
+#===KontoCheck::init( [p1 [,p2 [,set]]])
+#=====KontoCheckRaw::init( [p1 [,p2 [,set]]])
 #Die Variablen p1 und p2 stehen für level und lutfile (in beliebiger
 #Reihenfolge); die Zuordnung der beiden Parameter erfolgt on the fly durch eine
 #Typüberprüfung.
@@ -430,8 +430,8 @@ module KontoCheck
       KontoCheckRaw::init(*args)
     end
 
-#===<tt>KontoCheck::load_bank_data(<datafile>)</tt>
-#=====<tt>KontoCheckRaw::load_bank_data(<datafile>)</tt>
+#===KontoCheck::load_bank_data( datafile)
+#=====KontoCheckRaw::load_bank_data( datafile)
 #
 #Diese Funktion war die alte Initialisierungsroutine für konto_check; es ist
 #nun durch die Funktionen KontoCheck::init() und KontoCheck::generate_lutfile()
@@ -458,10 +458,10 @@ module KontoCheck
       KontoCheckRaw::load_bank_data(*args)
    end
 
-#===<tt>KontoCheck::current_lutfile_name()</tt>
-#=====<tt>KontoCheckRaw::current_lutfile_name()</tt>
-#=====<tt>KontoCheck::current_lutfile_set()</tt>
-#=====<tt>KontoCheck::current_init_level()</tt>
+#===KontoCheck::current_lutfile_name()
+#=====KontoCheckRaw::current_lutfile_name()
+#=====KontoCheck::current_lutfile_set()
+#=====KontoCheck::current_init_level()
 #
 #Diese Funktion bestimmt den Dateinamen der zur Initialisierung benutzten LUT-Datei.
 
@@ -469,10 +469,10 @@ module KontoCheck
       KontoCheckRaw::current_lutfile_name().first
     end
 
-#===<tt>KontoCheck::current_lutfile_set()</tt>
-#=====<tt>KontoCheckRaw::current_lutfile_name()</tt>
-#=====<tt>KontoCheck::current_lutfile_name()</tt>
-#=====<tt>KontoCheck::current_init_level()</tt>
+#===KontoCheck::current_lutfile_set()
+#=====KontoCheckRaw::current_lutfile_name()
+#=====KontoCheck::current_lutfile_name()
+#=====KontoCheck::current_init_level()
 #
 #Diese Funktion bestimmt das Set der LUT-Datei, das bei der Initialisierung benutzt wurde.
 
@@ -481,10 +481,10 @@ module KontoCheck
       raw_results[1]
     end
 
-#===<tt>KontoCheck::current_init_level()</tt>
-#=====<tt>KontoCheckRaw::current_lutfile_name()</tt>
-#=====<tt>KontoCheckRaw::current_lutfile_name()</tt>
-#=====<tt>KontoCheck::current_lutfile_set()</tt>
+#===KontoCheck::current_init_level()
+#=====KontoCheckRaw::current_lutfile_name()
+#=====KontoCheckRaw::current_lutfile_name()
+#=====KontoCheck::current_lutfile_set()
 #
 #Diese Funktion bestimmt den aktuell benutzten Initialisierungslevel
 
@@ -493,17 +493,17 @@ module KontoCheck
       raw_results[2]
     end
 
-#===<tt>KontoCheck::free()</tt>
-#=====<tt>KontoCheckRaw::free()</tt>
+#===KontoCheck::free()
+#=====KontoCheckRaw::free()
 #Diese Funktion gibt allen allokierten Speicher wieder frei.
 
     def free()
       KontoCheckRaw::free()
     end
 
-#===<tt>KontoCheck::konto_check(blz,kto)</tt>
-#=====<tt>KontoCheckRaw::konto_check(blz,kto)</tt>
-#=====<tt>KontoCheck::valid(blz,kto)</tt>
+#===KontoCheck::konto_check( blz,kto)
+#=====KontoCheckRaw::konto_check( blz,kto)
+#=====KontoCheck::valid( blz,kto)
 #Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die Funktion gibt einen skalaren
 #Statuswert zurück, der das Ergebnis der Prüfung enthält. Mögliche Rückgabewerte sind:
 #
@@ -526,18 +526,18 @@ module KontoCheck
       KontoCheckRaw::konto_check(blz,kto)
     end
 
-#===<tt>KontoCheck::valid(blz,kto)</tt>
-#=====<tt>KontoCheck::konto_check(blz,kto)</tt>
-#=====<tt>KontoCheckRaw::konto_check(blz,kto)</tt>
+#===KontoCheck::valid( blz,kto)
+#=====KontoCheck::konto_check( blz,kto)
+#=====KontoCheckRaw::konto_check( blz,kto)
 #Dies ist ein Alias für die Funktion KontoCheck::konto_check()
 
     def valid(blz,kto)
-      KontoCheckRaw::konto_check(blz,kto)
+      KontoCheckRaw::konto_check( blz,kto)
     end
 
-#===<tt>KontoCheck::konto_check?(blz, kto)</tt>
-#=====<tt>KontoCheck::konto_check(blz,kto)</tt>
-#=====<tt>KontoCheckRaw::konto_check(blz,kto)</tt>
+#===KontoCheck::konto_check?( blz, kto)
+#=====KontoCheck::konto_check( blz,kto)
+#=====KontoCheckRaw::konto_check( blz,kto)
 #Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die
 #Funktion gibt einen skalaren Statuswert zurück, der das Ergebnis der Prüfung
 #enthält. Mögliche Rückgabewerte sind einfach true und false (convenience
@@ -547,18 +547,18 @@ module KontoCheck
       KontoCheckRaw::konto_check(blz,kto)>0?true:false
     end
 
-#===<tt>KontoCheck::valid?(blz, kto)</tt>
-#=====<tt>KontoCheck::valid(blz, kto)</tt>
-#=====<tt>KontoCheckRaw::konto_check(blz, kto)</tt>
+#===KontoCheck::valid?( blz, kto)
+#=====KontoCheck::valid( blz, kto)
+#=====KontoCheckRaw::konto_check (blz, kto)
 #Dies ist einn Alias für die Funktion KontoCheck::konto_check?. Mögliche Rückgabewerte sind true oder false.
 
     def valid?(blz,kto)
       KontoCheckRaw::konto_check(blz, kto)>0?true:false
     end
 
-#===<tt>KontoCheck::konto_check_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheck::valid_pz(pz,kto[,blz])</tt>
+#===KontoCheck::konto_check_pz (pz,kto [,blz])
+#=====KontoCheckRaw::konto_check_pz (pz,kto [,blz])
+#=====KontoCheck::valid_pz (pz,kto [,blz])
 #Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination gültig ist.
 #
 #Der zusätzliche Parameter blz ist nur für die Verfahren 52, 53, B6 und C0 notwendig; bei
@@ -586,9 +586,9 @@ module KontoCheck
       KontoCheckRaw::konto_check_pz(*args)
     end
 
-#===<tt>KontoCheck::konto_check_pz?(pz,kto[,blz])</tt>
-#=====<tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheck::valid_pz?(pz,kto[,blz])</tt>
+#===KontoCheck::konto_check_pz?( pz,kto [,blz])
+#=====KontoCheckRaw::konto_check_pz (pz,kto [,blz])
+#=====KontoCheck::valid_pz?( pz,kto [,blz])
 #Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination
 #gültig ist. Der Rückgabewert dieser Funktion ist true oder false (convenience
 #function für KontoCheck::konto_check_pz()).
@@ -602,27 +602,27 @@ module KontoCheck
       KontoCheckRaw::konto_check_pz(*args)>0?true:false
     end
 
-#===<tt>KontoCheck::valid_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheck::konto_check_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt>
+#===KontoCheck::valid_pz( pz,kto [,blz])
+#=====KontoCheck::konto_check_pz( pz,kto [,blz])
+#=====KontoCheckRaw::konto_check_pz( pz,kto [,blz])
 #Diese Funktion ist ein Alias für KontoCheck::konto_check_pz
 
     def valid_pz(*args)
       KontoCheckRaw::konto_check_pz(*args)
     end
 
-#===<tt>KontoCheck::valid_pz?(pz,kto[,blz])</tt>
-#=====<tt>KontoCheck::valid_pz(pz,kto[,blz])</tt>
-#=====<tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt>
+#===KontoCheck::valid_pz?( pz,kto [,blz])
+#=====KontoCheck::valid_pz( pz,kto [,blz])
+#=====KontoCheckRaw::konto_check_pz( pz,kto [,blz])
 #Diese Funktion ist ein Alias für KontoCheck::konto_check_pz?()
 
     def valid_pz?(*args)
       KontoCheckRaw::konto_check_pz(*args)>0?true:false
     end
 
-#==== <tt>KontoCheck::bank_valid(blz [,filiale])</tt>
-#======<tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt>
-#======<tt>KontoCheck::bank_valid?(blz [,filiale])</tt>
+#==== KontoCheck::bank_valid( blz [,filiale])
+#======KontoCheckRaw::bank_valid( blz [,filiale])
+#======KontoCheck::bank_valid?( blz [,filiale])
 #Diese Funktion testet, ob eine gegebene BLZ gültig ist. Der Rückgabewert ist ein
 #Statuscode mit den unten angegebenen Werten. Falls das Argument filiale auch
 #angegeben ist, wird zusätzlich noch getestet, ob eine Filiale mit dem gegebenen
@@ -640,9 +640,9 @@ module KontoCheck
       KontoCheckRaw::bank_valid(*args)
     end
 
-#====<tt>KontoCheck::bank_valid?(blz [,filiale])</tt>
-#======<tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt>
-#======<tt>KontoCheck::bank_valid(blz [,filiale])</tt>
+#====KontoCheck::bank_valid?( blz [,filiale])
+#======KontoCheckRaw::bank_valid( blz [,filiale])
+#======KontoCheck::bank_valid( blz [,filiale])
 #Dies ist eine convenience function zu KontoCheck::bank_valid(). Es wird getestet, ob
 #die gegebene BLZ (und evl. noch der Filialindex) gültig ist. Der Rückgabewert ist
 #nur true oder false.
@@ -651,8 +651,8 @@ module KontoCheck
       KontoCheckRaw::bank_valid(*args)>0?true:false
     end
 
-#===<tt>KontoCheck::bank_filialen(blz)</tt>
-#=====<tt>KontoCheckRaw::bank_filialen(blz)</tt>
+#===KontoCheck::bank_filialen( blz)
+#=====KontoCheckRaw::bank_filialen(blz)
 #
 #Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive Hauptstelle).
 #Die LUT-Datei muß dazu natürlich mit den Filialdaten generiert sein, sonst
@@ -662,8 +662,8 @@ module KontoCheck
       KontoCheckRaw::bank_filialen(*args).first
     end
 
-#===<tt>KontoCheck::bank_name(blz[,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_name(blz[,filiale])</tt>
+#===KontoCheck::bank_name( blz [,filiale])
+#=====KontoCheckRaw::bank_name(blz [,filiale])
 #
 #Diese Funktion liefert den Namen einer Bank, oder nil im Fehlerfall.
 
@@ -671,8 +671,8 @@ module KontoCheck
       KontoCheckRaw::bank_name(*args).first
     end
 
-#===<tt>KontoCheck::bank_name_kurz(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_name_kurz(blz [,filiale])</tt>
+#===KontoCheck::bank_name_kurz( blz [,filiale])
+#=====KontoCheckRaw::bank_name_kurz(blz [,filiale])
 #
 #Diese Funktion liefert den Kurznamen einer Bank, oder nil im Fehlerfall.
 
@@ -680,8 +680,8 @@ module KontoCheck
       KontoCheckRaw::bank_name_kurz(*args).first
     end
 
-#===<tt>KontoCheck::bank_ort(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_ort(blz [,filiale])</tt>
+#===KontoCheck::bank_ort( blz [,filiale])
+#=====KontoCheckRaw::bank_ort(blz [,filiale])
 #
 #Diese Funktion liefert den Ort einer Bank. Falls der Parameter filiale nicht
 #angegeben ist, wird der Sitz der Hauptstelle ausgegeben. Im Fehlerfall wird
@@ -691,8 +691,8 @@ module KontoCheck
       KontoCheckRaw::bank_ort(*args).first
     end
 
-#===<tt>KontoCheck::bank_plz(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_plz(blz [,filiale])</tt>
+#===KontoCheck::bank_plz( blz [,filiale])
+#=====KontoCheckRaw::bank_plz(blz [,filiale])
 #
 #Diese Funktion liefert die Postleitzahl einer Bank. Falls der Parameter
 #filiale nicht angegeben ist, wird die PLZ der Hauptstelle ausgegeben. Im
@@ -702,8 +702,8 @@ module KontoCheck
       KontoCheckRaw::bank_plz(*args).first
     end
 
-#===<tt>KontoCheck::bank_pz(blz)</tt>
-#=====<tt>KontoCheckRaw::bank_pz(blz)</tt>
+#===KontoCheck::bank_pz( blz)
+#=====KontoCheckRaw::bank_pz(blz)
 #
 #Diese Funktion liefert die Prüfziffer einer Bank. Die Funktion unterstützt
 #keine Filialen; zu jeder BLZ kann es in der LUT-Datei nur eine
@@ -713,8 +713,8 @@ module KontoCheck
       KontoCheckRaw::bank_pz(blz).first
     end
 
-#===<tt>KontoCheck::bank_bic(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_bic(blz [,filiale])</tt>
+#===KontoCheck::bank_bic( blz [,filiale])
+#=====KontoCheckRaw::bank_bic(blz [,filiale])
 #
 #Diese Funktion liefert den BIC (Bank Identifier Code) einer Bank. Im
 #Fehlerfall wird nil zurückgegeben.
@@ -723,8 +723,8 @@ module KontoCheck
       KontoCheckRaw::bank_bic(*args).first
     end
 
-#===<tt>KontoCheck::bank_aenderung(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_aenderung(blz [,filiale])</tt>
+#===KontoCheck::bank_aenderung( blz [,filiale])
+#=====KontoCheckRaw::bank_aenderung(blz [,filiale])
 #
 #Diese Funktion liefert das  'Änderung' Flag einer Bank (als string). Mögliche
 #Werte sind: A (Addition), M (Modified), U (Unchanged), D (Deletion).
@@ -733,8 +733,8 @@ module KontoCheck
       KontoCheckRaw::bank_aenderung(*args).first
     end
 
-#===<tt>KontoCheck::bank_loeschung(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_loeschung(blz [,filiale])</tt>
+#===KontoCheck::bank_loeschung( blz [,filiale])
+#=====KontoCheckRaw::bank_loeschung(blz [,filiale])
 #
 #Diese Funktion liefert das Lösch-Flag für eine Bank zurück (als Integer;
 #mögliche Werte sind 0 und 1); im Fehlerfall wird nil zurückgegeben.
@@ -743,8 +743,8 @@ module KontoCheck
       KontoCheckRaw::bank_loeschung(*args).first
     end
 
-#===<tt>KontoCheck::bank_nachfolge_blz(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])</tt>
+#===KontoCheck::bank_nachfolge_blz( blz [,filiale])
+#=====KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])
 #Diese Funktion liefert die Nachfolge-BLZ für eine Bank, die gelöscht werden
 #soll (bei der das 'Löschung' Flag 1 ist).
 
@@ -752,8 +752,8 @@ module KontoCheck
       KontoCheckRaw::bank_nachfolge_blz(*args).first
     end
 
-#===<tt>KontoCheck::bank_pan(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_pan(blz [,filiale])</tt>
+#===KontoCheck::bank_pan( blz [,filiale])
+#=====KontoCheckRaw::bank_pan(blz [,filiale])
 #
 #Diese Funktion liefert den PAN (Primary Account Number) einer Bank.
 
@@ -761,8 +761,8 @@ module KontoCheck
       KontoCheckRaw::bank_pan(*args).first
     end
 
-#===<tt>KontoCheck::bank_nr(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_nr(blz [,filiale])</tt>
+#===KontoCheck::bank_nr( blz [,filiale])
+#=====KontoCheckRaw::bank_nr(blz [,filiale])
 #
 #Diese Funktion liefert die laufende Nummer einer Bank (internes Feld der BLZ-Datei). Der Wert
 #wird wahrscheinlich nicht oft benötigt, ist aber der Vollständigkeit halber enthalten.
@@ -771,8 +771,8 @@ module KontoCheck
       KontoCheckRaw::bank_nr(*args).first
     end
 
-#===<tt>KontoCheck::bank_alles(blz [,filiale])</tt>
-#=====<tt>KontoCheckRaw::bank_alles(blz [,filiale])</tt>
+#===KontoCheck::bank_alles( blz [,filiale])
+#=====KontoCheckRaw::bank_alles(blz [,filiale])
 #
 #Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
 #Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden Komponenten:
@@ -806,8 +806,8 @@ module KontoCheck
       KontoCheckRaw::bank_alles(*args)
     end
 
-#===<tt>KontoCheck::iban2bic(iban)</tt>
-#=====<tt>KontoCheckRaw::iban2bic(iban)</tt>
+#===KontoCheck::iban2bic( iban)
+#=====KontoCheckRaw::iban2bic(iban)
 #
 #Diese Funktion bestimmt zu einer (deutschen!) IBAN den zugehörigen BIC (Bank
 #Identifier Code). Der BIC wird für eine EU-Standard-Überweisung im
@@ -819,8 +819,8 @@ module KontoCheck
       KontoCheckRaw::iban2bic(*args).first
     end
 
-#===<tt>KontoCheck::iban_check(iban)</tt>
-#=====<tt>KontoCheckRaw::iban_check(iban)</tt>
+#===KontoCheck::iban_check( iban)
+#=====KontoCheckRaw::iban_check(iban)
 #
 #Diese Funktion testet einen IBAN. Dabei wird sowohl die Prüfziffer des IBAN
 #getestet als auch (bei deutschen Konten) die Prüfziffer der Bankverbindung
@@ -839,56 +839,40 @@ module KontoCheck
       KontoCheckRaw::iban_check(*args).first
     end
 
-#===<tt>KontoCheck::iban_gen(kto,blz)</tt>
-#=====<tt>KontoCheckRaw::iban_gen(kto,blz)</tt>
-#Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN. Hierbei
-#ist zu beachten, daß nicht alle Banken der Selbstberechnung zugestimmt
-#haben. Es gibt von den Sparkassen eine Liste dieser Institute; sie ist auch
-#in der LUT-Datei mit der ID 22 (1. Eigene IBAN) enthalten. Bei diesen Banken
-#wird - falls der Block in der LUT-Datei enthalten ist - keine Berechnung
-#durchgeführt, sondern die Status-Variable auf NO_OWN_IBAN_CALCULATION
-#gesetzt. 
+#===KontoCheck::iban_gen( kto,blz)
+#=====KontoCheckRaw::iban_gen( kto,blz)
+#Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN.
 #
-#Alle Banken der Liste erzeugen eine Statusmeldung mit dem Wert
-#OK_UNTERKONTO_ATTACHED, OK_UNTERKONTO_POSSIBLE oder OK_UNTERKONTO_GIVEN. Falls
-#einer dieser Stauswerte zurückgegeben wird, ist somit immer Vorsicht geboten;
-#der generierte IBAN sollte direkt bei dem zugehörigen Institut überprüft
-#werden.
-#
-#Hier ein Auszug aus der Anleitung des SEPA Account Converters:
-#
-#Der SEPA Account Converter ist so eingestellt, dass nur Kontoverbindungen in IBAN und
-#BIC umgerechnet werden, bei denen das ausgebende Kreditinstitut der Umrechnung
-#zugestimmt hat. Kreditinstitute, welche einer Umrechnung nicht zugestimmt haben und
-#welche zum Teil spezielle, dem SEPA Account Converter nicht bekannte Umrechnungs-
-#methoden verwenden, sind in der Datei "CONFIG.INI" hinterlegt. Durch Löschen der Datei
-#"CONFIG.INI" aus dem Programmverzeichnis haben Sie die Möglichkeit, eine Umrechnung
-#für alle Konten durchzuführen. Bitte beachten Sie dabei, dass die so erhaltenen IBAN und
-#BIC fehlerhaft sein können und deshalb mit ihren Kunden zu überprüfen sind.
-#
-#Weblinks:
-#
-#     https://www.sparkasse-rhein-neckar-nord.de/pdf/content/sepa/kurzanleitung.pdf
-#     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/index.php
-#     https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/sepa_account_converter.msi
+#Nachdem im Mai 2013 die IBAN-Regeln zur Berechnung von IBAN und BIC aus
+#Kontonummer und BLZ veröffentlicht wurden, gibt es endlich ein verbindliches
+#Verfahren zur Bestimmung der IBAN. Die definierten IBAN-Regeln wurden in der
+#C-Datei eingearbeitet und werden automatisch ausgewertet, falls der Block mit
+#den IBAN-Regeln in der LUT-Datei enthalten ist. Andere LUT-Dateien sollten
+#für die IBAN-Berechnung möglichst nicht verwendet werden, da die Anzahl der
+#BLZs mit Sonderregelungen doch sehr groß ist.
 #
 #Es ist möglich, sowohl die Prüfung auf Stimmigkeit der Kontonummer als auch
-#auf Zulässigkeit der Selbstberechnung zu deaktivieren. Falls die IBAN trotz
-#fehlender Zustimmung der Bank berechnet werden, ist vor die BLZ ein @ zu
+#die "schwarze Liste" (ausgeschlossene BLZs) zu deaktivieren. Falls die IBAN
+#ohne Test der Blacklist berechnet werden soll, ist vor die BLZ ein @ zu
 #setzen; falls auch bei falscher Bankverbindung ein IBAN berechnet werden
 #soll, ist vor die BLZ ein + zu setzen. Um beide Prüfungen zu deaktiviern,
 #kann @+ (oder +@) vor die BLZ gesetzt werden. Die so erhaltenen IBANs sind
-#dann i.A. allerdings wohl nicht gültig.
+#dann u.U. allerdings wohl nicht gültig.
 #
-#Rückgabewert ist der generierte IBAN oder nil, falls ein Fehler aufgetreten ist. Die genauere
-#Fehlerursache läßt sich mit der Funktion KontoCheckRaw::iban_gen() feststellen.
+#Rückgabewert ist der generierte IBAN oder nil, falls ein Fehler aufgetreten
+#ist. Die genauere Fehlerursache läßt sich mit der Funktion
+#KontoCheckRaw::iban_gen() feststellen.
+#
+#Bei vielen Banken wird die BLZ und damit der BIC ebenfalls ersetzt. Der
+#gültige BIC sowie viele andere Werte interessante Werte lassen sich durch die
+#Funktion KontoCheckRaw::iban_gen() ermitteln.
 
     def iban_gen(*args)
       KontoCheckRaw::iban_gen(*args).first
     end
 
-#===<tt>KontoCheck::ipi_gen(zweck)</tt>
-#=====<tt>KontoCheckRaw::ipi_gen(zweck)</tt>
+#===KontoCheck::ipi_gen( zweck)
+#=====KontoCheckRaw::ipi_gen( zweck)
 #
 #Diese Funktion generiert einen "Strukturierten Verwendungszweck" für SEPA-Überweisungen.
 #Der Rückgabewert ist der Strukturierte Verwendungszweck als String oder nil, falls ein Fehler
@@ -902,8 +886,8 @@ module KontoCheck
       KontoCheckRaw::ipi_gen(zweck).first
     end
 
-#===<tt>KontoCheck::ipi_check(zweck)</tt>
-#=====<tt>KontoCheckRaw::ipi_check(zweck)</tt>
+#===KontoCheck::ipi_check( zweck)
+#=====KontoCheckRaw::ipi_check( zweck)
 #
 #Die Funktion testet, ob ein Strukturierter Verwendungszweck gültig ist (Anzahl Zeichen, Prüfziffer). Der
 #Rückgabewert ist true oder false.
@@ -912,19 +896,19 @@ module KontoCheck
       KontoCheckRaw::ipi_check(zweck)>0?true:false
     end
 
-#===<tt>KontoCheck::suche()</tt>
-#=====<tt>KontoCheck::search()</tt>
-#=====<tt>KontoCheck::SEARCH_KEYS</tt>
-#=====<tt>KontoCheck::SEARCH_KEY_MAPPINGS</tt>
-#=====<tt>KontoCheckRaw::bank_suche_bic(search_bic)</tt>
-#=====<tt>KontoCheckRaw::bank_suche_blz(blz1[,blz2])</tt>
-#=====<tt>KontoCheckRaw::bank_suche_namen(name)</tt>
-#=====<tt>KontoCheckRaw::bank_suche_namen_kurz(short_name)</tt>
-#=====<tt>KontoCheckRaw::bank_suche_plz(plz1[,plz2])</tt>
-#=====<tt>KontoCheckRaw::bank_suche_pz(pz1[,pz2])</tt>
-#=====<tt>KontoCheckRaw::bank_suche_ort(suchort)</tt>
-#=====<tt>KontoCheckRaw::bank_suche_volltext(suchwort)</tt>
-#=====<tt>KontoCheckRaw::bank_suche_multiple(suchworte)</tt>
+#===KontoCheck::suche()
+#=====KontoCheck::search()
+#=====KontoCheck::SEARCH_KEYS
+#=====KontoCheck::SEARCH_KEY_MAPPINGS
+#=====KontoCheckRaw::bank_suche_bic(search_bic)
+#=====KontoCheckRaw::bank_suche_blz(blz1 [,blz2])
+#=====KontoCheckRaw::bank_suche_namen(name)
+#=====KontoCheckRaw::bank_suche_namen_kurz(short_name)
+#=====KontoCheckRaw::bank_suche_plz(plz1 [,plz2])
+#=====KontoCheckRaw::bank_suche_pz(pz1 [,pz2])
+#=====KontoCheckRaw::bank_suche_ort(suchort)
+#=====KontoCheckRaw::bank_suche_volltext(suchwort)
+#=====KontoCheckRaw::bank_suche_multiple(suchworte)
 #
 #Diese Funktion sucht alle Banken, die auf bestimmte Suchmuster passen.
 #Mit dem Schlüssel multiple ist auch eine Suche nach mehreren Kriterien
@@ -968,10 +952,10 @@ module KontoCheck
 #   s=KontoCheck::suche( :pz => ['95',98] )       Prüfzifferbereich gemischt String/numerisch auch möglich
 #   s=KontoCheck::suche( :name => 'postbank' ) 
 #   s=KontoCheck::suche( :ort => 'lingenfeld' )
-#   r=KontoCheck::suche(:volltext=>'südwest',:uniq=>1)      Volltextsuche mit uniq
-#   s=KontoCheck::suche(:multiple=>'deutsche bank mannheim y:sparda x:südwest',:uniq=>1, :cmd=>'ac+xy')
+#   r=KontoCheck::suche( :volltext=>'südwest',:uniq=>1)      Volltextsuche mit uniq
+#   s=KontoCheck::suche( :multiple=>'deutsche bank mannheim y:sparda x:südwest',:uniq=>1, :cmd=>'ac+xy')
 #        Suche nach mehreren Kriterien: Deutsche Bank in Mannheim oder Sparda Südwest
-#   r=KontoCheck::suche(:multiple=>'deutsche bank mannheim sparda mainz', :cmd=>'abc+de')
+#   r=KontoCheck::suche( :multiple=>'deutsche bank mannheim sparda mainz', :cmd=>'abc+de')
 #        nochmal dasselbe, nur Sparda in Mainz
 
 
@@ -1000,12 +984,22 @@ module KontoCheck
     end
     alias_method :search, :suche
 
-#===<tt>KontoCheck::version()</tt>
-#=====<tt>KontoCheckRaw::version()</tt>
-#Diese Funktion gibt den Versions-String der C-Bibliothek zurück.
+#===KontoCheck::version( [mode] )
+#=====KontoCheckRaw::version( [mode] )
+#Diese Funktion gibt die Versions-Infos der C-Bibliothek zurück.
+#
+#====Mögliche Werte für mode:
+#* 0 bzw. ohne Parameter: Versionsstring der C-Bibliothek
+#* 1: Versionsnummer
+#* 2: Versionsdatum
+#* 3: Compilerdatum und -zeit
+#* 4: Datum der Prüfziffermethoden
+#* 5: Datum der IBAN-Regeln
+#* 6: Klartext-Datum der Bibliotheksversion
+#* 7: Versionstyp (devel, beta, final)
 
-    def version()
-      KontoCheckRaw::version()
+    def version(*args)
+      KontoCheckRaw::version(*args)
     end
 
   end
