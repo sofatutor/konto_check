@@ -64,18 +64,18 @@ a valid number of a bank with the given check method pz.
 
 Possible return values (and short description):
 
-    -69  (MISSING_PARAMETER)       "bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)"
+    -69  (MISSING_PARAMETER)       "bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
     -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
 
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
+    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
     -29  (UNDEFINED_SUBMETHOD)     "die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muß zwischen 1 und 10 Stellen haben"
-     -3  (INVALID_KTO)             "das Konto ist ungültig"
+    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
+     -3  (INVALID_KTO)             "das Konto ist ungueltig"
      -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
      -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
       0  (FALSE)                   "falsch"
       1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Prüfung"
+      2  (OK_NO_CHK)               "ok, ohne Pruefung"
 
 
 h3. <tt>KontoCheck::konto_check(&lt;blz&gt;, &lt;kto&gt;)</tt>
@@ -85,20 +85,20 @@ a valid number of the bank with the bic blz.
 
 Possible return values (and short description):
 
-    -69  (MISSING_PARAMETER)       "Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)"
+    -69  (MISSING_PARAMETER)       "Bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
     -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
 
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
+    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
     -29  (UNDEFINED_SUBMETHOD)     "Die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muß zwischen 1 und 10 Stellen haben"
+    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
      -5  (INVALID_BLZ_LENGTH)      "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)             "die Bankleitzahl ist ungültig"
-     -3  (INVALID_KTO)             "das Konto ist ungültig"
+     -4  (INVALID_BLZ)             "die Bankleitzahl ist ungueltig"
+     -3  (INVALID_KTO)             "das Konto ist ungueltig"
      -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
      -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
       0  (FALSE)                   "falsch"
       1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Prüfung"
+      2  (OK_NO_CHK)               "ok, ohne Pruefung"
 
 
 h3. <tt>KontoCheck::init(&lt;level&gt;[,&lt;lutfile&gt;[,&lt;set&gt;]]])</tt>
@@ -116,17 +116,17 @@ Possible return values (and short description):
 
    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
     -64  (INIT_FATAL_ERROR)        "Initialisierung fehlgeschlagen (init_wait geblockt)"
-    -63  (INCREMENTAL_INIT_NEEDS_INFO)            "Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei"
-    -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich"
+    -63  (INCREMENTAL_INIT_NEEDS_INFO)            "Ein inkrementelles Initialisieren benoetigt einen Info-Block in der LUT-Datei"
+    -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht moeglich"
     -36  (LUT2_Z_MEM_ERROR)        "Memory error in den ZLIB-Routinen"
     -35  (LUT2_Z_DATA_ERROR)       "Datenfehler im komprimierten LUT-Block"
     -34  (LUT2_BLOCK_NOT_IN_FILE)  "Der Block ist nicht in der LUT-Datei enthalten"
     -33  (LUT2_DECOMPRESS_ERROR)   "Fehler beim Dekomprimieren eines LUT-Blocks"
     -31  (LUT2_FILE_CORRUPTED)     "Die LUT-Datei ist korrumpiert"
-    -20  (LUT_CRC_ERROR)           "Prüfsummenfehler in der blz.lut Datei"
+    -20  (LUT_CRC_ERROR)           "Pruefsummenfehler in der blz.lut Datei"
     -10  (FILE_READ_ERROR)         "kann Datei nicht lesen"
      -9  (ERROR_MALLOC)            "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)        "die blz.lut Datei ist inkosistent/ungültig"
+     -7  (INVALID_LUT_FILE)        "die blz.lut Datei ist inkosistent/ungueltig"
      -6  (NO_LUT_FILE)             "die blz.lut Datei wurde nicht gefunden"
 
       6  (LUT1_SET_LOADED)         "Die Datei ist im alten LUT-Format (1.0/1.1)"
@@ -147,16 +147,16 @@ generate a new lutfile
 
 Possible return values (and short description):
    -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
-    -57  (LUT2_GUELTIGKEIT_SWAPPED)   "Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht"
-    -56  (LUT2_INVALID_GUELTIGKEIT)   "Das angegebene Gültigkeitsdatum ist ungültig (Soll: JJJJMMTT-JJJJMMTT)"
+    -57  (LUT2_GUELTIGKEIT_SWAPPED)   "Im Gueltigkeitsdatum sind Anfangs- und Enddatum vertauscht"
+    -56  (LUT2_INVALID_GUELTIGKEIT)   "Das angegebene Gueltigkeitsdatum ist ungueltig (Soll: JJJJMMTT-JJJJMMTT)"
     -32  (LUT2_COMPRESS_ERROR)        "Fehler beim Komprimieren eines LUT-Blocks"
     -31  (LUT2_FILE_CORRUPTED)        "Die LUT-Datei ist korrumpiert"
     -30  (LUT2_NO_SLOT_FREE)          "Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei"
-    -15  (INVALID_BLZ_FILE)           "Fehler in der blz.txt Datei (falsche Zeilenlänge)"
+    -15  (INVALID_BLZ_FILE)           "Fehler in der blz.txt Datei (falsche Zeilenlaenge)"
     -11  (FILE_WRITE_ERROR)           "kann Datei nicht schreiben"
     -10  (FILE_READ_ERROR)            "kann Datei nicht lesen"
      -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)           "die blz.lut Datei ist inkosistent/ungültig"
+     -7  (INVALID_LUT_FILE)           "die blz.lut Datei ist inkosistent/ungueltig"
 
       1  (OK)                         "ok"
       7  (LUT1_FILE_GENERATED)        "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert"
@@ -203,12 +203,12 @@ info2:   second infoblock
 
 Possible return value for info1 and info2 with short description:
 
-   -105  (LUT2_NO_LONGER_VALID_BETTER)   "Beide Datensätze sind nicht mehr gültig; dieser ist  aber jünger als der andere"
-    -59  (LUT2_NOT_YET_VALID)            "Der Datenblock ist noch nicht gültig"
-    -58  (LUT2_NO_LONGER_VALID)          "Der Datenblock ist nicht mehr gültig"
-    -34  (LUT2_BLOCK_NOT_IN_FILE)        "Die LUT-Datei enthält den Infoblock nicht"
-      4  (LUT2_VALID)                    "Der Datenblock ist aktuell gültig"
-      5  (LUT2_NO_VALID_DATE)            "Der Datenblock enthält kein Gültigkeitsdatum"
+   -105  (LUT2_NO_LONGER_VALID_BETTER)   "Beide Datensaetze sind nicht mehr gueltig; dieser ist  aber juenger als der andere"
+    -59  (LUT2_NOT_YET_VALID)            "Der Datenblock ist noch nicht gueltig"
+    -58  (LUT2_NO_LONGER_VALID)          "Der Datenblock ist nicht mehr gueltig"
+    -34  (LUT2_BLOCK_NOT_IN_FILE)        "Die LUT-Datei enthaelt den Infoblock nicht"
+      4  (LUT2_VALID)                    "Der Datenblock ist aktuell gueltig"
+      5  (LUT2_NO_VALID_DATE)            "Der Datenblock enthaelt kein Gueltigkeitsdatum"
 
 Possible return value for retval (and short description):
 
@@ -220,10 +220,10 @@ Possible return value for retval (and short description):
     -35  (LUT2_Z_DATA_ERROR)      "Datenfehler im komprimierten LUT-Block"
     -34  (LUT2_BLOCK_NOT_IN_FILE) "Der Block ist nicht in der LUT-Datei enthalten"
     -31  (LUT2_FILE_CORRUPTED)    "Die LUT-Datei ist korrumpiert"
-    -20  (LUT_CRC_ERROR)          "Prüfsummenfehler in der blz.lut Datei"
+    -20  (LUT_CRC_ERROR)          "Pruefsummenfehler in der blz.lut Datei"
     -10  (FILE_READ_ERROR)        "kann Datei nicht lesen"
      -9  (ERROR_MALLOC)           "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)       "die blz.lut Datei ist inkosistent/ungültig"
+     -7  (INVALID_LUT_FILE)       "die blz.lut Datei ist inkosistent/ungueltig"
       1  (OK)                     "ok"
 
 
@@ -255,7 +255,7 @@ Possible return values for retval (and short description):
     -46  (LUT2_BIC_NOT_INITIALIZED)   "Das Feld BIC wurde nicht initialisiert"
     -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
       1  (OK)                         "ok"
 
 
@@ -265,26 +265,26 @@ Test an IBAN
 
 Possible return values for retval (and short description):
 
-    -74  (NO_GERMAN_BIC)              "Ein Konto kann kann nur für deutsche Banken geprüft werden"
-    -67  (IBAN_OK_KTO_NOT)            "Die Prüfziffer der IBAN stimmt, die der Kontonummer nicht"
-    -66  (KTO_OK_IBAN_NOT)            "Die Prüfziffer der Kontonummer stimmt, die der IBAN nicht"
+    -74  (NO_GERMAN_BIC)              "Ein Konto kann kann nur fuer deutsche Banken geprueft werden"
+    -67  (IBAN_OK_KTO_NOT)            "Die Pruefziffer der IBAN stimmt, die der Kontonummer nicht"
+    -66  (KTO_OK_IBAN_NOT)            "Die Pruefziffer der Kontonummer stimmt, die der IBAN nicht"
       0  (FALSE)                      "falsch"
       1  (OK)                         "ok"
 
 Possible return values for retval_kc:
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
-    -69  (MISSING_PARAMETER)       "Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)"
+    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
+    -69  (MISSING_PARAMETER)       "Bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
     -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
     -29  (UNDEFINED_SUBMETHOD)     "Die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muß zwischen 1 und 10 Stellen haben"
+    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
      -5  (INVALID_BLZ_LENGTH)      "die Bankleitzahl ist nicht achtstellig"
      -4  (INVALID_BLZ)             "Die (Unter)Methode ist nicht definiert"
-     -3  (INVALID_KTO)             "das Konto ist ungültig"
+     -3  (INVALID_KTO)             "das Konto ist ungueltig"
      -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
      -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
       0  (FALSE)                   "falsch"
       1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Prüfung"
+      2  (OK_NO_CHK)               "ok, ohne Pruefung"
 
 
 
@@ -294,8 +294,8 @@ Determine the BIC for a given (german) IBAN
 
 Possible return values for retval (and short description):
 
-    -72  (IPI_INVALID_CHARACTER)      "Im strukturierten Verwendungszweck dürfen nur alphanumerische Zeichen vorkommen"
-    -71  (IPI_INVALID_LENGTH)         "Die Länge des IPI-Verwendungszwecks darf maximal 18 Byte sein"
+    -72  (IPI_INVALID_CHARACTER)      "Im strukturierten Verwendungszweck duerfen nur alphanumerische Zeichen vorkommen"
+    -71  (IPI_INVALID_LENGTH)         "Die Laenge des IPI-Verwendungszwecks darf maximal 18 Byte sein"
       1  (OK)                         "ok"
 
 
@@ -306,7 +306,7 @@ Determine the BIC for a given (german) IBAN
 
 Possible return values for retval (and short description):
 
-    -73  (IPI_CHECK_INVALID_LENGTH)   "Der zu validierende strukturierete Verwendungszweck muß genau 20 Zeichen enthalten"
+    -73  (IPI_CHECK_INVALID_LENGTH)   "Der zu validierende strukturierete Verwendungszweck muss genau 20 Zeichen enthalten"
       0  (FALSE)                      "falsch"
       1  (OK)                         "ok"
 
@@ -317,10 +317,10 @@ Check if a given blz is valid
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)    "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)    "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)   "Das Feld BLZ wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
       1  (OK)                         "ok"
 
 
@@ -330,11 +330,11 @@ Return the number of branch offices
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -52  (LUT2_FILIALEN_NOT_INITIALIZED) "Das Feld Filialen wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -348,7 +348,7 @@ Possible return values (and short description):
     -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
     -38  (LUT2_PARTIAL_OK)            "es wurden nicht alle Blocks geladen"
      -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
       1  (OK)                         "ok"
 
 
@@ -359,11 +359,11 @@ Return the name of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -51  (LUT2_NAME_NOT_INITIALIZED)     "Das Feld Bankname wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -373,11 +373,11 @@ Return the short name of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -48  (LUT2_NAME_KURZ_NOT_INITIALIZED) "Das Feld Kurzname wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -387,11 +387,11 @@ Return the location of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -49  (LUT2_ORT_NOT_INITIALIZED)      "Das Feld Ort wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -402,11 +402,11 @@ Return the plz of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -50  (LUT2_PLZ_NOT_INITIALIZED)      "Das Feld PLZ wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -416,11 +416,11 @@ Return the check method of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -45  (LUT2_PZ_NOT_INITIALIZED)       "Das Feld Prüfziffer wurde nicht initialisiert"
+    -45  (LUT2_PZ_NOT_INITIALIZED)       "Das Feld Pruefziffer wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -431,57 +431,57 @@ Return the BIC (Bank Identifier Code) of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -46  (LUT2_BIC_NOT_INITIALIZED)      "Das Feld BIC wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
 
 h3. <tt>KontoCheck::bank_aenderung(&lt;blz&gt; [,filiale])</tt>
 
-Return the 'Änderung' flag of a bank (as string):
+Return the 'Aenderung' flag of a bank (as string):
 A Addition, M Modified, U Unchanged, D Deletion.
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -43  (LUT2_AENDERUNG_NOT_INITIALIZED) "Das Feld Änderung wurde nicht initialisiert"
+    -43  (LUT2_AENDERUNG_NOT_INITIALIZED) "Das Feld Aenderung wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
 
 h3. <tt>KontoCheck::bank_loeschung(&lt;blz&gt; [,filiale])</tt>
 
-Return the 'Löschung' flag of a bank as int: 0 or 1
+Return the 'Loeschung' flag of a bank as int: 0 or 1
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -42  (LUT2_LOESCHUNG_NOT_INITIALIZED) "Das Feld Löschung wurde nicht initialisiert"
+    -42  (LUT2_LOESCHUNG_NOT_INITIALIZED) "Das Feld Loeschung wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
 
 h3. <tt>KontoCheck::bank_nachfolge_blz(&lt;blz&gt; [,filiale])</tt>
 
-Return the successor of a bank which will be deleted ('Löschung' flag set)
+Return the successor of a bank which will be deleted ('Loeschung' flag set)
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -41  (LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED) "Das Feld Nachfolge-BLZ wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -492,11 +492,11 @@ Return the PAN (Primary Account Number) of a bank
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -47  (LUT2_PAN_NOT_INITIALIZED)      "Das Feld PAN wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 
@@ -507,11 +507,11 @@ Return the sequence number of a bank (internal field of BLZ file)
 
 Possible return values (and short description):
 
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index für die Filiale ist ungültig"
+    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
     -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
     -44  (LUT2_NR_NOT_INITIALIZED)       "Das Feld NR wurde nicht initialisiert"
      -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungültig"
+     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
       1  (OK)                            "ok"
 
 

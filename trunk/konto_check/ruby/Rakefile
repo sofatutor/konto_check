@@ -24,13 +24,14 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "konto_check"
-    gem.summary = %Q{Checking german BICs/Bank account numbers and IBANs, retrieve information about german Banks, search for Banks matching certain criteria}
-    gem.description = %Q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
+    gem.summary = %Q{Checking german BICs/Bank account numbers and IBANs, generate IBANs, retrieve information about german Banks, search for Banks matching certain criteria}
+    gem.description = %Q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, generate IBANs, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
     gem.email = "info@provideal.net"
+    gem.files=Dir.glob('lib/**/*.rb')+Dir.glob('ext/**/*.{c,h,rb}')
     gem.homepage = "http://github.com/provideal/konto_check"
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
-    gem.version = "4.4.0"
+    gem.version = "5.0.0"
     gem.extra_rdoc_files = [
       "LICENSE",
       "README.textile",
@@ -72,7 +73,7 @@ task :default => :test
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
 #  version = File.exist?('VERSION') ? File.read('VERSION') : ""
-  version = "4.4.0"
+  version = "5.0.0"
 
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "konto_check #{version}"

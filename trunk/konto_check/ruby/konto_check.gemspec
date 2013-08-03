@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{konto_check}
-  s.version = "4.4.0"
+  s.name = "konto_check"
+  s.version = "5.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Provideal Systems GmbH", "Jan Schwenzien", "Michael Plugge"]
-  s.date = %q{2013-01-23}
-  s.description = %q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
-  s.email = %q{info@provideal.net}
+  s.date = "2013-08-03"
+  s.description = "Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, generate IBANs, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge."
+  s.email = "info@provideal.net"
   s.extensions = ["ext/konto_check_raw/extconf.rb"]
   s.extra_rdoc_files = [
     "LICENSE",
@@ -19,25 +19,16 @@ Gem::Specification.new do |s|
     "ext/konto_check_raw/konto_check_raw_ruby.c"
   ]
   s.files = [
-    "CHANGES",
-    "LICENSE",
-    "README.textile",
-    "Rakefile",
-    "VERSION.yml",
     "ext/konto_check_raw/extconf.rb",
     "ext/konto_check_raw/konto_check.c",
     "ext/konto_check_raw/konto_check.h",
     "ext/konto_check_raw/konto_check_raw_ruby.c",
-    "init.rb",
-    "konto_check.gemspec",
-    "lib/konto_check.rb",
-    "test/helper.rb",
-    "test/test_konto_check.rb"
+    "lib/konto_check.rb"
   ]
-  s.homepage = %q{http://github.com/provideal/konto_check}
+  s.homepage = "http://github.com/provideal/konto_check"
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{Checking german BICs/Bank account numbers and IBANs, retrieve information about german Banks, search for Banks matching certain criteria}
+  s.rubygems_version = "1.8.25"
+  s.summary = "Checking german BICs/Bank account numbers and IBANs, generate IBANs, retrieve information about german Banks, search for Banks matching certain criteria"
 
   if s.respond_to? :specification_version then
     s.specification_version = 3

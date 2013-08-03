@@ -478,13 +478,13 @@ static void get_params(int argc,VALUE* argv,char *arg1s,char *arg2s,char *arg3s,
 }
 
 /**
- * ===<tt>KontoCheckRaw::konto_check_pz(pz,kto[,blz])</tt>
- * =====<tt>KontoCheck::konto_check_pz(pz,kto[,blz])</tt>
+ * ===KontoCheckRaw::konto_check_pz( pz, kto [,blz])
+ * =====KontoCheck::konto_check_pz( pz, kto [,blz])
  *
  * Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination gültig ist.
  * 
  * ====Aufruf:
- * ret=KontoCheckRaw::konto_check_pz(pz,kto[,blz])
+ * ret=KontoCheckRaw::konto_check_pz( pz, kto [,blz])
  *
  * ====Parameter:
  * * pz: Prüfzifferverfahren das benutzt werden soll
@@ -524,12 +524,12 @@ static VALUE konto_check_pz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::konto_check(blz,kto)</tt>
- * =====<tt>KontoCheck::konto_check(blz,kto)</tt>
+ * ===KontoCheckRaw::konto_check( blz, kto)
+ * =====KontoCheck::konto_check( blz, kto)
  * Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält.
  *
  * ====Aufruf:
- * ret=KontoCheckRaw::konto_check(blz,kto)
+ * ret=KontoCheckRaw::konto_check( blz, kto)
  *
  * ====Parameter:
  * * blz: Die Bankleitzahl der zu testenden Bankverbindung
@@ -567,20 +567,20 @@ static VALUE konto_check(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::init([<p1>[,<p2>[,<set>]]])</tt>
- * =====<tt>KontoCheck::init([<p1>[,<p2>[,<set>]]])</tt>
+ * ===KontoCheckRaw::init( [p1 [,p2 [,set]]])
+ * =====KontoCheck::init( [p1 [,p2 [,set]]])
  * Diese Funktion initialisiert die Bibliothek und lädt die gewünschten
  * Datenblocks in den Speicher. Alle Argumente sind optional; in konto_check.h
  * werden die Defaultwerte definiert.
  *
  * ====Aufruf:
- * * <tt>ret=KontoCheckRaw::init([p1[,p2[,set]]])</tt>
+ * * ret=KontoCheckRaw::init( [p1 [,p2 [,set]]])
  * =====Beispielsaufrufe:
- * * <tt>ret=KontoCheckRaw::init</tt>
- * * <tt>ret=KontoCheckRaw::init(5)</tt>
- * * <tt>ret=KontoCheckRaw::init("/etc/blz.lut")</tt>
- * * <tt>ret=KontoCheckRaw::init(3,"/etc/blz.lut")</tt>
- * * <tt>ret=KontoCheckRaw::init("/etc/blz.lut",9,2)</tt>
+ * * ret=KontoCheckRaw::init
+ * * ret=KontoCheckRaw::init( 5)
+ * * ret=KontoCheckRaw::init( "/etc/blz.lut")
+ * * ret=KontoCheckRaw::init( 3,"/etc/blz.lut")
+ * * ret=KontoCheckRaw::init( "/etc/blz.lut",9,2)
 
  * ====Parameter:
  * * Die Variablen p1 und p2 stehen für den Initialisierungslevel und den
@@ -669,10 +669,10 @@ static VALUE init(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::current_lutfile_name()</tt>
- * =====<tt>KontoCheck::current_lutfile_name()</tt>
- * =====<tt>KontoCheck::current_lutfile_set()</tt>
- * =====<tt>KontoCheck::current_init_level()</tt>
+ * ===KontoCheckRaw::current_lutfile_name()
+ * =====KontoCheck::current_lutfile_name()
+ * =====KontoCheck::current_lutfile_set()
+ * =====KontoCheck::current_init_level()
  *
  * Diese Funktion bestimmt den Dateinamen der zur Initialisierung benutzen
  * LUT-Datei, das benutzte Set und den Initialisierungslevel der aktuellen
@@ -706,8 +706,8 @@ static VALUE current_lutfile_name_rb(VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::free()</tt>
- * =====<tt>KontoCheck::free()</tt>
+ * ===KontoCheckRaw::free()
+ * =====KontoCheck::free()
  *
  * Diese Funktion gibt allen allokierten Speicher wieder frei. Der Rückgabewert ist immer true.
  */
@@ -718,8 +718,8 @@ static VALUE free_rb(VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt>
- * =====<tt>KontoCheck::generate_lutfile(inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])</tt>
+ * ===KontoCheckRaw::generate_lutfile( inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])
+ * =====KontoCheck::generate_lutfile( inputfile,outputfile [,user_info [,gueltigkeit [,felder [,filialen [,set [,iban_file]]]]]])
  *
  * Diese Funktion generiert eine neue LUT-Datei aus der BLZ-Datei der Deutschen Bundesbank. Die folgenden
  * Parameter werden unterstützt:
@@ -904,10 +904,10 @@ static int enc_mode(int argc,VALUE *argv)
 }
 
 /**
- * ===<tt>KontoCheckRaw::encoding([mode])</tt>
- * =====<tt>KontoCheck::encoding([mode])</tt>
- * =====<tt>KontoCheckRaw::encoding_str([mode])</tt>
- * =====<tt>KontoCheckRaw::keep_raw_data(mode)</tt>
+ * ===KontoCheckRaw::encoding( [mode])
+ * =====KontoCheck::encoding( [mode])
+ * =====KontoCheckRaw::encoding_str( [mode])
+ * =====KontoCheckRaw::keep_raw_data( mode)
  *
  * Diese Funktion legt den benutzten Zeichensatz für Fehlermeldungen durch die
  * Funktion KontoCheckRaw::retval2txt() und einige Felder der LUT-Datei (Name,
@@ -924,7 +924,7 @@ static int enc_mode(int argc,VALUE *argv)
  * gelöscht und abgefragt werden.
  *
  * ====Aufruf:
- * KontoCheckRaw::encoding([mode])
+ * KontoCheckRaw::encoding( [mode])
  *
  * ====Parameter:
  * * mode: die gewünschte Kodierung.
@@ -976,17 +976,17 @@ static VALUE encoding_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::encoding_str(mode)</tt>
- * =====<tt>KontoCheck::encoding_str(mode)</tt>
- * =====<tt>KontoCheckRaw::encoding(mode)</tt>
- * =====<tt>KontoCheckRaw::keep_raw_data(mode)</tt>
+ * ===KontoCheckRaw::encoding_str( mode)
+ * =====KontoCheck::encoding_str( mode)
+ * =====KontoCheckRaw::encoding( mode)
+ * =====KontoCheckRaw::keep_raw_data( mode)
  *
  * Diese Funktion entspricht der Funktion KontoCheck::encoding(). Allerdings
  * ist der Rückgabewert nicht numerisch, sondern ein String, der die aktuelle
  * Kodierung angibt.
  *
  * ====Aufruf:
- * KontoCheckRaw::encoding_str([mode])
+ * KontoCheckRaw::encoding_str( [mode])
  *
  * ====Parameter:
  * wie bei KontoCheckRaw::encoding()
@@ -1022,9 +1022,9 @@ static VALUE encoding_str_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::keep_raw_data(mode)</tt>
- * =====<tt>KontoCheckRaw::encoding(mode)</tt>
- * =====<tt>KontoCheck::encoding(mode)</tt>
+ * ===KontoCheckRaw::keep_raw_data( mode)
+ * =====KontoCheckRaw::encoding( mode)
+ * =====KontoCheck::encoding( mode)
  *
  * Diese Funktion setzt bzw. liest das Flag keep_raw_data in der C-Bibliothek.
  * Falls es gesetzt ist, werden werden die Rohdaten der Blocks Name, Kurzname
@@ -1037,7 +1037,7 @@ static VALUE encoding_str_rb(int argc,VALUE* argv,VALUE self)
  * Bibliothek enthalten, nicht in KontoCheck..
  * 
  * ====Aufruf:
- * retval=KontoCheck::encoding(mode)
+ * retval=KontoCheck::encoding( mode)
  *
  * ====Parameter:
  * Das Verhalten der Funktion wird durch den Parameter mode gesteuert:
@@ -1064,8 +1064,8 @@ static VALUE keep_raw_data_rb(VALUE self, VALUE mode_rb)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2txt(retval)</tt>
- * =====<tt>KontoCheck::retval2txt(retval)</tt>
+ * ===KontoCheckRaw::retval2txt( retval)
+ * =====KontoCheck::retval2txt( retval)
  *
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
  * Der benutzte Zeichensatz wird über die Funktion KontoCheckRaw::encoding()
@@ -1073,7 +1073,7 @@ static VALUE keep_raw_data_rb(VALUE self, VALUE mode_rb)
  * Makros DEFAULT_ENCODING aus konto_check.h benutzt.
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2txt(retval)
+ * retval_str=KontoCheckRaw::retval2txt( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1087,14 +1087,14 @@ static VALUE retval2txt_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2iso(retval)</tt>
- * =====<tt>KontoCheck::retval2iso(retval)</tt>
+ * ===KontoCheckRaw::retval2iso( retval)
+ * =====KontoCheck::retval2iso( retval)
  *
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
  * Der benutzte Zeichensatz ist ISO 8859-1. 
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2iso(retval)
+ * retval_str=KontoCheckRaw::retval2iso( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1108,14 +1108,14 @@ static VALUE retval2iso_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2txt_short(retval)</tt>
- * =====<tt>KontoCheck::retval2txt_short(retval)</tt>
+ * ===KontoCheckRaw::retval2txt_short( retval)
+ * =====KontoCheck::retval2txt_short( retval)
  *
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen kurzen
  * String. Die Ausgabe ist der Makroname, wie er in C benutzt wird.
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2txt_short(retval)
+ * retval_str=KontoCheckRaw::retval2txt_short( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1129,14 +1129,14 @@ static VALUE retval2txt_short_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2dos(<retval>)</tt>
- * =====<tt>KontoCheck::retval2dos(<retval>)</tt>
+ * ===KontoCheckRaw::retval2dos( retval)
+ * =====KontoCheck::retval2dos( retval)
  * 
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
  * Der benutzte Zeichensatz ist cp850 (DOS).
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2dos(retval)
+ * retval_str=KontoCheckRaw::retval2dos( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1150,14 +1150,14 @@ static VALUE retval2dos_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2html(<retval>)</tt>
- * =====<tt>KontoCheck::retval2html(<retval>)</tt>
+ * ===KontoCheckRaw::retval2html( retval)
+ * =====KontoCheck::retval2html( retval)
  *
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
  * Für Umlaute werden HTML-Entities benutzt.
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2html(retval)
+ * retval_str=KontoCheckRaw::retval2html( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1171,14 +1171,14 @@ static VALUE retval2html_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::retval2utf8(<retval>)</tt>
- * =====<tt>KontoCheck::retval2utf8(<retval>)</tt>
+ * ===KontoCheckRaw::retval2utf8( retval)
+ * =====KontoCheck::retval2utf8( retval)
  *
  * Diese Funktion konvertiert einen numerischen Rückgabewert in einen String.
  * Der benutzte Zeichensatz ist UTF-8.
  *
  * ====Aufruf:
- * retval_str=KontoCheckRaw::retval2utf8(retval)
+ * retval_str=KontoCheckRaw::retval2utf8( retval)
  *
  * ====Parameter:
  * * retval: der zu konvertierende numerische Rückgabewert
@@ -1192,14 +1192,14 @@ static VALUE retval2utf8_rb(VALUE self, VALUE retval)
 }
 
 /**
- * ===<tt>KontoCheckRaw::dump_lutfile(lutfile)</tt>
- * =====<tt>KontoCheck::dump_lutfile(lutfile)</tt>
+ * ===KontoCheckRaw::dump_lutfile( lutfile)
+ * =====KontoCheck::dump_lutfile( lutfile)
  *
  * Diese Funktion liefert detaillierte Informationen über alle Blocks, die in
  * der LUT-Datei gespeichert sind, sowie noch einige Internas der LUT-Datei.
  *
  * ====Aufruf:
- * retval=KontoCheckRaw::dump_lutfile(lutfile)
+ * retval=KontoCheckRaw::dump_lutfile( lutfile)
  *
  * ====Parameter:
  * * lutfile: Name der LUT-Datei.
@@ -1239,16 +1239,16 @@ static VALUE dump_lutfile_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::lut_info([lutfile])</tt>
- * =====<tt>KontoCheck::lut_info()</tt>
- * =====<tt>KontoCheck::lut_info1(lutfile)</tt>
- * =====<tt>KontoCheck::lut_info2(lutfile)</tt>
+ * ===KontoCheckRaw::lut_info( [lutfile])
+ * =====KontoCheck::lut_info()
+ * =====KontoCheck::lut_info1( lutfile)
+ * =====KontoCheck::lut_info2( lutfile)
  *
  * Diese Funktion liefert Informationen über die Datensätze sowie die beiden
  * Infoblocks einer LUT-Date oder die in den Speicher geladenen Blocks.
  * 
  * ====Aufruf:
- * ret=KontoCheckRaw::lut_info([lutfile])
+ * ret=KontoCheckRaw::lut_info( [lutfile])
  * 
  * ====Parameter:
  * * lutfile: Name der LUT-Datei, falls angegeben. Falls der Parameter weggelassen wird, werden Infnos über die geladenen Blocks zurückgegeben.
@@ -1309,8 +1309,8 @@ static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::load_bank_data(<datafile>)</tt>
- * =====<tt>KontoCheck::load_bank_data(<datafile>)</tt>
+ * ===KontoCheckRaw::load_bank_data( datafile)
+ * =====KontoCheck::load_bank_data( datafile)
  *
  * Diese Funktion war die alte Initialisierungsroutine für konto_check; es ist
  * nun durch die Funktionen KontoCheck::init() und KontoCheck::generate_lutfile()
@@ -1318,9 +1318,9 @@ static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
  * Bundesbank und generiertge daraus eine LUT-Datei, die dann von der
  * Initialisierungsroutine der C-Bibliothek benutzt wurde.
  * 
- * Die init() Funktion ist wesentlich schneller (7..20 mal so schnell ohne
+ * Die init() Funktion ist wesentlich schneller (7...20 mal so schnell ohne
  * Generierung der Indexblocks; mit Indexblocks macht es noch wesentlich mehr
- * aus) und hat eine Reihe weiterer Vorteile. So ist es z.B. möglich, zwwei
+ * aus) und hat eine Reihe weiterer Vorteile. So ist es z.B. möglich, zwei
  * Datensätze mit unterschiedlichem Gültigkeitszeitraum in einer Datei zu
  * halten und den jeweils gültigen Satz automatisch (nach der Systemzeit)
  * auswählen zu lassen. Die einzelnen Datenblocks (Bankleitzahlen,
@@ -1330,13 +1330,13 @@ static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
  * Format, so daß einzelne Blocks nicht unabhängig von anderen geladen werden
  * können.
  * 
- * Die Funktion load_bank_data() wird nur noch als ein schibbolet benutzt, um
+ * Die Funktion load_bank_data() wird nur noch als ein Schibbolet benutzt, um
  * zu testen, ob jemand das alte Interface benutzt. Bei der Routine
  * KontoCheck::konto_check() wurde die Reihenfolge der Parameter getauscht, so
  * daß man in dem Falle den alten Code umstellen muß.
  *
  * ====Aufruf:
- * retval=KontoCheckRaw::load_bank_data(datafile)
+ * retval=KontoCheckRaw::load_bank_data( datafile)
  *
  * ====Parameter:
  * * der alte Parameter datafile ist die BLZ-Datei der Deutschen Bundesbank; er wird ignoriert.
@@ -1354,8 +1354,8 @@ static VALUE load_bank_data(VALUE self, VALUE path_rb)
 }
 
 /**
- * ===<tt>KontoCheckRaw::iban2bic(iban)</tt>
- * =====<tt>KontoCheck::iban2bic(iban)</tt>
+ * ===KontoCheckRaw::iban2bic( iban)
+ * =====KontoCheck::iban2bic( iban)
  * 
  * Diese Funktion bestimmt zu einer (deutschen!) IBAN den zugehörigen BIC (Bank
  * Identifier Code). Der BIC wird für eine EU-Standard-Überweisung im
@@ -1364,7 +1364,7 @@ static VALUE load_bank_data(VALUE self, VALUE path_rb)
  * http://www.bic-code.de/
  *
  * ====Aufruf:
- * ret=KontoCheckRaw::iban2bic(iban)
+ * ret=KontoCheckRaw::iban2bic( iban)
  *
  * ====Parameter:
  * * iban: die IBAN, zu der der entsprechende BIC bestimmt werden soll.
@@ -1397,63 +1397,53 @@ static VALUE iban2bic_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::iban_gen(blz,kto)</tt>
- * =====<tt>KontoCheck::iban_gen(kto,blz)</tt>
- * Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN. Hierbei
- * ist zu beachten, daß nicht alle Banken der Selbstberechnung zugestimmt
- * haben. Es gibt von den Sparkassen eine Liste dieser Institute; sie ist auch
- * in der LUT-Datei mit der ID 22 (1. Eigene IBAN) enthalten. Bei diesen Banken
- * wird - falls der Block in der LUT-Datei enthalten ist - keine Berechnung
- * durchgeführt, sondern die Status-Variable auf NO_OWN_IBAN_CALCULATION
- * gesetzt. 
+ * ===KontoCheckRaw::iban_gen( blz,kto)
+ * =====KontoCheck::iban_gen( kto,blz)
+ * Diese Funktion generiert aus (deutscher) BLZ und Konto einen IBAN, sowie den
+ * zugehörigen BIC.
  *
- * Alle Banken der Liste erzeugen eine Statusmeldung mit dem Wert
- * OK_UNTERKONTO_ATTACHED, OK_UNTERKONTO_POSSIBLE oder OK_UNTERKONTO_GIVEN.
- * Falls einer dieser Stauswerte zurückgegeben wird, ist somit immer Vorsicht
- * geboten; der generierte IBAN sollte direkt bei dem zugehörigen Institut
- * überprüft werden.
- * 
- * Hier ein Auszug aus der Anleitung des SEPA Account Converters:
- * 
- * Der SEPA Account Converter ist so eingestellt, dass nur Kontoverbindungen in
- * IBAN und BIC umgerechnet werden, bei denen das ausgebende Kreditinstitut der
- * Umrechnung zugestimmt hat. Kreditinstitute, welche einer Umrechnung nicht
- * zugestimmt haben und welche zum Teil spezielle, dem SEPA Account Converter
- * nicht bekannte Umrechnungsmethoden verwenden, sind in der Datei "CONFIG.INI"
- * hinterlegt. Durch Löschen der Datei "CONFIG.INI" aus dem Programmverzeichnis
- * haben Sie die Möglichkeit, eine Umrechnung für alle Konten durchzuführen.
- * Bitte beachten Sie dabei, dass die so erhaltenen IBAN und BIC fehlerhaft
- * sein können und deshalb mit ihren Kunden zu überprüfen sind.
- * 
- * Weblinks:
- * 
- *      https://www.sparkasse-rhein-neckar-nord.de/pdf/content/sepa/kurzanleitung.pdf
- *      https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/index.php
- *      https://www.sparkasse-rhein-neckar-nord.de/firmenkunden/internationales_geschaeft/sepa/vorteile/sepa_account_converter.msi
+ * Nachdem im Mai 2013 die IBAN-Regeln zur Berechnung von IBAN und BIC aus
+ * Kontonummer und BLZ veröffentlicht wurden, gibt es endlich ein verbindliches
+ * Verfahren zur Bestimmung der IBAN. Die definierten IBAN-Regeln wurden in der
+ * C-Datei eingearbeitet und werden automatisch ausgewertet, falls der Block mit
+ * den IBAN-Regeln in der LUT-Datei enthalten ist. Andere LUT-Dateien sollten
+ * für die IBAN-Berechnung möglichst nicht verwendet werden, da die Anzahl der
+ * BLZs mit Sonderregelungen doch sehr groß ist.
  *
  * Es ist möglich, sowohl die Prüfung auf Stimmigkeit der Kontonummer als auch
- * auf Zulässigkeit der Selbstberechnung zu deaktivieren. Falls die IBAN trotz
- * fehlender Zustimmung der Bank berechnet werden, ist vor die BLZ ein @ zu
+ * die "schwarze Liste" (ausgeschlossene BLZs) zu deaktivieren. Falls die IBAN
+ * ohne Test der Blacklist berechnet werden soll, ist vor die BLZ ein @ zu
  * setzen; falls auch bei falscher Bankverbindung ein IBAN berechnet werden
  * soll, ist vor die BLZ ein + zu setzen. Um beide Prüfungen zu deaktiviern,
  * kann @+ (oder +@) vor die BLZ gesetzt werden. Die so erhaltenen IBANs sind
- * dann i.A. allerdings wohl nicht gültig.
+ * dann u.U. allerdings wohl nicht gültig.
  * 
  * ====Aufruf:
- * ret=KontoCheckRaw::iban_gen(blz,kto)
+ * ret=KontoCheckRaw::iban_gen( blz,kto)
  *
  * ====Parameter:
  * * blz: die BLZ, zu der die IBAN generiert werden soll
  * * kto: Kontonummer
  *
  * ====Rückgabe:
- * Rückgabe ist ein Array mit drei Elementen:
+ * Rückgabe ist ein Array mit sieben Elementen:
  * * das erste Element enthält die generierten IBAN in komprimierter Form
  * * das zweite Element enthält die generierte IBAN in Papierform (mit eingestreuten Blanks)
  * * das dritte Element enthält den Statuscode der Funktion
+ * * das vierte Element enthält den BIC (dieser unterscheidet sich u.U. von demjenigen der BLZ-Datei!!). Dieses und die folgenden Elemente waren ursprünglich nicht in der Funktion enthalten und wurde erst nach Einführung der IBAN-Regeln (Juni 2013) hinzugefügt.
+ * * das fünfte Element enthält die verwendete BLZ
+ * * das sechste Element enthält die verwendete Kontonummer
+ * * das siebte Element enthält die verwendete IBAN-Regel
  *
  * ====Mögliche Statuscodes:
- * *  -110  OK_UNTERKONTO_ATTACHED    "wahrscheinlich OK; es wurde allerdings ein (weggelassenes) Unterkonto angefügt"
+ * *  -128  (IBAN_INVALID_RULE)       "Die BLZ passt nicht zur angegebenen IBAN-Regel"
+ * *  -127  (IBAN_AMBIGUOUS_KTO)      "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
+ * *  -125  (IBAN_RULE_UNKNOWN)       "Die IBAN-Regel ist nicht bekannt"
+ * *  -124  (NO_IBAN_CALCULATION)     "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
+ * *  -123  (OLD_BLZ_OK_NEW_NOT)      "Die Bankverbindung ist mit der alten BLZ stimmig, mit der Nachfolge-BLZ nicht"
+ * *  -122  (LUT2_IBAN_REGEL_NOT_INITIALIZED) "Das Feld IBAN-Regel wurde nicht initialisiert"
+ * *  -120  (LUT2_NO_ACCOUNT_GIVEN)   "Keine Bankverbindung/IBAN angegeben"
+ * *  -113  (NO_OWN_IBAN_CALCULATION) "das Institut erlaubt keine eigene IBAN-Berechnung"
  * *   -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
  * *   -74  (NO_GERMAN_BIC)           "Ein Konto kann kann nur für deutsche Banken geprüft werden"
  * *   -69  (MISSING_PARAMETER)       "Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)"
@@ -1461,39 +1451,50 @@ static VALUE iban2bic_rb(int argc,VALUE* argv,VALUE self)
  * *   -29  (UNDEFINED_SUBMETHOD)     "Die (Unter)Methode ist nicht definiert"
  * *   -12  (INVALID_KTO_LENGTH)      "ein Konto muß zwischen 1 und 10 Stellen haben"
  * *    -5  (INVALID_BLZ_LENGTH)      "die Bankleitzahl ist nicht achtstellig"
- * *    -4  (INVALID_BLZ)             "Die (Unter)Methode ist nicht definiert"
+ * *    -4  (INVALID_BLZ)             "Die Bankleitzahl ist nicht definiert"
  * *    -3  (INVALID_KTO)             "das Konto ist ungültig"
  * *    -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
- * *    -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
+ * *    -1  (NOT_DEFINED)             "die (Unter)Methode ist nicht definiert"
  * *     0  (FALSE)                   "falsch"
  * *     1  (OK)                      "ok"
  * *     2  (OK_NO_CHK)               "ok, ohne Prüfung"
  * *    11  (OK_UNTERKONTO_POSSIBLE)  "wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten"
  * *    12  (OK_UNTERKONTO_GIVEN)     "wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer"
+ * *    18  (OK_KTO_REPLACED)         "ok; die Kontonummer wurde allerdings ersetzt"
+ * *    19  (OK_BLZ_REPLACED)         "ok; die Bankleitzahl wurde allerdings ersetzt"
+ * *    20  (OK_BLZ_KTO_REPLACED)     "ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt"
+ * *    21  (OK_IBAN_WITHOUT_KC_TEST) "ok; die Bankverbindung ist (ohne Test) als richtig anzusehen"
+ * *    22  (OK_INVALID_FOR_IBAN)     "ok; für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert"
+ * *    24  (OK_KTO_REPLACED_NO_PZ)   "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer"
+ * *    25  (OK_UNTERKONTO_ATTACHED)  "ok; es wurde ein (weggelassenes) Unterkonto angefügt"
  */
 static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
 {
-   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20];
-   int retval;
-   VALUE iban_rb,papier_rb;
+   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20],blz2[20],kto2[20],*bic;
+   int retval,regel;
+   VALUE iban_rb,papier_rb,bic_rb,blz2_rb,kto2_rb;
 
    get_params(argc,argv,blz,kto,NULL,NULL,2);
-   papier=iban_gen(blz,kto,&retval);
+   papier=iban_bic_gen(blz,kto,&bic,blz2,kto2,&retval);
    if(retval==OK || retval==OK_UNTERKONTO_ATTACHED || retval==OK_UNTERKONTO_POSSIBLE || retval==OK_UNTERKONTO_GIVEN){
       for(ptr=papier,dptr=iban;*ptr;ptr++)if(*ptr!=' ')*dptr++=*ptr;
       *dptr=0;
       iban_rb=rb_str_new2(iban);
       papier_rb=rb_str_new2(papier);
+      bic_rb=rb_str_new2(bic);
+      blz2_rb=rb_str_new2(blz2);
+      kto2_rb=rb_str_new2(kto2);
       kc_free(papier);  /* die C-Funktion allokiert Speicher, der muß wieder freigegeben werden */
+      regel=lut_iban_regel(blz,0,NULL)/100;
    }
    else
       iban_rb=papier_rb=Qnil;
-   return rb_ary_new3(3,iban_rb,papier_rb,INT2FIX(retval));
+   return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,regel);
 }
 
 /**
- * ===<tt>KontoCheckRaw::iban_check(iban)</tt>
- * =====<tt>KontoCheck::iban_check(iban)</tt>
+ * ===KontoCheckRaw::iban_check( iban)
+ * =====KontoCheck::iban_check( iban)
  * Diese Funktion testet eine IBAN; bei deutschen Bankverbindungen wird
  * zusätzlich noch die Plausibilität der Bankverbindung getestet und im
  * Statuswert zurückgegeben. Die Rückgabe ist ein Array mit zwei Elementen: im
@@ -1501,7 +1502,7 @@ static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
  * (bei deutschen Bankverbindungen) das Testergebnis des Kontotests.
  *
  * ====Aufruf:
- * ret=KontoCheckRaw::iban_check(iban)
+ * ret=KontoCheckRaw::iban_check( iban)
  *
  * ====Parameter:
  * * iban: die IBAN, die getestet werden soll
@@ -1544,8 +1545,8 @@ static VALUE iban_check_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::ipi_gen(zweck)</tt>
- * =====<tt>KontoCheck::ipi_gen(zweck)</tt>
+ * ===KontoCheckRaw::ipi_gen( zweck)
+ * =====KontoCheck::ipi_gen( zweck)
  *
  * Diese Funktion generiert einen "Strukturierten Verwendungszweck" für
  * SEPA-Überweisungen. Der Rückgabewert ist der Strukturierte Verwendungszweck
@@ -1558,7 +1559,7 @@ static VALUE iban_check_rb(int argc,VALUE* argv,VALUE self)
  * Änderungen des Interfaces, aber an dieser Stelle schien es geboten zu sein).
  * 
  * ====Aufruf:
- * ret=KontoCheckRaw::ipi_gen(zweck)
+ * ret=KontoCheckRaw::ipi_gen( zweck)
  *
  * ====Parameter:
  * * zweck: String für den ein Strukturierter Verwendungszweck generiert werden soll.
@@ -1591,14 +1592,14 @@ static VALUE ipi_gen_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::ipi_check(zweck)</tt>
- * =====<tt>KontoCheck::ipi_check(zweck)</tt>
+ * ===KontoCheckRaw::ipi_check( zweck)
+ * =====KontoCheck::ipi_check( zweck)
  * 
  * Die Funktion testet, ob ein Strukturierter Verwendungszweck gültig ist
  * (Anzahl Zeichen, Prüfziffer).
  *
  * ====Aufruf:
- * ret=KontoCheckRaw::ipi_check(zweck)
+ * ret=KontoCheckRaw::ipi_check( zweck)
  *
  * ====Parameter:
  * * zweck: der Strukturierte Verwendungszweck, der getestet werden soll
@@ -1621,9 +1622,9 @@ static VALUE ipi_check_rb(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ====<tt>KontoCheckRaw::bank_valid(blz [,filiale])</tt>
- * ====== <tt>KontoCheck::bank_valid(blz [,filiale])</tt>
- * ====== <tt>KontoCheck::bank_valid?(blz [,filiale])</tt>
+ * ====KontoCheckRaw::bank_valid( blz [,filiale])
+ * ====== KontoCheck::bank_valid( blz [,filiale])
+ * ====== KontoCheck::bank_valid?( blz [,filiale])
  * Diese Funktion testet, ob eine gegebene BLZ gültig ist. Der Rückgabewert ist ein
  * Statuscode mit den unten angegebenen Werten. Falls das Argument filiale auch
  * angegeben ist, wird zusätzlich noch getestet, ob eine Filiale mit dem gegebenen
@@ -1649,8 +1650,8 @@ static VALUE bank_valid(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_filialen(blz)</tt>
- * =====<tt>KontoCheck::bank_filialen(blz)</tt>
+ * ===KontoCheckRaw::bank_filialen( blz)
+ * =====KontoCheck::bank_filialen( blz)
  * 
  * Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive Hauptstelle).
  * Die LUT-Datei muß dazu natürlich mit den Filialdaten generiert sein, sonst
@@ -1679,8 +1680,8 @@ static VALUE bank_filialen(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_alles(blz[,filiale])</tt>
- * =====<tt>KontoCheck::bank_alles(blz[,filiale])</tt>
+ * ===KontoCheckRaw::bank_alles( blz [,filiale])
+ * =====KontoCheck::bank_alles( blz [,filiale])
  * 
  * Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
  * Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden Komponenten:
@@ -1751,8 +1752,8 @@ static VALUE bank_alles(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_name(blz[,filiale])</tt>
- * =====<tt>KontoCheck::bank_name(blz[,filiale])</tt>
+ * ===KontoCheckRaw::bank_name( blz [,filiale])
+ * =====KontoCheck::bank_name( blz [,filiale])
  * 
  * Diese Funktion liefert den Namen einer Bank. Der Rückgabewert ist ein
  * Array mit zwei Elementen: im ersten steht ein String mit dem Namen, im
@@ -1780,8 +1781,8 @@ static VALUE bank_name(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_name_kurz(blz [,filiale])</tt>
- * =====<tt>KontoCheck::bank_name_kurz(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_name_kurz( blz [,filiale])
+ * =====KontoCheck::bank_name_kurz( blz [,filiale])
  * 
  * Diese Funktion liefert den Kurznamen einer Bank. Der Rückgabewert ist ein
  * Array mit zwei Elementen: im ersten steht ein String mit dem Namen, im
@@ -1809,8 +1810,8 @@ static VALUE bank_name_kurz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_ort(blz[,filiale])</tt>
- * =====<tt>KontoCheck::bank_ort(blz[,filiale])</tt>
+ * ===KontoCheckRaw::bank_ort( blz [,filiale])
+ * =====KontoCheck::bank_ort( blz [,filiale])
  *
  * Diese Funktion liefert den Ort einer Bank. Falls der Parameter filiale nicht
  * angegeben ist, wird der Sitz der Hauptstelle ausgegeben. Der Rückgabewert
@@ -1840,8 +1841,8 @@ static VALUE bank_ort(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_plz(blz [,filiale])</tt>
- * =====<tt>KontoCheck::bank_plz(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_plz( blz [,filiale])
+ * =====KontoCheck::bank_plz( blz [,filiale])
  * 
  * Diese Funktion liefert die Postleitzahl einer Bank. Falls der Parameter
  * filiale nicht angegeben ist, wird die PLZ der Hauptstelle ausgegeben. Der
@@ -1869,8 +1870,8 @@ static VALUE bank_plz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_pz(blz)</tt>
- * =====<tt>KontoCheck::bank_pz(blz)</tt>
+ * ===KontoCheckRaw::bank_pz( blz)
+ * =====KontoCheck::bank_pz( blz)
  * 
  * Diese Funktion liefert die Prüfziffer einer Bank. Die Funktion unterstützt
  * keine Filialen; zu jeder BLZ kann es in der LUT-Datei nur eine
@@ -1899,8 +1900,8 @@ static VALUE bank_pz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_bic(blz[,filiale])</tt>
- * =====<tt>KontoCheck::bank_bic(blz[,filiale])</tt>
+ * ===KontoCheckRaw::bank_bic( blz [,filiale])
+ * =====KontoCheck::bank_bic( blz [,filiale])
  * 
  * Diese Funktion liefert den BIC (Bank Identifier Code) einer Bank. Der
  * Rückgabewert ist ein Array mit zwei Elementen: im ersten steht ein String
@@ -1929,8 +1930,8 @@ static VALUE bank_bic(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_aenderung(blz [,filiale])</tt>
- * =====<tt>KontoCheck::bank_aenderung(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_aenderung( blz [,filiale])
+ * =====KontoCheck::bank_aenderung( blz [,filiale])
  * 
  * Diese Funktion liefert das  'Änderung' Flag einer Bank (als string).
  * Mögliche Werte sind: A (Addition), M (Modified), U (Unchanged), D
@@ -1960,8 +1961,8 @@ static VALUE bank_aenderung(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheck::bank_loeschung(blz [,filiale])</tt>
- * =====<tt>KontoCheckRaw::bank_loeschung(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_loeschung( blz [,filiale])
+ * =====KontoCheck::bank_loeschung( blz [,filiale])
  * 
  * Diese Funktion liefert das Lösch-Flag für eine Bank zurück (als Integer;
  * mögliche Werte sind 0 und 1). Der Rückgabewert ist ein Array mit zwei
@@ -1989,8 +1990,8 @@ static VALUE bank_loeschung(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_nachfolge_blz(blz [,filiale])</tt>
- * =====<tt>KontoCheck::bank_nachfolge_blz(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_nachfolge_blz( blz [,filiale])
+ * =====KontoCheck::bank_nachfolge_blz( blz [,filiale])
  * 
  * Diese Funktion liefert die Nachfolge-BLZ für eine Bank, die gelöscht werden
  * soll (bei der das 'Löschung' Flag 1 ist). Der Rückgabewert ist ein Array mit
@@ -2018,10 +2019,8 @@ static VALUE bank_nachfolge_blz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_pan(blz[,filiale])</tt>
- *
- * ===<tt>KontoCheckRaw::bank_pan(blz [,filiale])</tt>
- * =====<tt>KontoCheck::bank_pan(blz [,filiale])</tt>
+ * ===KontoCheckRaw::bank_pan( blz [,filiale])
+ * =====KontoCheck::bank_pan( blz [,filiale])
  * 
  * Diese Funktion liefert den PAN (Primary Account Number) einer Bank. Der
  * Rückgabewert ist ein Array mit zwei Elementen: im ersten steht der PAN, im
@@ -2048,8 +2047,8 @@ static VALUE bank_pan(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheck::bank_nr(blz [,filiale])</tt>
- * =====<tt>KontoCheckRaw::bank_nr(blz[,filiale])</tt>
+ * ===KontoCheckRaw::bank_nr( blz [,filiale])
+ * =====KontoCheck::bank_nr( blz [,filiale])
  * 
  * Diese Funktion liefert die laufende Nummer einer Bank (internes Feld der
  * BLZ-Datei). Der Wert wird wahrscheinlich nicht oft benötigt, ist aber der
@@ -2217,8 +2216,8 @@ static VALUE bank_suche_int(int argc,VALUE* argv,VALUE self,int (*suchfkt_s)(cha
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_bic(search_bic[,sort_uniq[,sort]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_bic( search_bic [,sort_uniq [,sort]])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren BIC mit dem angegebenen Wert <search_bic> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
@@ -2244,8 +2243,8 @@ static VALUE bank_suche_bic(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_namen(name[,sort_uniq[,sort]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_namen( name [,sort_uniq [,sort]])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert <search_bic> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
@@ -2271,8 +2270,8 @@ static VALUE bank_suche_namen(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_namen_kurz(short_name[,sort_uniq[,sort]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_namen_kurz( short_name [,sort_uniq [,sort]])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Kurznamen mit dem angegebenen Wert <search_bic> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
@@ -2298,8 +2297,8 @@ static VALUE bank_suche_namen_kurz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_plz(plz1[,plz2[,sort_uniq[,sort]]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_plz( plz1 [,plz2 [,sort_uniq [,sort]]])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren PLZ gleich <plz1> ist oder (bei
  * Angabe von plz2) die im Bereich zwischen <plz1> und <plz2> liegen.. Die
@@ -2326,8 +2325,8 @@ static VALUE bank_suche_plz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_pz(pz1[,pz2[,sort_uniq[,sort]]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * === KontoCheckRaw::bank_suche_pz( pz1 [,pz2 [,sort_uniq [,sort]]])
+ * ===== KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Prüfziffer gleich <pz1> ist oder (bei
  * Angabe von pz2) die im Bereich zwischen <pz1> und <pz2> liegen.. Die
@@ -2354,8 +2353,8 @@ static VALUE bank_suche_pz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_blz(blz1[,blz2[,uniq]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_blz( blz1 [,blz2 [,uniq]])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Bankleitzahl gleich <blz1> ist oder (bei
  * Angabe von blz2) die im Bereich zwischen <blz1> und <blz2> liegen.. Die
@@ -2382,8 +2381,8 @@ static VALUE bank_suche_blz(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_ort(suchort[,uniq])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_ort( suchort [,uniq])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Sitz mit dem angegebenen Wert <suchort> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
@@ -2409,8 +2408,8 @@ static VALUE bank_suche_ort(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_volltext(suchwort[,sort_uniq[,sort]])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_volltext( suchwort [,sort_uniq [,sort]])
+ * =====KontoCheck::suche()
  * 
  * Diese Funktion sucht alle Banken, bei denen in Name, Kurzname oder Ort das
  * angegebenen Wort <suchwort> vorkommt. Dabei wird immer nur ein einziges Wort
@@ -2482,20 +2481,20 @@ static VALUE bank_suche_volltext(int argc,VALUE* argv,VALUE self)
 }
 
 /**
- * ===<tt>KontoCheckRaw::bank_suche_multiple(suchtext[,such_cmd][,uniq])</tt>
- * =====<tt>KontoCheck::suche()</tt>
+ * ===KontoCheckRaw::bank_suche_multiple( suchtext [,such_cmd] [,uniq])
+ * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, die mehreren Kriterien entsprechen. Dabei
  * können bis zu 26 Teilsuchen definiert werden, die beliebig miteinander
  * verknüpft werden können (additiv, subtraktiv und multiplikativ).
  *
  * ====Aufruf:
- * result=bank_suche_multiple(such_string[,such_cmd][,uniq])
+ * result=bank_suche_multiple(such_string [,such_cmd] [,uniq])
  *
  * ====Parameter:
  * * such_string: Dieser Parameter gibt die Felder an, nach denen gesucht wird.
  *   Er besteht aus einem oder mehreren Suchbefehlen, die jeweils folgenden
- *   Aufbau haben: <tt>[such_index:]suchwert[@suchfeld]</tt>
+ *   Aufbau haben: [such_index:]suchwert[@suchfeld]
  *
  *   Der (optionale) Suchindex ist ein Buchstabe von a-z, mit dem das Suchfeld
  *   im Suchkommando (zweiter Parameter) referenziert werden kann. Falls er
@@ -2542,17 +2541,17 @@ static VALUE bank_suche_volltext(int argc,VALUE* argv,VALUE self)
  *   konto_check.h benutzt.
  *
  * ====Beispiele:
- * * ret=KontoCheckRaw::bank_suche_multiple("b:55000000-55100000@blz o:67000-68000@plz sparkasse","bo")
+ * * ret=KontoCheckRaw::bank_suche_multiple( "b:55000000-55100000@blz o:67000-68000@plz sparkasse","bo")
  *   Bei diesem Aufruf werden nur die beiden ersten Teilsuchen (nach BLZ und
  *   PLZ) benutzt; die Suche findet alle Banken mit einer BLZ zwischen 55000000
  *   und 55100000 im PLZ-Bereich 67000 bis 68000.
- * * ret=KontoCheckRaw::bank_suche_multiple("b:55000000-55030000@blz o:67000-68000@plz sparkasse","co")
+ * * ret=KontoCheckRaw::bank_suche_multiple( "b:55000000-55030000@blz o:67000-68000@plz sparkasse","co")
  *   Ähnlicher Aufruf wie oben, allerdings werden nur die beiden letzten Teilsuchen
  *   berücksichtigt.
- * * ret=KontoCheckRaw::bank_suche_multiple("67000-68000@plz sparda",0)
+ * * ret=KontoCheckRaw::bank_suche_multiple( "67000-68000@plz sparda",0)
  *   Dieser Aufruf gibt alle Filialen der Sparda-Bank im PLZ-Bereich 67000 bis 68000
  *   zurück.
- * * ret=KontoCheckRaw::bank_suche_multiple("skat")
+ * * ret=KontoCheckRaw::bank_suche_multiple( "skat")
  *   Dieser Aufruf ist einfach eine Volltextsuche nach der Skat-Bank. Der
  *   direkte Aufruf von bank_suche_volltext() ist intern natürlich wesentlich
  *   leichtgewichtiger, aber die Suche so auch möglich.
@@ -2599,14 +2598,32 @@ static VALUE bank_suche_multiple(int argc,VALUE* argv,VALUE self)
 
 
 /**
- * ===<tt>KontoCheckRaw::version()</tt>
- * =====<tt>KontoCheck::version()</tt>
+ * ===KontoCheckRaw::version( [mode] )
+ * =====KontoCheck::version( [mode] )
  *
- * Diese Funktion gibt den Versions-String der C-Bibliothek zurück.
+ * Diese Funktion gibt die Versions-Infos der C-Bibliothek zurück.
+ *
+ * ====Mögliche Werte für mode:
+ * * 0 bzw. ohne Parameter: Versionsstring der C-Bibliothek
+ * * 1: Versionsnummer
+ * * 2: Versionsdatum
+ * * 3: Compilerdatum und -zeit
+ * * 4: Datum der Prüfziffermethoden
+ * * 5: Datum der IBAN-Regeln
+ * * 6: Klartext-Datum der Bibliotheksversion
+ * * 7: Versionstyp (devel, beta, final)
  */
 static VALUE version_rb(int argc,VALUE* argv,VALUE self)
 {
-   return rb_str_new2(get_kto_check_version());
+   int level;
+   VALUE level_rb;
+
+   rb_scan_args(argc,argv,"01",&level_rb);
+   if(NIL_P(level_rb))
+      level=0;
+   else
+      level=NUM2INT(level_rb);
+   return rb_str_new2(get_kto_check_version_x(level));
 }
 
 /**
@@ -2616,8 +2633,8 @@ void Init_konto_check_raw()
 {
 /* 
  * This is a C/Ruby library to check the validity of German Bank Account
- * Numbers. All currently defined test methods by Deutsche Bundesbank (April
- * 2011: 00 to D8) are implemented. 
+ * Numbers. All currently defined test methods by Deutsche Bundesbank
+ * (March 2013: 00 to E0) are implemented. 
  * 
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
@@ -2625,12 +2642,12 @@ void Init_konto_check_raw()
  * 
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
- * * The function KontoCheck::konto_check(blz,kto) changed the order of
+ * * The function KontoCheck::konto_check( blz,kto) changed the order of
  *   parameters from (kto,blz) to (blz,kto)
  * 
  * Another change affects only the version 0.0.6 by jeanmartin:
  * 
- * * In KontoCheck::init(level,name,set) the order of the two first parameters
+ * * In KontoCheck::init( level,name,set) the order of the two first parameters
  *   is now free; the order is determined by the type of the variable (level is
  *   integer, filename string). 
  * 
@@ -2751,10 +2768,36 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"bank_suche_pz",bank_suche_pz,-1);
    rb_define_module_function(KontoCheck,"bank_suche_volltext",bank_suche_volltext,-1);
    rb_define_module_function(KontoCheck,"bank_suche_multiple",bank_suche_multiple,-1);
-   rb_define_module_function(KontoCheck,"version",version_rb,0);
+   rb_define_module_function(KontoCheck,"version",version_rb,-1);
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-134) Die BLZ findet sich in der Ausschlußliste für IBAN-Berechnungen */
+   rb_define_const(KontoCheck,"BLZ_BLACKLISTED",INT2FIX(BLZ_BLACKLISTED));
+      /* (-133) Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig */
+   rb_define_const(KontoCheck,"BLZ_MARKED_AS_DELETED",INT2FIX(BLZ_MARKED_AS_DELETED));
+      /* (-132) Die IBAN-Prüfsumme stimmt, es gibt allerdings einen Fehler in der eigenen IBAN-Bestimmung (wahrscheinlich falsch) */
+   rb_define_const(KontoCheck,"IBAN_CHKSUM_OK_SOMETHING_WRONG",INT2FIX(IBAN_CHKSUM_OK_SOMETHING_WRONG));
+      /* (-131) Die IBAN-Prüfsumme stimmt, eine IBAN-Berechnung ist allerdings nicht erlaubt (wahrscheinlich falsch) */
+   rb_define_const(KontoCheck,"IBAN_CHKSUM_OK_NO_IBAN_CALCULATION",INT2FIX(IBAN_CHKSUM_OK_NO_IBAN_CALCULATION));
+      /* (-130) Die IBAN-Prüfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch) */
+   rb_define_const(KontoCheck,"IBAN_CHKSUM_OK_RULE_IGNORED",INT2FIX(IBAN_CHKSUM_OK_RULE_IGNORED));
+      /* (-129) Die IBAN-Prüfsumme stimmt, es fehlt aber ein Unterkonto (wahrscheinlich falsch) */
+   rb_define_const(KontoCheck,"IBAN_CHKSUM_OK_UNTERKTO_MISSING",INT2FIX(IBAN_CHKSUM_OK_UNTERKTO_MISSING));
+      /* (-128) Die BLZ passt nicht zur angegebenen IBAN-Regel */
+   rb_define_const(KontoCheck,"IBAN_INVALID_RULE",INT2FIX(IBAN_INVALID_RULE));
+      /* (-127) Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten) */
+   rb_define_const(KontoCheck,"IBAN_AMBIGUOUS_KTO",INT2FIX(IBAN_AMBIGUOUS_KTO));
+      /* (-126) Die IBAN-Regel ist noch nicht implementiert */
+   rb_define_const(KontoCheck,"IBAN_RULE_NOT_IMPLEMENTED",INT2FIX(IBAN_RULE_NOT_IMPLEMENTED));
+      /* (-125) Die IBAN-Regel ist nicht bekannt */
+   rb_define_const(KontoCheck,"IBAN_RULE_UNKNOWN",INT2FIX(IBAN_RULE_UNKNOWN));
+      /* (-124) Für die Bankverbindung ist keine IBAN-Berechnung erlaubt */
+   rb_define_const(KontoCheck,"NO_IBAN_CALCULATION",INT2FIX(NO_IBAN_CALCULATION));
+      /* (-123) Die Bankverbindung ist mit der alten BLZ stimmig, mit der Nachfolge-BLZ nicht */
+   rb_define_const(KontoCheck,"OLD_BLZ_OK_NEW_NOT",INT2FIX(OLD_BLZ_OK_NEW_NOT));
+      /* (-122) Das Feld IBAN-Regel wurde nicht initialisiert */
+   rb_define_const(KontoCheck,"LUT2_IBAN_REGEL_NOT_INITIALIZED",INT2FIX(LUT2_IBAN_REGEL_NOT_INITIALIZED));
       /* (-121) Die Länge der IBAN für das angegebene Länderkürzel ist falsch */
    rb_define_const(KontoCheck,"INVALID_IBAN_LENGTH",INT2FIX(INVALID_IBAN_LENGTH));
       /* (-120) Keine Bankverbindung/IBAN angegeben */
@@ -2777,8 +2820,8 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"KTO_CHECK_UNSUPPORTED_COMPRESSION",INT2FIX(KTO_CHECK_UNSUPPORTED_COMPRESSION));
       /* (-111) der angegebene Wert für die Default-Kompression ist ungültig */
    rb_define_const(KontoCheck,"KTO_CHECK_INVALID_COMPRESSION_LIB",INT2FIX(KTO_CHECK_INVALID_COMPRESSION_LIB));
-      /* (-110) wahrscheinlich OK; es wurde allerdings ein (weggelassenes) Unterkonto angefügt */
-   rb_define_const(KontoCheck,"OK_UNTERKONTO_ATTACHED",INT2FIX(OK_UNTERKONTO_ATTACHED));
+      /* (-110) (nicht mehr als Fehler, sondern positive Ausgabe - Dummy für den alten Wert) */
+   rb_define_const(KontoCheck,"OK_UNTERKONTO_ATTACHED_OLD",INT2FIX(OK_UNTERKONTO_ATTACHED_OLD));
       /* (-109) Ungültige Signatur im Default-Block */
    rb_define_const(KontoCheck,"KTO_CHECK_DEFAULT_BLOCK_INVALID",INT2FIX(KTO_CHECK_DEFAULT_BLOCK_INVALID));
       /* (-108) Die maximale Anzahl Einträge für den Default-Block wurde erreicht */
@@ -3023,10 +3066,30 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"OK_UNTERKONTO_POSSIBLE",INT2FIX(OK_UNTERKONTO_POSSIBLE));
       /* (12) wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_GIVEN",INT2FIX(OK_UNTERKONTO_GIVEN));
-      /* (13) ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (40) hochgesetzt */
+      /* (13) ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt */
    rb_define_const(KontoCheck,"OK_SLOT_CNT_MIN_USED",INT2FIX(OK_SLOT_CNT_MIN_USED));
       /* (14) ok; ein(ige) Schlüssel wurden nicht gefunden */
    rb_define_const(KontoCheck,"SOME_KEYS_NOT_FOUND",INT2FIX(SOME_KEYS_NOT_FOUND));
       /* (15) Die Bankverbindung wurde nicht getestet */
    rb_define_const(KontoCheck,"LUT2_KTO_NOT_CHECKED",INT2FIX(LUT2_KTO_NOT_CHECKED));
+      /* (16) Es wurden fast alle BLocks (außer den IBAN-Regeln) geladen */
+   rb_define_const(KontoCheck,"LUT2_OK_WITHOUT_IBAN_RULES",INT2FIX(LUT2_OK_WITHOUT_IBAN_RULES));
+      /* (17) ok; für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt */
+   rb_define_const(KontoCheck,"OK_NACHFOLGE_BLZ_USED",INT2FIX(OK_NACHFOLGE_BLZ_USED));
+      /* (18) ok; die Kontonummer wurde allerdings ersetzt */
+   rb_define_const(KontoCheck,"OK_KTO_REPLACED",INT2FIX(OK_KTO_REPLACED));
+      /* (19) ok; die Bankleitzahl wurde allerdings ersetzt */
+   rb_define_const(KontoCheck,"OK_BLZ_REPLACED",INT2FIX(OK_BLZ_REPLACED));
+      /* (20) ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt */
+   rb_define_const(KontoCheck,"OK_BLZ_KTO_REPLACED",INT2FIX(OK_BLZ_KTO_REPLACED));
+      /* (21) ok; die Bankverbindung ist (ohne Test) als richtig anzusehen */
+   rb_define_const(KontoCheck,"OK_IBAN_WITHOUT_KC_TEST",INT2FIX(OK_IBAN_WITHOUT_KC_TEST));
+      /* (22) ok; für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert */
+   rb_define_const(KontoCheck,"OK_INVALID_FOR_IBAN",INT2FIX(OK_INVALID_FOR_IBAN));
+      /* (23) ok; für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt */
+   rb_define_const(KontoCheck,"OK_HYPO_REQUIRES_KTO",INT2FIX(OK_HYPO_REQUIRES_KTO));
+      /* (24) ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer */
+   rb_define_const(KontoCheck,"OK_KTO_REPLACED_NO_PZ",INT2FIX(OK_KTO_REPLACED_NO_PZ));
+      /* (25) ok; es wurde ein (weggelassenes) Unterkonto angefügt */
+   rb_define_const(KontoCheck,"OK_UNTERKONTO_ATTACHED",INT2FIX(OK_UNTERKONTO_ATTACHED));
 }

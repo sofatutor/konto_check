@@ -1,5 +1,6 @@
 /* vim: ft=c:set si:set fileencoding=iso-8859-1
  */
+#line 9 "konto_check_h.lx"
 
 /*
  * ##########################################################################
@@ -81,12 +82,19 @@
 
 #define FLESSA_KORREKTUR 1
 
-/* Zum Gueltigkeitstermin 4. Maerz 2013 erfolgen Aenderungen der
- * Pruefzifferberechnungsmethoden C6 und D1; mit dem folgenden Makro werden
- * diese Änderungen aktiviert.
- */
-#define PZ_METHODEN_2013_03_04 1
+/* IBAN-Regeln benutzen (gültig ab 3.6.2013) */
+#define USE_IBAN_RULES 1
 
+   /* Änderungen der Prüfziffermethoden zum 9. September 2013 erzwingen
+    * (bei 0 werden sie abhängig vom Datum aktiviert).
+   */ 
+#define FORCE_AENDERUNGEN_2013_09 0
+
+/* Debug-Version für iban_gen in Perl aktivieren (zur Ausgabe der benutzten
+ * Prüfziffermethode in iban_gen()). Dies ist nur möglich, falls das Makro
+ * DEBUG auf 1 gesetzt ist.
+ */
+#define PERL_IBAN_DBG 1
 
 /* Das Makro DEFAULT_ENCODING legt die Ausgabe-Kodierung für die Funktion
  * kto_check_retval2txt() und die Blocks Name, Kurzname und Ort aus der
@@ -114,7 +122,14 @@
  * # unterschiedliche Interpretationen der Berechnungsmethoden existieren.  #
  * ##########################################################################
  */
+#define BAV_ENABLE 0
+
+#if BAV_ENABLE==1
 #ifndef BAV_KOMPATIBEL
+#define BAV_KOMPATIBEL 0
+#endif
+#else
+#undef BAV_KOMPATIBEL
 #define BAV_KOMPATIBEL 0
 #endif
 
@@ -220,7 +235,7 @@
  * # aktiviert.                                                         #
  * ######################################################################
  */
-#define AWK_ADD_MICROTIME 0
+#define AWK_ADD_MICROTIME 1
 
 
 /*
@@ -298,6 +313,7 @@
 #define LUT2_OWN_IBAN                22
 #define LUT2_VOLLTEXT_TXT            23
 #define LUT2_VOLLTEXT_IDX            24
+#define LUT2_IBAN_REGEL              25
 
 #define LUT2_2_BLZ                  101
 #define LUT2_2_FILIALEN             102
@@ -323,6 +339,7 @@
 #define LUT2_2_OWN_IBAN             122
 #define LUT2_2_VOLLTEXT_TXT         123
 #define LUT2_2_VOLLTEXT_IDX         124
+#define LUT2_2_IBAN_REGEL           125
 
 #define LUT2_DEFAULT                501
 
@@ -339,6 +356,19 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define BLZ_BLACKLISTED                       -134
+#define BLZ_MARKED_AS_DELETED                 -133
+#define IBAN_CHKSUM_OK_SOMETHING_WRONG        -132
+#define IBAN_CHKSUM_OK_NO_IBAN_CALCULATION    -131
+#define IBAN_CHKSUM_OK_RULE_IGNORED           -130
+#define IBAN_CHKSUM_OK_UNTERKTO_MISSING       -129
+#define IBAN_INVALID_RULE                     -128
+#define IBAN_AMBIGUOUS_KTO                    -127
+#define IBAN_RULE_NOT_IMPLEMENTED             -126
+#define IBAN_RULE_UNKNOWN                     -125
+#define NO_IBAN_CALCULATION                   -124
+#define OLD_BLZ_OK_NEW_NOT                    -123
+#define LUT2_IBAN_REGEL_NOT_INITIALIZED       -122
 #define INVALID_IBAN_LENGTH                   -121
 #define LUT2_NO_ACCOUNT_GIVEN                 -120
 #define LUT2_VOLLTEXT_INVALID_CHAR            -119
@@ -350,7 +380,7 @@ extern const char *lut2_feld_namen[256];
 #define NO_OWN_IBAN_CALCULATION               -113
 #define KTO_CHECK_UNSUPPORTED_COMPRESSION     -112
 #define KTO_CHECK_INVALID_COMPRESSION_LIB     -111
-#define OK_UNTERKONTO_ATTACHED                -110
+#define OK_UNTERKONTO_ATTACHED_OLD            -110
 #define KTO_CHECK_DEFAULT_BLOCK_INVALID       -109
 #define KTO_CHECK_DEFAULT_BLOCK_FULL          -108
 #define KTO_CHECK_NO_DEFAULT_BLOCK            -107
@@ -476,6 +506,17 @@ extern const char *lut2_feld_namen[256];
 #define OK_SLOT_CNT_MIN_USED                    13
 #define SOME_KEYS_NOT_FOUND                     14
 #define LUT2_KTO_NOT_CHECKED                    15
+#define LUT2_OK_WITHOUT_IBAN_RULES              16
+#define OK_NACHFOLGE_BLZ_USED                   17
+#define OK_KTO_REPLACED                         18
+#define OK_BLZ_REPLACED                         19
+#define OK_BLZ_KTO_REPLACED                     20
+#define OK_IBAN_WITHOUT_KC_TEST                 21
+#define OK_INVALID_FOR_IBAN                     22
+#define OK_HYPO_REQUIRES_KTO                    23
+#define OK_KTO_REPLACED_NO_PZ                   24
+#define OK_UNTERKONTO_ATTACHED                  25
+#line 308 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
@@ -551,8 +592,8 @@ typedef struct{
  * # Dieser Parameter gibt an, wieviele Slots das Inhaltsverzeichnis einer  #
  * # LUT-Datei mindestens haben soll. Für jeden Block in der LUT-Datei wird #
  * # ein Slot im Inhaltsverzeichnis benötigt; bei einer LUT-Datei mit allen #
- * # Einträgen (Level 9) sind das 19 Slots, falls zwei Datensätze in der    #
- * # Datei gehalten werden sollen, 38 (inklusive Indexblocks).              #
+ * # Einträgen (Level 9) sind das 23 Slots, falls zwei Datensätze in der    #
+ * # Datei gehalten werden sollen, 46 (inklusive Indexblocks).              #
  * #                                                                        #
  * # Das Slotverzeichnis ist eine relativ einfache Datenstruktur; es        #
  * # enthält für jeden Slot nur drei 4 Byte-Integers (Typ, Offset und       #
@@ -567,7 +608,7 @@ typedef struct{
  * #                                                                        #
  * ##########################################################################
  */
-#define SLOT_CNT_MIN 40
+#define SLOT_CNT_MIN 50
 
 /*
  * ##########################################################################
@@ -753,6 +794,7 @@ DLL_EXPORT int get_lut_info_t(char **info,char *lut_name,KTO_CHK_CTX *ctx);
  * ######################################################################
  */
 DLL_EXPORT const char *get_kto_check_version(void);
+DLL_EXPORT const char *get_kto_check_version_x(int mode);
 
 /*
  * ######################################################################
@@ -855,6 +897,8 @@ DLL_EXPORT int lut_loeschung_i(int b,int zweigstelle,int *retval);
 DLL_EXPORT int lut_nachfolge_blz(char *b,int zweigstelle,int *retval);
 DLL_EXPORT int lut_nachfolge_blz_i(int b,int zweigstelle,int *retval);
 DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int set);
+DLL_EXPORT int lut_iban_regel(char *b,int zweigstelle,int *retval);
+DLL_EXPORT int lut_iban_regel_i(int b,int zweigstelle,int *retval);
 
 /*
  * ######################################################################
@@ -918,6 +962,8 @@ DLL_EXPORT int lut_cleanup(void);
 DLL_EXPORT int iban_check(char *iban,int *retval);
 DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto);
 DLL_EXPORT char *iban_gen(char *kto,char *blz,int *retval);
+DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,char *kto2,int *retval);
+DLL_EXPORT char *iban_bic_gen1(char *blz,char *kto,const char **bicp,int *retval);
 DLL_EXPORT int ipi_gen(char *zweck,char *dst,char *papier);
 DLL_EXPORT int ipi_check(char *zweck);
 
