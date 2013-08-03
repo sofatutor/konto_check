@@ -2772,7 +2772,7 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
-      /* (-134) Die BLZ findet sich in der Ausschlußliste für IBAN-Berechnungen */
+      /* (-134) Die BLZ findet sich in der Ausschlussliste für IBAN-Berechnungen */
    rb_define_const(KontoCheck,"BLZ_BLACKLISTED",INT2FIX(BLZ_BLACKLISTED));
       /* (-133) Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig */
    rb_define_const(KontoCheck,"BLZ_MARKED_AS_DELETED",INT2FIX(BLZ_MARKED_AS_DELETED));
