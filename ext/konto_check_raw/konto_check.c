@@ -2588,7 +2588,7 @@ DLL_EXPORT int lut_dir_dump_str(char *lutname,char **dptr)
       RETURN(ERROR_MALLOC);
    }
    *dptr=ptr;
-   sprintf(ptr," Slot retval   Typ   Inhalt               Laenge   kompr.   Verh.    Adler32  Test\n");
+   sprintf(ptr," Slot retval   Typ   Inhalt                  Laenge   kompr.   Verh.    Adler32  Test\n");
    while(*ptr)ptr++;
    for(len1=len2=0,i=slot_cnt=1;i<=(int)slot_cnt;i++){
       retval=lut_dir(lut,i,&slot_cnt,&typ,&len,&compressed_len,&adler,NULL,NULL);
@@ -2597,11 +2597,11 @@ DLL_EXPORT int lut_dir_dump_str(char *lutname,char **dptr)
          RETURN(retval);
       }
       if(typ)
-         sprintf(ptr,"%2d/%2u %3d %8d   %-17s %8u %8u%7.1f%%  0x%08x   %s\n",
+         sprintf(ptr,"%2d/%2u %3d %8d   %-20s %8u %8u%7.1f%%  0x%08x   %s\n",
                i,slot_cnt,retval,typ,typ<400?lut_block_name2[typ]:"(Userblock)",
                len,compressed_len,len?(double)compressed_len/len*100:0,adler,retval==OK?"OK":"FEHLER");
       else
-         sprintf(ptr,"%2d/%2u   1        0   leer                     0        0     -    0x00000000   OK\n",i,slot_cnt);
+         sprintf(ptr,"%2d/%2u %3d %8d   %-20s %8u %8u%7s   0x%08x   %s\n",i,slot_cnt,1,0,"   (ungenutzt)",0,0,"-",0,"OK");
       while(*ptr)ptr++;
       len1+=len;
       len2+=compressed_len;
