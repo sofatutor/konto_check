@@ -110,6 +110,8 @@
     
     <li><a href="#method-c-bank_valid">::bank_valid</a>
     
+    <li><a href="#method-c-ci_check">::ci_check</a>
+    
     <li><a href="#method-c-current_lutfile_name">::current_lutfile_name</a>
     
     <li><a href="#method-c-dump_lutfile">::dump_lutfile</a>
@@ -947,7 +949,7 @@ lut_suche_multiple() zur Suche nach mehreren Worten</p>
       
         <dt id="MISSING_PARAMETER">MISSING_PARAMETER
         
-        <dd class="description"><p>(-69) Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto)</p>
+        <dd class="description"><p>(-69) Für die aufgerufene Funktion fehlt ein notwendiger Parameter</p>
         
       
         <dt id="NOT_DEFINED">NOT_DEFINED
@@ -2573,6 +2575,61 @@ mit dem gegebenen Index existiert.</p>
 
         
       </div><!-- bank_valid-method -->
+
+    
+      <div id="method-c-ci_check" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ci_check</span><span
+            class="method-args">(p1)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-ci_check-label-KontoCheckRaw%3A%3Aci_check%28+ci%29"><a href="KontoCheckRaw.html#method-c-ci_check">::ci_check</a>( ci)</h3>
+
+<h5 id="method-c-ci_check-label-KontoCheck%3A%3Aci_check%28+ci%29"><a href="KontoCheck.html#method-c-ci_check">KontoCheck.ci_check</a>( ci)</h5>
+
+<p>Diese Funktion testet eine Gläubiger-Identifikationsnummer (Credit
+Identifier, ci)</p>
+
+<h4 id="method-c-ci_check-label-Aufruf%3A">Aufruf:</h4>
+
+<p>ret=<a href="KontoCheckRaw.html#method-c-ci_check">::ci_check</a>( ci)</p>
+
+<h4 id="method-c-ci_check-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>ci: der CI, der getestet werden soll</p>
+</li></ul>
+
+<h4 id="method-c-ci_check-label-M%C3%B6gliche+R%C3%BCckgabewerte+f%C3%BCr+den+Test%3A">Mögliche Rückgabewerte für den Test:</h4>
+<ul><li>
+<p>0  (<a href="KontoCheckRaw.html#FALSE">FALSE</a>)                  
+"falsch"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                      "ok"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="ci_check-source">
+            <pre>static VALUE ci_check_rb(int argc,VALUE* argv,VALUE self)
+{
+   char ci[128];
+
+   get_params(argc,argv,ci,NULL,NULL,NULL,3);
+   return INT2FIX(ci_check(ci));
+}</pre>
+          </div><!-- ci_check-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- ci_check-method -->
 
     
       <div id="method-c-current_lutfile_name" class="method-detail ">

@@ -94,6 +94,8 @@
     
     <li><a href="#method-c-bank_valid-3F">::bank_valid?</a>
     
+    <li><a href="#method-c-ci_check">::ci_check</a>
+    
     <li><a href="#method-c-current_init_level">::current_init_level</a>
     
     <li><a href="#method-c-current_lutfile_name">::current_lutfile_name</a>
@@ -879,6 +881,46 @@ Der Rückgabewert ist nur true oder false.</p>
       </div><!-- bank_valid-3F-method -->
 
     
+      <div id="method-c-ci_check" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ci_check</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-ci_check-label-KontoCheck%3A%3Aci_check%28+ci%29"><a href="KontoCheck.html#method-c-ci_check">::ci_check</a>( ci)</h3>
+
+<h5 id="method-c-ci_check-label-KontoCheckRaw%3A%3Aci_check%28+ci%29"><a href="KontoCheckRaw.html#method-c-ci_check">KontoCheckRaw.ci_check</a>( ci)</h5>
+
+<p>Diese Funktion testet eine Gläubiger-Identifikationsnummer (Credit
+Identifier, ci)</p>
+
+<p>Mögliche Rückgabewerte sind:</p>
+
+<pre>0  (FALSE)                      &quot;falsch&quot;
+1  (OK)                         &quot;ok&quot;</pre>
+          
+
+          
+          <div class="method-source-code" id="ci_check-source">
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 832</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ci_check</span>(*<span class="ruby-identifier">args</span>)
+  <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">ci_check</span>(*<span class="ruby-identifier">args</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- ci_check-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- ci_check-method -->
+
+    
       <div id="method-c-current_init_level" class="method-detail ">
         
         <div class="method-heading">
@@ -1387,7 +1429,7 @@ kann man zusätzlich noch den Status der Kontenprüfung abfragen.</p>
 
           
           <div class="method-source-code" id="iban_check-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 838</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 852</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">iban_check</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">iban_check</span>(*<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1449,7 +1491,7 @@ ermitteln.</p>
 
           
           <div class="method-source-code" id="iban_gen-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 870</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 884</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">iban_gen</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">iban_gen</span>(*<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1596,7 +1638,7 @@ Initialisierung nicht alle Blocks in der LUT-Datei enthalten.</p>
 
           
           <div class="method-source-code" id="ipi_check-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 895</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 909</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ipi_check</span>(<span class="ruby-identifier">zweck</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">ipi_check</span>(<span class="ruby-identifier">zweck</span>)<span class="ruby-operator">&gt;</span><span class="ruby-value">0</span><span class="ruby-operator">?</span><span class="ruby-keyword">true</span><span class="ruby-operator">:</span><span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1638,7 +1680,7 @@ einen Statuscode zurück, der etwas nähere Infos im Fehlerfall enthält.</p>
 
           
           <div class="method-source-code" id="ipi_gen-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 885</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 899</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ipi_gen</span>(<span class="ruby-identifier">zweck</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">ipi_gen</span>(<span class="ruby-identifier">zweck</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -2402,7 +2444,7 @@ lut_suche_multiple() implementiert.</p>
 
           
           <div class="method-source-code" id="suche-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 962</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 976</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">suche</span>(<span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">search_cmd</span>=<span class="ruby-identifier">value</span>=<span class="ruby-identifier">key</span>=<span class="ruby-string">&quot;&quot;</span>
   <span class="ruby-identifier">sort</span>=<span class="ruby-identifier">uniq</span>=<span class="ruby-value">1</span>
@@ -2628,7 +2670,7 @@ href="KontoCheck.html#method-c-konto_check_pz-3F">::konto_check_pz?</a></p>
 
           
           <div class="method-source-code" id="version-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1001</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1015</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">version</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">version</span>(*<span class="ruby-identifier">args</span>)
 <span class="ruby-keyword">end</span></pre>
