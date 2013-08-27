@@ -819,6 +819,20 @@ module KontoCheck
       KontoCheckRaw::iban2bic(*args).first
     end
 
+#===KontoCheck::ci_check( ci)
+#=====KontoCheckRaw::ci_check( ci)
+#
+#Diese Funktion testet eine Gläubiger-Identifikationsnummer (Credit Identifier, ci)
+#
+#Mögliche Rückgabewerte sind:
+#
+#      0  (FALSE)                      "falsch"
+#      1  (OK)                         "ok"
+
+    def ci_check(*args)
+      KontoCheckRaw::ci_check(*args)
+    end
+
 #===KontoCheck::iban_check( iban)
 #=====KontoCheckRaw::iban_check(iban)
 #

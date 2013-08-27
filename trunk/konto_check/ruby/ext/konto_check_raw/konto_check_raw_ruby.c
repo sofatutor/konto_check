@@ -312,7 +312,7 @@ static void get_params(int argc,VALUE* argv,char *arg1s,char *arg2s,char *arg3s,
          rb_scan_args(argc,argv,"20",&arg1_rb,&arg2_rb);
          break;
 
-      case 3:  /* ein notwendiger Parameter (für iban_check) */
+      case 3:  /* ein notwendiger Parameter (für iban_check und ci_check) */
          rb_scan_args(argc,argv,"10",&arg1_rb);
          maxlen=128;
          break;
@@ -1490,6 +1490,30 @@ static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
    else
       iban_rb=papier_rb=Qnil;
    return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,regel);
+}
+
+/**
+ * ===KontoCheckRaw::ci_check( ci)
+ * =====KontoCheck::ci_check( ci)
+ * Diese Funktion testet eine Gläubiger-Identifikationsnummer (Credit Identifier, ci)
+ *
+ * ====Aufruf:
+ * ret=KontoCheckRaw::ci_check( ci)
+ *
+ * ====Parameter:
+ * * ci: der CI, der getestet werden soll
+ *
+ * ====Mögliche Rückgabewerte für den Test:
+ * *     0  (FALSE)                   "falsch"
+ * *     1  (OK)                      "ok"
+ *
+ */
+static VALUE ci_check_rb(int argc,VALUE* argv,VALUE self)
+{
+   char ci[128];
+
+   get_params(argc,argv,ci,NULL,NULL,NULL,3);
+   return INT2FIX(ci_check(ci));
 }
 
 /**
@@ -2754,6 +2778,7 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"retval2html",retval2html_rb,1);
    rb_define_module_function(KontoCheck,"retval2utf8",retval2utf8_rb,1);
    rb_define_module_function(KontoCheck,"generate_lutfile",generate_lutfile_rb,-1);
+   rb_define_module_function(KontoCheck,"ci_check",ci_check_rb,1);
    rb_define_module_function(KontoCheck,"iban_check",iban_check_rb,-1);
    rb_define_module_function(KontoCheck,"iban2bic",iban2bic_rb,-1);
    rb_define_module_function(KontoCheck,"iban_gen",iban_gen_rb,-1);
@@ -2902,7 +2927,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"IPI_INVALID_LENGTH",INT2FIX(IPI_INVALID_LENGTH));
       /* (-70) Es wurde eine LUT-Datei im Format 1.0/1.1 geladen */
    rb_define_const(KontoCheck,"LUT1_FILE_USED",INT2FIX(LUT1_FILE_USED));
-      /* (-69) Bei der Kontoprüfung fehlt ein notwendiger Parameter (BLZ oder Konto) */
+      /* (-69) Für die aufgerufene Funktion fehlt ein notwendiger Parameter */
    rb_define_const(KontoCheck,"MISSING_PARAMETER",INT2FIX(MISSING_PARAMETER));
       /* (-68) Die Funktion iban2bic() arbeitet nur mit deutschen Bankleitzahlen */
    rb_define_const(KontoCheck,"IBAN2BIC_ONLY_GERMAN",INT2FIX(IBAN2BIC_ONLY_GERMAN));
