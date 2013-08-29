@@ -9392,6 +9392,12 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          if(pz)pz=10-pz;
          CHECK_PZX8;
 
+            /* falls die beiden ersten Stellen der Kontonummer nicht 00 sind,
+             * kann keine Unterkontonummer weggelassen sein; in dem Fall FALSE
+             * zur¸ckgeben.
+             */
+         if(kto[0]!='0' || kto[1]!='0')return FALSE;
+
 #if DEBUG>0
       case 2013:
          if(retvals){
@@ -11231,7 +11237,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * ######################################################################
  */
 
-#line 11280 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11286 "ruby/ext/konto_check_raw/konto_check.lxx"
       case 51:
          if(*(kto+2)=='9'){   /* Ausnahme */
 
@@ -11493,8 +11499,8 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          else
             return FALSE;
 
-#line 11494 "ruby/ext/konto_check_raw/konto_check.lxx"
-#line 11496 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11500 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11502 "ruby/ext/konto_check_raw/konto_check.lxx"
 /*  Berechnung nach der Methode 53 +ßßß4 */
 /*
  * ######################################################################
@@ -11794,7 +11800,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # bewerten.                                                          #
  * ######################################################################
  */
-#line 11766 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11772 "ruby/ext/konto_check_raw/konto_check.lxx"
       case 57:
 #if DEBUG>0
       case 1057:  /* die Untermethoden werden in einem eigenen switch abgearbeitet, daher alle hier zusammen */
@@ -19290,7 +19296,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          return NOT_IMPLEMENTED;
    }
 }
-#line 18089 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18095 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /*
  * ######################################################################
@@ -19412,7 +19418,7 @@ DLL_EXPORT int kto_check_pz(char *pz,char *kto,char *blz)
  * ###########################################################################
  */
 
-#line 18211 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18217 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
 {
    char *ptr,*dptr,xkto[32];
@@ -19441,7 +19447,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
    switch(pz_methode){
       case 13:
             /* Methode 13a */
-         if(kto[0]!='0' || kto[1]!='0')*uk_cnt=-1; /* Unterkonto angegeben */
+         if(kto[0]!='0' || kto[1]!='0')*uk_cnt=-1; /* 9- oder 10-stelliges Konto: Unterkonto angegeben */
          pz =(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
          if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
          if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
@@ -19449,7 +19455,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
          MOD_10_80;   /* pz%=10 */
          if(pz)pz=10-pz;
          CHECK_PZX8;
-         if(*uk_cnt==-1)return FALSE;   /* Methode 13b nur falls 1. und 2. Stelle '0' sind */
+         if(*uk_cnt==-1)return FALSE;   /* Methode 13b nur mˆglich, falls 1. und 2. Stelle '0' sind */
 
             /* Methode 13b: 2-stelliges Unterkonto weggelassen */
          *uk_cnt=2;
@@ -19752,7 +19758,7 @@ DLL_EXPORT int kto_check_blz_dbg(char *blz,char *kto,RETVAL *retvals)
  * # Copyright (C) 2007 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
  */
-#line 18551 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18557 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int kto_check_pz_dbg(char *pz,char *kto,char *blz,RETVAL *retvals)
 {
    int untermethode,pz_methode;
@@ -20097,7 +20103,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Pr¸fziffer";
       case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angef¸gt";
       default: return "ung¸ltiger R¸ckgabewert";
-#line 18735 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18741 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20275,7 +20281,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine PrÅfziffer";
       case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angefÅgt";
       default: return "ungÅltiger RÅckgabewert";
-#line 18752 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18758 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20453,7 +20459,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Pr&uuml;fziffer";
       case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angef&uuml;gt";
       default: return "ung&uuml;ltiger R&uuml;ckgabewert";
-#line 18769 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18775 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20631,7 +20637,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Pr√ºfziffer";
       case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angef√ºgt";
       default: return "ung√ºltiger R√ºckgabewert";
-#line 18786 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18792 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20809,7 +20815,7 @@ DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "OK_KTO_REPLACED_NO_PZ";
       case OK_UNTERKONTO_ATTACHED: return "OK_UNTERKONTO_ATTACHED";
       default: return "UNDEFINED_RETVAL";
-#line 18803 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18809 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20865,7 +20871,7 @@ DLL_EXPORT int get_lut_info2_b(char *lutname,int *version,char **prolog_p,char *
    }
    else
       **user_info_p=0;
-#line 18844 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18850 "ruby/ext/konto_check_raw/konto_check.lxx"
    FREE(prolog);
    return OK;
 }
@@ -21151,7 +21157,7 @@ DLL_EXPORT int dump_lutfile(char *outputname,UINT4 *required)
       default:
          break;
    }
-#line 19069 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 19075 "ruby/ext/konto_check_raw/konto_check.lxx"
    fputc('\n',out);
    while(--i)fputc('=',out);
    fputc('\n',out);
@@ -21514,7 +21520,7 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
  * ###########################################################################
  */
 
-#line 19432 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 19438 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT char *iban_gen(char *blz,char *kto,int *retval)
 {
    return iban_bic_gen(blz,kto,NULL,NULL,NULL,retval);
@@ -22251,7 +22257,7 @@ DLL_EXPORT int ipi_check(char *zweck)
  * # Copyright (C) 2009,2011 Michael Plugge <m.plugge@hs-mannheim.de>        #
  * ###########################################################################
  */
-#line 20169 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 20175 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion volltext_zeichen() +ßßß2 */
 /* Diese Funktion gibt f¸r Zeichen die bei der Volltextsuche g¸ltig sind
@@ -23084,7 +23090,7 @@ static int qcmp_sortc(const void *ap,const void *bp)
       return a-b;
 }
 
-#line 21002 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21008 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion qcmp_bic() +ßßß3 */
 static int qcmp_bic(const void *ap,const void *bp)
@@ -23176,7 +23182,7 @@ static int qcmp_plz(const void *ap,const void *bp)
    else 
       return a-b;
 }
-#line 21017 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21023 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion init_blzf() +ßßß2
  * Diese Funktion initialisiert das Array mit den Bankleitzahlen f¸r alle
@@ -23244,7 +23250,7 @@ DLL_EXPORT int konto_check_idx2blz(int idx,int *zweigstelle,int *retval)
 }
 
 /* Funktion suche_int1() +ßßß2 */
-#line 21085 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21091 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int suche_int1(int a1,int a2,int *anzahl,int **start_idx,int **zweigstellen_base,int **blz_base,
       int **base_name,int **base_sort,int(*cmp)(const void *, const void *),int cnt,int such_idx)
 {
@@ -23295,7 +23301,7 @@ static int suche_int1(int a1,int a2,int *anzahl,int **start_idx,int **zweigstell
 }
 
 /* Funktion suche_int2() +ßßß2 */
-#line 21136 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21142 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int suche_int2(int a1,int a2,int *anzahl,int **start_idx,int **zweigstellen_base,int **blz_base,
       int **base_name,int **base_sort,int(*cmp)(const void *, const void *),int such_idx,int pz_suche)
 {
@@ -23853,7 +23859,7 @@ static int cmp_suche_sort(const void *ap,const void *bp)
 DLL_EXPORT int lut_suche_sort1(int anzahl,int *blz_base,int *zweigstellen_base,int *idx,int *anzahl_o,int **idx_op,int **cnt_op,int uniq)
 {
    int i,j,last_idx,*idx_a,*cnt_o;
-#line 21695 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21701 "ruby/ext/konto_check_raw/konto_check.lxx"
 
    if(idx_op)*idx_op=NULL;
    if(cnt_op)*cnt_op=NULL;
@@ -24139,7 +24145,7 @@ DLL_EXPORT int lut_suche_plz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int2(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&plz,&sort_plz,qcmp_plz,LUT2_PLZ_SORT,0);
 }
 
-#line 21955 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21961 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion kto_check_set_default() und kto_check_set_default_bin() +ßßß1 */
 /* ###########################################################################
@@ -25162,7 +25168,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       default: return "??";
    }
 }
-#line 22621 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 22627 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion lut_keine_iban_berechnung() +ßßß1 */
 /*
