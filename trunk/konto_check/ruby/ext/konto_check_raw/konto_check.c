@@ -45,12 +45,13 @@
  * # im Internet herunterladen.                                             #
  * ##########################################################################
  */
+#line 326 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.1 (development)"
+#define VERSION "5.1 (beta)"
 #endif
-#define VERSION_DATE "2013-08-26"
+#define VERSION_DATE "2013-09-04"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -239,7 +240,7 @@ static int convert_encoding(char **data,UINT4 *len);
 #define free(ptr) efree(ptr)
 #endif
 
-#line 758 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 759 "ruby/ext/konto_check_raw/konto_check.lxx"
 
    /* Testwert zur Markierung ungültiger Ziffern im BLZ-String (>8 Stellen) */
 #define BLZ_FEHLER 100000000
@@ -375,7 +376,7 @@ static int convert_encoding(char **data,UINT4 *len);
     */
 #define CHECK_RETVAL(fkt) do{if((retval=fkt)!=OK)goto fini;}while(0)     /* es muß noch aufgeräumt werden, daher goto */
 #define CHECK_RETURN(fkt) do{if((retval=fkt)!=OK)return retval;}while(0)
-#line 899 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 900 "ruby/ext/konto_check_raw/konto_check.lxx"
 
    /* einige Makros zur Umwandlung zwischen unsigned int und char */
 #define UCP  (unsigned char*)
@@ -495,7 +496,7 @@ int pz=-777;
 
 #define E_START(x)
 #define E_END(x)
-#line 1024 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1025 "ruby/ext/konto_check_raw/konto_check.lxx"
 
    /* Variable für die Methoden 27, 29 und 69 */
 static const int m10h_digits[4][10]={
@@ -522,7 +523,7 @@ static const int lut_name_cnt=sizeof(default_lutname)/sizeof(char *);
 static char *lut2_block_data[400],*current_info;
 static int lut2_block_status[400],lut2_block_len[400],lut2_cnt,lut2_cnt_hs;
 static UINT4 current_info_len,current_v1,current_v2;
-static int lut_id_status,lut_init_level,current_lut_set,current_lut_level;
+static int lut_id_status,lut_init_level,current_lut_set,current_lut_level,lut_init_level_tmp=-1;
 static char lut_id[36],*current_lutfile;
 
 
@@ -918,7 +919,7 @@ static int create_lutfile_int(char *name, char *prolog, int slots,FILE **lut)
  * ###########################################################################
  */
 
-#line 1447 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1448 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int write_lut_block(char *lutname,UINT4 typ,UINT4 len,char *data)
 {
    char buffer[SLOT_BUFFER],*ptr;
@@ -956,7 +957,7 @@ DLL_EXPORT int write_lut_block(char *lutname,UINT4 typ,UINT4 len,char *data)
  * #############################################################################
  */
 
-#line 1485 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1486 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int write_lut_block_int(FILE *lut,UINT4 typ,UINT4 len,char *data)
 {
    char buffer[SLOT_BUFFER],*ptr,*cptr;
@@ -1092,7 +1093,7 @@ static int write_lut_block_int(FILE *lut,UINT4 typ,UINT4 len,char *data)
  * ###########################################################################
  */
 
-#line 1621 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1622 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int read_lut_block(char *lutname, UINT4 typ,UINT4 *blocklen,char **data)
 {
    int retval;
@@ -1115,7 +1116,7 @@ DLL_EXPORT int read_lut_block(char *lutname, UINT4 typ,UINT4 *blocklen,char **da
  * ###########################################################################
  */
 
-#line 1645 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1646 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int read_lut_slot(char *lutname,int slot,UINT4 *blocklen,char **data)
 {
    int retval;
@@ -1137,7 +1138,7 @@ DLL_EXPORT int read_lut_slot(char *lutname,int slot,UINT4 *blocklen,char **data)
  * ###########################################################################
  */
 
-#line 1668 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1669 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int read_lut_block_int(FILE *lut,int slot,int typ,UINT4 *blocklen,char **data)
 {
    char buffer[SLOT_BUFFER],*ptr,*sbuffer,*dbuffer;
@@ -1227,7 +1228,7 @@ static int read_lut_block_int(FILE *lut,int slot,int typ,UINT4 *blocklen,char **
             FREE(sbuffer);
             RETURN(ERROR_MALLOC);
          }
-#line 1773 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 1774 "ruby/ext/konto_check_raw/konto_check.lxx"
 
          if(fread(sbuffer,1,compressed_len,lut)<compressed_len){
             FREE(sbuffer);
@@ -2733,7 +2734,7 @@ DLL_EXPORT int lut_info_b(char *lut_name,char **info1,char **info2,int *valid1,i
  * ###########################################################################
  */
 
-#line 3279 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 3280 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int lut_info(char *lut_name,char **info1,char **info2,int *valid1,int *valid2)
 {
    char *ptr,*ptr1,buffer[128];
@@ -2821,7 +2822,7 @@ DLL_EXPORT int lut_info(char *lut_name,char **info1,char **info2,int *valid1,int
 
       /* Infoblocks lesen: 1. Infoblock */
    if((ret=read_lut_block_int(in,0,LUT2_INFO,&cnt,&ptr))==OK){
-#line 3368 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 3369 "ruby/ext/konto_check_raw/konto_check.lxx"
       *(ptr+cnt)=0;
       if(valid1){
          for(ptr1=ptr,v1=v2=0;*ptr1 && *ptr1!='\n' && !isdigit(*ptr1);ptr1++);
@@ -2869,7 +2870,7 @@ DLL_EXPORT int lut_info(char *lut_name,char **info1,char **info2,int *valid1,int
 
       /* Infoblocks lesen: 2. Infoblock */
    if((ret=read_lut_block_int(in,0,LUT2_2_INFO,&cnt,&ptr))==OK){
-#line 3417 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 3418 "ruby/ext/konto_check_raw/konto_check.lxx"
       *(ptr+cnt)=0;
       if(valid2){
          for(ptr1=ptr,v1=v2=0;*ptr1 && *ptr1!='\n' && !isdigit(*ptr1);ptr1++);
@@ -3088,7 +3089,7 @@ DLL_EXPORT int copy_lutfile(char *old_name,char *new_name,int new_slots)
    qsort(slotdir,slot_cnt,sizeof(int),cmp_int);
    for(last_slot=-1,i=0;i<(int)slot_cnt;i++)if((typ=slotdir[i]) && typ!=(UINT4)last_slot){
       read_lut_block_int(lut1,0,typ,&len,&data);
-#line 3637 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 3638 "ruby/ext/konto_check_raw/konto_check.lxx"
       write_lut_block_int(lut2,typ,len,data);
       FREE(data);
       last_slot=typ;
@@ -3132,7 +3133,7 @@ DLL_EXPORT int kto_check_init_p(char *lut_name,int required,int set,int incremen
    int i,j;
    int *rq1,rq2[MAX_SLOTS+1];
 
-   current_lut_level=lut_init_level=required;
+   lut_init_level_tmp=required;
    switch(required){
       case 0:  rq1=lut_set_0; break;
       case 1:  rq1=lut_set_1; break;
@@ -3317,7 +3318,7 @@ DLL_EXPORT int lut_init(char *lut_name,int required,int set)
  * # Copyright (C) 2008 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
  */
-#line 3866 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 3867 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,int incremental)
 {
    char *ptr,*dptr,*data,*eptr,*prolog,*info,*user_info,*hs=NULL,*info1,*info2,*ci=NULL,name_buffer[LUT_PATH_LEN];
@@ -3339,6 +3340,9 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
       if(!(init_status&1))init_atoi_table();
       init_status=1; /* init_status löschen, nur Variablen */
    }
+      /* current_lut_level und lut_init_level werden in lut_cleanup() aufgeräumt, deshalb werden sie erst hier gesetzt. */
+   if(lut_init_level_tmp>=0)current_lut_level=lut_init_level=lut_init_level_tmp;
+   lut_init_level_tmp=-1;
 
    INITIALIZE_WAIT;     /* zunächst testen, ob noch eine andere Initialisierung läuft (z.B. in einem anderen Thread) */
    init_in_progress=1;  /* Lockflag für Tests und Initialierung setzen */
@@ -3346,7 +3350,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
    usleep(10);
    if(init_status&16){
       init_in_progress=0;        /* Flag für Aufräumaktion rücksetzen */
-      RETURN(INIT_FATAL_ERROR);   /* Aufräumaktion parallel gelaufen; alles hinwerfen */
+      RETURN(INIT_FATAL_ERROR);   /* Aufräumaktion parallel gelaufen; alles hinwerfen (aktueller Status unklar) */
    }
 
       /* falls keine LUT-Datei angegeben wurde, die Suchpfade und Defaultnamen durchprobieren */
@@ -3469,9 +3473,11 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
       current_info_len=current_v1=current_v2=0;
       if(!set)set=1; /* kein Gültigkeitsdatum vorhanden, defaultmäßig primären Datensatz nehmen */
    }
-   if(current_lutfile)FREE(current_lutfile);
-   if(!(current_lutfile=malloc(strlen(lut_name)+10)))return ERROR_MALLOC;
-   strcpy(current_lutfile,lut_name);
+   if(!incremental){ /* der folgende Teil darf nicht bei incremental gemacht werden, da dieses u.U. current_lutfile benutzt */
+      if(current_lutfile)FREE(current_lutfile);
+      if(!(current_lutfile=malloc(strlen(lut_name)+10)))return ERROR_MALLOC;
+      strcpy(current_lutfile,lut_name);
+   }
    current_lut_set=set;
 
       /* zunächst muß zwingend die die BLZ und die Anzahl der Filialen
@@ -4050,7 +4056,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
  * ###########################################################################
  */
 
-#line 4604 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 4610 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT const char *current_lutfile_name(int *set,int *level,int *retval)
 {
    if(init_status<7 || !current_lutfile){
@@ -4760,13 +4766,12 @@ static int iban_init(void)
  * ###########################################################################
  */
 
-#line 5314 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 5320 "ruby/ext/konto_check_raw/konto_check.lxx"
 #if USE_IBAN_RULES
 static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_version)
 {
    char tmp_buffer[16];
-   int regel,version,b,b_neu,k1,k2,k3,not_ok,i,ret,loesch,ret_ok;
-   int idx,pz_methode,uk_cnt;
+   int regel,version,b,b_neu,k1,k2,k3,not_ok,i,ret,loesch,idx,pz_methode,uk_cnt;
 
       /* prüfen, ob bereits initialisiert wurde */
    INITIALIZE_WAIT;
@@ -4904,6 +4909,9 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
              * der Commerzbank bekommen COBADEFFXXX.
              */
          if(blz[3]=='4' && strcmp(lut_name(blz,0,NULL),"comdirect bank"))*bicp="COBADEFFXXX";
+
+            /* BLZs ohne Prüfzifferberechnung */
+         if(pz_methode==9)return OK_NO_CHK;
 
             /* Kontenkreis ohne IBAN-Berechnung (für etliche BLZs) */
          if(k1==9 && (k2>=98000000 && k2<=99499999))switch(b){
@@ -5045,8 +5053,11 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
           * einige Spendenkonten müssen auch noch Unterkonto 00   
           * angehängt bekommen, deshalb gibt es in diesem switch()
           * noch kein return :-(
+          *
+          * Seit Version 1.4 der Regel-Dokumentation der Commerzbank werden
+          * Unterkonten in den Spendenkonten berücksichtigt, daher sind
+          * return-Befehle (endlich) möglich.
           */                                                    
-         ret_ok=OK;
          switch(b){
             case 10040000: 
                if(!k1 && k2==7878){strcpy(kto,"0267878700"); return OK_KTO_REPLACED;}
@@ -5054,32 +5065,32 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
             case 10080000:
                if(!k1)switch(k2){
-                  case    1987: strcpy(kto,"0928127700"); ret_ok=OK_KTO_REPLACED; break;
-                  case    8888: strcpy(kto,"0928126501"); ret_ok=OK_KTO_REPLACED; break;
-                  case 1234567: strcpy(kto,"0920192001"); ret_ok=OK_KTO_REPLACED; break;
+                  case    1987: strcpy(kto,"0928127700"); return OK_KTO_REPLACED;
+                  case    8888: strcpy(kto,"0928126501"); return OK_KTO_REPLACED;
+                  case 1234567: strcpy(kto,"0920192001"); return OK_KTO_REPLACED;
                }
                break;
 
             case 12080000:
                if(!k1)switch(k2){
-                  case   212121: strcpy(kto,"4050462200"); ret_ok=OK_KTO_REPLACED; break;
-                  case  7654321: strcpy(kto,"0144000700"); ret_ok=OK_KTO_REPLACED; break;
-                  case 12121212: strcpy(kto,"4101725100"); ret_ok=OK_KTO_REPLACED; break;
+                  case   212121: strcpy(kto,"4050462200"); return OK_KTO_REPLACED;
+                  case  7654321: strcpy(kto,"0144000700"); return OK_KTO_REPLACED;
+                  case 12121212: strcpy(kto,"4101725100"); return OK_KTO_REPLACED;
                }
                break;
 
             case 16080000: 
                if(!k1){
-                  if(k2== 123456){strcpy(kto,"0012345600"); ret_ok=OK_KTO_REPLACED; break;}
-                  if(k2==3030400){strcpy(kto,"4205227110"); ret_ok=OK_KTO_REPLACED; break;}
+                  if(k2== 123456){strcpy(kto,"0012345600"); return OK_KTO_REPLACED;}
+                  if(k2==3030400){strcpy(kto,"4205227110"); return OK_KTO_REPLACED;}
                }
                break;
 
             case 20080000:
                if(!k1)switch(k2){
-                  case   2222: strcpy(kto,"0903927200"); ret_ok=OK_KTO_REPLACED; break;
-                  case 505050: strcpy(kto,"0500100600"); ret_ok=OK_KTO_REPLACED; break;
-                  case 666666: strcpy(kto,"0900732500"); ret_ok=OK_KTO_REPLACED; break;
+                  case   2222: strcpy(kto,"0903927200"); return OK_KTO_REPLACED;
+                  case 505050: strcpy(kto,"0500100600"); return OK_KTO_REPLACED;
+                  case 666666: strcpy(kto,"0900732500"); return OK_KTO_REPLACED;
                }
                break;
 
@@ -5088,28 +5099,28 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 26580070: 
-               if(!k1 && k2==700){strcpy(kto,"0710000000"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==700){strcpy(kto,"0710000000"); return OK_KTO_REPLACED;}
                break;
 
             case 29080010: 
                if(!k1){
-                  if(k2==  124124){strcpy(kto,"0107502000"); ret_ok=OK_KTO_REPLACED; break;}
-                  if(k2==12412400){strcpy(kto,"0107502000"); ret_ok=OK_KTO_REPLACED; break;}
+                  if(k2==  124124){strcpy(kto,"0107502000"); return OK_KTO_REPLACED;}
+                  if(k2==12412400){strcpy(kto,"0107502000"); return OK_KTO_REPLACED;}
                }
                break;
 
             case 30040000: 
                if(!k1)switch(k2){
                   case  36: strcpy(kto,"0261103600");  return OK_KTO_REPLACED;
-                  case 222: strcpy(kto,"0348010002"); ret_ok=OK_KTO_REPLACED; break;
+                  case 222: strcpy(kto,"0348010002"); return OK_KTO_REPLACED;
                   case 999: strcpy(kto,"0123799900"); return OK_KTO_REPLACED;
                }
                break;
 
             case 30080000: 
                if(!k1){
-                  if(k2==  700000){strcpy(kto,"0800005000"); ret_ok=OK_KTO_REPLACED; break;}
-                  if(k2==70000000){strcpy(kto,"0800005000"); ret_ok=OK_KTO_REPLACED; break;}
+                  if(k2==  700000){strcpy(kto,"0800005000"); return OK_KTO_REPLACED;}
+                  if(k2==70000000){strcpy(kto,"0800005000"); return OK_KTO_REPLACED;}
                }
                break;
 
@@ -5118,7 +5129,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 34280032: 
-               if(!k1 && k2==14111935){strcpy(kto,"0645753800"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==14111935){strcpy(kto,"0645753800"); return OK_KTO_REPLACED;}
                break;
 
             case 36040039: 
@@ -5127,7 +5138,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
             case 37040044:
                if(!k1)switch(k2){
-                  case   1888: strcpy(kto,"0212129101"); ret_ok=OK_KTO_REPLACED; break;
+                  case   1888: strcpy(kto,"0212129101"); return OK_KTO_REPLACED;
                   case 102030: strcpy(kto,"0222344400"); return OK_KTO_REPLACED;
                   case 300000: strcpy(kto,"0300000700"); return OK_KTO_REPLACED; 
                }
@@ -5135,18 +5146,18 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
             case 37080040:
                if(!k1)switch(k2){
-                  case     100: strcpy(kto,"0269100000"); ret_ok=OK_KTO_REPLACED; break;
-                  case     111: strcpy(kto,"0215022000"); ret_ok=OK_KTO_REPLACED; break;
-                  case    4004: strcpy(kto,"0233533500"); ret_ok=OK_KTO_REPLACED; break;
-                  case    4444: strcpy(kto,"0233000300"); ret_ok=OK_KTO_REPLACED; break;
-                  case   55555: strcpy(kto,"0263602501"); ret_ok=OK_KTO_REPLACED; break;
-                  case  182002: strcpy(kto,"0216603302"); ret_ok=OK_KTO_REPLACED; break;
-                  case  300000: strcpy(kto,"0983307900"); ret_ok=OK_KTO_REPLACED; break;
-                  case  333333: strcpy(kto,"0270330000"); ret_ok=OK_KTO_REPLACED; break;
-                  case  414141: strcpy(kto,"0041414100"); ret_ok=OK_KTO_REPLACED; break;
-                  case  555666: strcpy(kto,"0055566600"); ret_ok=OK_KTO_REPLACED; break;
-                  case  909090: strcpy(kto,"0269100000"); ret_ok=OK_KTO_REPLACED; break;
-                  case 5555500: strcpy(kto,"0263602501"); ret_ok=OK_KTO_REPLACED; break;
+                  case     100: strcpy(kto,"0269100000"); return OK_KTO_REPLACED;
+                  case     111: strcpy(kto,"0215022000"); return OK_KTO_REPLACED;
+                  case    4004: strcpy(kto,"0233533500"); return OK_KTO_REPLACED;
+                  case    4444: strcpy(kto,"0233000300"); return OK_KTO_REPLACED;
+                  case   55555: strcpy(kto,"0263602501"); return OK_KTO_REPLACED;
+                  case  182002: strcpy(kto,"0216603302"); return OK_KTO_REPLACED;
+                  case  300000: strcpy(kto,"0983307900"); return OK_KTO_REPLACED;
+                  case  333333: strcpy(kto,"0270330000"); return OK_KTO_REPLACED;
+                  case  414141: strcpy(kto,"0041414100"); return OK_KTO_REPLACED;
+                  case  555666: strcpy(kto,"0055566600"); return OK_KTO_REPLACED;
+                  case  909090: strcpy(kto,"0269100000"); return OK_KTO_REPLACED;
+                  case 5555500: strcpy(kto,"0263602501"); return OK_KTO_REPLACED;
                }
                break;
 
@@ -5165,18 +5176,18 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 39040013: 
-               if(!k1 && k2==556){strcpy(kto,"0106555600"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==556){strcpy(kto,"0106555600"); return OK_KTO_REPLACED;}
                break;
 
             case 39080005: 
                if(!k1){
-                  if(k2== 556){strcpy(kto,"0204655600"); ret_ok=OK_KTO_REPLACED; break;}
-                  if(k2==9800){strcpy(kto,"0208457000"); ret_ok=OK_KTO_REPLACED; break;}
+                  if(k2== 556){strcpy(kto,"0204655600"); return OK_KTO_REPLACED;}
+                  if(k2==9800){strcpy(kto,"0208457000"); return OK_KTO_REPLACED;}
                }
                break;
 
             case 43080083: 
-               if(!k1 && k2==4630){strcpy(kto,"0825110100"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==4630){strcpy(kto,"0825110100"); return OK_KTO_REPLACED;}
                break;
 
             case 44040037: 
@@ -5192,7 +5203,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 47880031: 
-               if(!k1 && k2==50){strcpy(kto,"0519899900"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==50){strcpy(kto,"0519899900"); return OK_KTO_REPLACED;}
                break;
 
             case 50040000: 
@@ -5204,10 +5215,10 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
             case 50080000:
                if(!k1)switch(k2){
-                  case   6060: strcpy(kto,"0096736100"); ret_ok=OK_KTO_REPLACED; break;
-                  case   9000: strcpy(kto,"0026492100"); ret_ok=OK_KTO_REPLACED; break;
-                  case  42195: strcpy(kto,"0900333200"); ret_ok=OK_KTO_REPLACED; break;
-                  case 101010: strcpy(kto,"0090003500"); ret_ok=OK_KTO_REPLACED; break;
+                  case   6060: strcpy(kto,"0096736100"); return OK_KTO_REPLACED;
+                  case   9000: strcpy(kto,"0026492100"); return OK_KTO_REPLACED;
+                  case  42195: strcpy(kto,"0900333200"); return OK_KTO_REPLACED;
+                  case 101010: strcpy(kto,"0090003500"); return OK_KTO_REPLACED;
                }
                break;
 
@@ -5216,22 +5227,18 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 51080060: 
-               if(!k1 && k2==123){strcpy(kto,"0012299300"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==123){strcpy(kto,"0012299300"); return OK_KTO_REPLACED;}
                break;
 
             case 55040022: 
                if(!k1){
-                     /* bei den beiden folgenden Konten wird (wohl irrtümlich)
-                      * eine Unterkontonummer 00 angehängt, deshalb kommt
-                      * direkt ein return
-                      */
                   if(k2==   555){strcpy(kto,"0002110500"); return OK_KTO_REPLACED;}
                   if(k2==343434){strcpy(kto,"0002179000"); return OK_KTO_REPLACED;}
                }
                break;
 
             case 57080070: 
-               if(!k1 && k2==661){strcpy(kto,"0604101200"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==661){strcpy(kto,"0604101200"); return OK_KTO_REPLACED;}
                break;
 
             case 60040071: 
@@ -5240,24 +5247,24 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 60080000: 
-               if(k1==0 && k2==   502){strcpy(kto,"0901581400"); ret_ok=OK_KTO_REPLACED; break;}
-               if(k1==5 && k2==500500){strcpy(kto,"0901581400"); ret_ok=OK_KTO_REPLACED; break;}
+               if(k1==0 && k2==   502){strcpy(kto,"0901581400"); return OK_KTO_REPLACED;}
+               if(k1==5 && k2==500500){strcpy(kto,"0901581400"); return OK_KTO_REPLACED;}
                break;
 
             case 61080006: 
-               if(!k1 && k2==9999999){strcpy(kto,"0202427500"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==9999999){strcpy(kto,"0202427500"); return OK_KTO_REPLACED;}
                break;
 
             case 64140036: 
-               if(!k1 && k2==8907339){strcpy(kto,"0890733900"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==8907339){strcpy(kto,"0890733900"); return OK_KTO_REPLACED;}
                break;
 
             case 66280053: 
-               if(!k1 && k2==121212){strcpy(kto,"0625242400"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==121212){strcpy(kto,"0625242400"); return OK_KTO_REPLACED;}
                break;
 
             case 68080030: 
-               if(!k1 && k2==202){strcpy(kto,"0416520200"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==202){strcpy(kto,"0416520200"); return OK_KTO_REPLACED;}
                break;
 
             case 69240075: 
@@ -5275,19 +5282,19 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
             case 70080000:
                if(!k1)switch(k2){
-                  case       94: strcpy(kto,"0928553201"); ret_ok=OK_KTO_REPLACED; break;
-                  case   700000: strcpy(kto,"0750055500"); ret_ok=OK_KTO_REPLACED; break;
-                  case   900000: strcpy(kto,"0319966601"); ret_ok=OK_KTO_REPLACED; break;
-                  case   949494: strcpy(kto,"0575757500"); ret_ok=OK_KTO_REPLACED; break;
-                  case  1111111: strcpy(kto,"0448060000"); ret_ok=OK_KTO_REPLACED; break;
-                  case  7777777: strcpy(kto,"0443540000"); ret_ok=OK_KTO_REPLACED; break;
-                  case  9000000: strcpy(kto,"0319966601"); ret_ok=OK_KTO_REPLACED; break;
-                  case 70000000: strcpy(kto,"0750055500"); ret_ok=OK_KTO_REPLACED; break;
+                  case       94: strcpy(kto,"0928553201"); return OK_KTO_REPLACED;
+                  case   700000: strcpy(kto,"0750055500"); return OK_KTO_REPLACED;
+                  case   900000: strcpy(kto,"0319966601"); return OK_KTO_REPLACED;
+                  case   949494: strcpy(kto,"0575757500"); return OK_KTO_REPLACED;
+                  case  1111111: strcpy(kto,"0448060000"); return OK_KTO_REPLACED;
+                  case  7777777: strcpy(kto,"0443540000"); return OK_KTO_REPLACED;
+                  case  9000000: strcpy(kto,"0319966601"); return OK_KTO_REPLACED;
+                  case 70000000: strcpy(kto,"0750055500"); return OK_KTO_REPLACED;
                }
                break;
 
             case 75040062: 
-               if(!k1 && k2==6008833){strcpy(kto,"0600883300"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==6008833){strcpy(kto,"0600883300"); return OK_KTO_REPLACED;}
                break;
 
             case 76040061: 
@@ -5299,17 +5306,17 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                break;
 
             case 79080052: 
-               if(!k1 && k2==9696){strcpy(kto,"0300021700"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==9696){strcpy(kto,"0300021700"); return OK_KTO_REPLACED;}
                break;
 
             case 85080000: 
-               if(!k1 && k2==400000){strcpy(kto,"0459488501"); ret_ok=OK_KTO_REPLACED; break;}
+               if(!k1 && k2==400000){strcpy(kto,"0459488501"); return OK_KTO_REPLACED;}
                break;
 
             case 86080000: 
                if(!k1){
-                  if(k2==  1212){strcpy(kto,"0480375900"); ret_ok=OK_KTO_REPLACED; break;}
-                  if(k2==121200){strcpy(kto,"0480375900"); ret_ok=OK_KTO_REPLACED; break;}
+                  if(k2==  1212){strcpy(kto,"0480375900"); return OK_KTO_REPLACED;}
+                  if(k2==121200){strcpy(kto,"0480375900"); return OK_KTO_REPLACED;}
                }
                break;
          }
@@ -5325,16 +5332,20 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
           */
          if(pz_methode==13 && *kto=='0' && kto[1]=='0' && kto[2]=='0'
                && ( kto[3]!='0' || (kto[3]=='0' && kto[4]!='0'))){
-            kto[1]=kto[3];
-            kto[2]=kto[4];
-            kto[3]=kto[5];
-            kto[4]=kto[6];
-            kto[5]=kto[7];
-            kto[6]=kto[8];
-            kto[7]=kto[9];
-            kto[8]='0';
-            kto[9]='0';
-            return OK_UNTERKONTO_ATTACHED;
+            if(kto_check_pz("13b",kto,NULL)>0){
+               kto[1]=kto[3];
+               kto[2]=kto[4];
+               kto[3]=kto[5];
+               kto[4]=kto[6];
+               kto[5]=kto[7];
+               kto[6]=kto[8];
+               kto[7]=kto[9];
+               kto[8]='0';
+               kto[9]='0';
+               return OK_UNTERKONTO_ATTACHED;
+            }
+            else
+               return FALSE;
          }
 
          /* Hinweis für den Fall der Ausnahme in Prüfziffermethode 76:
@@ -5346,21 +5357,25 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
           * ebenfalls eine ergänzte Unterkontonummer "00" in die IBAN zu
           * übernehmen.
           */
-         if(pz_methode==76 && kto_check_pz("76a",kto,NULL)==0 && kto_check_pz("76b",kto,NULL)>0){
-            kto[0]=kto[2];
-            kto[1]=kto[3];
-            kto[2]=kto[4];
-            kto[3]=kto[5];
-            kto[4]=kto[6];
-            kto[5]=kto[7];
-            kto[6]=kto[8];
-            kto[7]=kto[9];
-            kto[8]='0';
-            kto[9]='0';
-            return OK_UNTERKONTO_ATTACHED;
+         if(pz_methode==76){
+            if((ret=kto_check_pz("76a",kto,NULL))<OK && *kto=='0' && kto[1]=='0' && kto_check_pz("76b",kto,NULL)>0){
+               kto[0]=kto[2];
+               kto[1]=kto[3];
+               kto[2]=kto[4];
+               kto[3]=kto[5];
+               kto[4]=kto[6];
+               kto[5]=kto[7];
+               kto[6]=kto[8];
+               kto[7]=kto[9];
+               kto[8]='0';
+               kto[9]='0';
+               return OK_UNTERKONTO_ATTACHED;
+            }
+            else  /* Methode 76a ergibt Fehler oder weniger als 2 führende Nullen */
+               return ret;
          }
 
-         return ret_ok;   /* Zum Schluß noch ein Lumpensammler für alles, das übrig geblieben ist */
+         return OK;   /* Zum Schluß noch ein Lumpensammler für alles, das übrig geblieben ist */
 
 
          /* Stadtsparkasse München */
@@ -5622,24 +5637,111 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
          return OK_BLZ_REPLACED;
 
 
-         /* Deutsche Bank AG */
+         /* Deutsche Bank AG
+          * Neuimplementierung nach der Regel-Version 1.6 (oder 1.5?) der Deutschen Bank vom 30.8.2013
+          */
       case 20:
 
-         /* BLZ ohne IBAN-Berechnung */
+   /* die neue Version der Regel 20 wird zum 9. Dezember in den offiziellen IBAN-Regeln veröffentlicht;
+    * die Bundesbank hat jedoch schon die Regelversion am 28. August veröffentlicht, mit der Bitte, sie
+    * möglichst schon zum 9. September einzusetzen. Der Best Guess Ansatz mit dem Fehlercode 51 bzw.
+    * IBAN_AMBIGUOUS_KTO wird entfernt und durch Verfahren zur Ermittlung eindeutiger IBANs ersetzt.
+    */
+
+#if DB_NEUE_VERSION>0
+
+            /* BLZ ohne IBAN-Berechnung */
          if(b==10020000)return NO_IBAN_CALCULATION;
 
-         /* Spendenkontonummer */
+            /* Spendenkontonummer */
          if(b==50070010 && k1==0 && k2==9999){
             strcpy(kto,"0092777202");
             return OK_KTO_REPLACED;
          }
 
-         /* Prüfziffermethode holen */
+            /* Prüfziffermethode holen */
          if((idx=lut_index(blz))<0)return idx;
          pz_methode=pz_methoden[idx];
 
-         /* Prüfzifferverfahren 09 (Deutsche Bank GF intern) */
+            /* Prüfzifferverfahren 09 (Deutsche Bank GF intern) */
+         if(pz_methode==9)return OK_NO_CHK;
+
+            /* Sonderfall Norisbank: Konten, bei denen ausschließlich das
+             * Prüfzifferverfahren 06 eine gültige Prüfziffer liefern, sind für
+             * die IBAN-Berechnung nicht zugelassen.
+             */
+         if(pz_methode==127 && kto_check_pz("c7a",kto,NULL)<OK && kto_check_pz("c7c",kto,NULL)<OK){
+            if((ret=kto_check_pz("c7b",kto,NULL))==OK)
+               return NO_IBAN_CALCULATION;
+            else
+               return ret;
+         }
+
+            /* 10-stellige Konten sind ungültig */
+         if(*kto!='0')return INVALID_KTO;
+
+         /* Prüfzifferverfahren 63 (Deutsche Bank) */
+
+         if(k1==0){  /* erstmal maximal 7-stellige Konten */
+               /* 1-4 stellige Konten sind generell nicht zugelassen */
+            if(k2<10000)return NO_IBAN_CALCULATION;
+
+               /* bei 5- und 6stellige Konten werden rechts zwei Nullen
+                * angefügt. Falls die Prüfziffer dann stimmt, wird diese
+                * Kontonummer für die IBAN-Berechnung übernommen. Es dürfen
+                * allerdings nicht noch einmal Nullen angehängt werden (d.h.
+                * nur Prüfzifferverfahren 63a ist gültig).
+                */
+            if(k2<1000000){
+               for(i=0;i<8;i++)kto[i]=kto[i+2];
+               kto[8]='0';
+               kto[9]='0';
+               if((ret=kto_check_pz("63a",kto,NULL))==OK)
+                  return OK_UNTERKONTO_ATTACHED;
+               else
+                  return ret;
+            }
+
+               /* 7-stellige Konten: zuerst Unterkonto 00 anhängen (Vorschrift
+                * aus Regel 20, Schritt c und d); falls das nicht klappt, mit
+                * Regel 63a probieren.
+               */
+            if(k2>=1000000 && k2<10000000){
+               if(kto_check_pz("63b",kto,NULL)==OK){
+                  for(i=0;i<8;i++)kto[i]=kto[i+2];
+                  kto[8]='0';
+                  kto[9]='0';
+                  return OK_UNTERKONTO_ATTACHED;
+               }
+               else
+                  return kto_check_pz("63a",kto,NULL);
+            }
+         }
+
+            /* alle restlichen Konten (8- bis 9-stellig) nur mit Methode 63a prüfen */
+         return kto_check_pz("63a",kto,NULL);
+
+#else
+         /* Deutsche Bank AG (alte Version mit IBAN_AMBIGUOUS_KTO) */
+
+            /* BLZ ohne IBAN-Berechnung */
+         if(b==10020000)return NO_IBAN_CALCULATION;
+
+            /* Spendenkontonummer */
+         if(b==50070010 && k1==0 && k2==9999){
+            strcpy(kto,"0092777202");
+            return OK_KTO_REPLACED;
+         }
+
+            /* Prüfziffermethode holen */
+         if((idx=lut_index(blz))<0)return idx;
+         pz_methode=pz_methoden[idx];
+
+            /* Prüfzifferverfahren 09 (Deutsche Bank GF intern) */
          if(pz_methode==9)return OK;
+
+            /* 10-stellige Konten sind ungültig */
+         if(*kto!='0')return INVALID_KTO;
 
          /* Prüfzifferverfahren 63 (Deutsche Bank) */
          if(pz_methode==63){
@@ -5703,28 +5805,44 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
          /* Prüfzifferverfahren C7 (Norisbank) */
          if(pz_methode==127){
-            if(kto[1]=='0' && kto[2]=='0' && kto_check_pz("c7c",kto,NULL)==OK){
+
+               /* die erste Stelle muß immer 0 sein */
+            if(*kto!='0')return FALSE;
+            if(kto[1]=='0' && kto[2]=='0'){
 
                   /* Falls die Kontonummer mit drei Nullen beginnt und zwei
-                   * Nullen am Ende hat, ist es unsicher ob ein Unterkonto
-                   * weggelassen wurde; bei Methode 63 steht zu den Stellen 2-7
-                   * der Kontonummer ausdrücklich, daß sie auch auch führende
-                   * Nullen enthalten kann :-(. Daher wird an dieser Stelle
-                   * keine Entscheidung getroffen.
+                   * Nullen am Ende hat, enthält sie das Unterkonto und ist
+                   * deshalb nach Methode c7a zu prüfen. Aus den IBAN-Regeln
+                   * (FAQ zu Regel 20, Frage 1):
+                   *    Eine Kontonummer, die in die IBAN-Berechnung - nach den
+                   *    Prüf-/Korrekturschritten 5.2.1 a) bis c) - einzubeziehen
+                   *    ist, ist immer mindestens 7-stellig und maximal
+                   *    9-stellig. Eine kürzere oder längere Kontonummer ist
+                   *    nicht gültig und muss zu einer Fehlermeldung (im
+                   *    Konverter-Tool bzw. -Portal) führen.
                    */
-               if(kto[8]=='0' && kto[9]=='0')return IBAN_AMBIGUOUS_KTO;
+               if(kto[8]=='0' && kto[9]=='0')return kto_check_pz("c7a",kto,NULL);
 
-                  /* Unterkonto bei Methode C7 weggelassen */
-               for(i=0;i<8;i++)kto[i]=kto[i+2];
-               kto[8]='0';
-               kto[9]='0';
-               return OK_UNTERKONTO_ATTACHED;
+               if(kto_check_pz("c7c",kto,NULL)==OK){
+
+                     /* nicht zu entscheiden, ob c7a oder c7c (mit ergänztem Unterkonto) richtig ist */
+                  if( kto_check_pz("c7a",kto,NULL)==OK)return IBAN_AMBIGUOUS_KTO;
+
+                     /* Unterkonto bei Methode C7 weggelassen */
+                  for(i=0;i<8;i++)kto[i]=kto[i+2];
+                  kto[8]='0';
+                  kto[9]='0';
+                  return OK_UNTERKONTO_ATTACHED;
+               }
             }
             if(kto_check_pz("c7a",kto,NULL)==OK)return OK;
+
+               /* Sonderfall Norisbank: ausschließlich Prüfzifferverfahren 06 (entspricht c7b) ist für IBAN-Berechnung nicht zugelassen */
             if(kto_check_pz("c7b",kto,NULL)==OK)return NO_IBAN_CALCULATION;
          }
 
-         return OK;   /* Lumpensammler */
+         return OK;   /* Lumpensammler für Regel 20 */
+#endif
 
 
          /* National-Bank AG */
@@ -6195,7 +6313,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
           */
 
          loesch=lut_loeschung(blz,0,&ret)=='1'?1:0;
-         if(ret<0)return ret;
+         if(ret<OK)return ret;
          if(!(    /* Spendenkonten nicht testen */
                   (regel==33 &&   k1==0 && (k2==22222 || k2==1111111 || k2==94 || k2==7777777 || k2==55555))   /* Spendenkonten Regel 33 */
                || (regel==34 && ((k1==0 &&  k2==502) || (k1==5 && k2==500500)))   /* Spendenkonten Regel 34 */
@@ -8099,7 +8217,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 }
 #endif
 
-#line 8653 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 8771 "ruby/ext/konto_check_raw/konto_check.lxx"
 /* Funktion lut_multiple() +§§§2 */
 /* ###########################################################################
  * # lut_multiple(): Universalfunktion, um zu einer gegebenen Bankleitzahl   #
@@ -8340,8 +8458,7 @@ DLL_EXPORT int lut_cleanup(void)
    init_status|=16;     /* init_status wird bei der Prüfung getestet */
    *lut_id=0;
    lut_id_status=0;
-   current_lut_level=current_lut_set=-1;
-   lut_init_level=-1;
+   lut_init_level=current_lut_level=current_lut_set=-1;
    if(init_status&8)INITIALIZE_WAIT;
 
       /* falls kto_check_init() den Notausstieg mit INIT_FATAL_ERROR gemacht
@@ -8363,7 +8480,7 @@ DLL_EXPORT int lut_cleanup(void)
    FREE(sort_blz);
    FREE(sort_pz_f);
    FREE(sort_plz);
-#line 8912 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 9029 "ruby/ext/konto_check_raw/konto_check.lxx"
    if(name_raw && name_data!=name_raw)
       FREE(name_raw);
    else
@@ -8426,7 +8543,7 @@ DLL_EXPORT int lut_cleanup(void)
       lut_cleanup(); /* neuer Versuch, aufzuräumen */
       RETURN(INIT_FATAL_ERROR);
    }
-#line 8980 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 9097 "ruby/ext/konto_check_raw/konto_check.lxx"
    init_status&=1;
    init_in_progress=0;
    return OK;
@@ -8848,7 +8965,7 @@ static void init_atoi_table(void)
    lut_block_name2[123]="2. Volltext txt";
    lut_block_name2[124]="2. Volltext idx";
    lut_block_name2[125]="2. IBAN Regel";
-#line 9218 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 9335 "ruby/ext/konto_check_raw/konto_check.lxx"
    init_status|=1;
 }
 
@@ -8908,7 +9025,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 
    switch(pz_methode){
 
-#line 9281 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 9398 "ruby/ext/konto_check_raw/konto_check.lxx"
 /* Berechnungsmethoden 00 bis 09 +§§§3
    Berechnung nach der Methode 00 +§§§4 */
 /*
@@ -11237,7 +11354,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * ######################################################################
  */
 
-#line 11286 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11403 "ruby/ext/konto_check_raw/konto_check.lxx"
       case 51:
          if(*(kto+2)=='9'){   /* Ausnahme */
 
@@ -11499,8 +11616,8 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          else
             return FALSE;
 
-#line 11500 "ruby/ext/konto_check_raw/konto_check.lxx"
-#line 11502 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11617 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11619 "ruby/ext/konto_check_raw/konto_check.lxx"
 /*  Berechnung nach der Methode 53 +§§§4 */
 /*
  * ######################################################################
@@ -11800,7 +11917,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # bewerten.                                                          #
  * ######################################################################
  */
-#line 11772 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 11889 "ruby/ext/konto_check_raw/konto_check.lxx"
       case 57:
 #if DEBUG>0
       case 1057:  /* die Untermethoden werden in einem eigenen switch abgearbeitet, daher alle hier zusammen */
@@ -12295,7 +12412,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 #endif
          MOD_10_80;   /* pz%=10 */
          if(pz)pz=10-pz;
-         CHECK_PZ10;
+         CHECK_PZX10;
       }
 #if DEBUG>0
       case 1063:
@@ -18012,32 +18129,31 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
                if(pz)pz=10-pz;
                CHECK_PZX10;
             }
-            else{
-               #if DEBUG>0
+               /* hier darf kein else-Zweig hin, damit nach 63c auch 63a geprüft wird */
+            #if DEBUG>0
       case 1127:
          if(retvals){
             retvals->methode="C7a";
             retvals->pz_methode=1127;
          }
 #endif
-                  if(*kto!='0')return INVALID_KTO;
+               if(*kto!='0')return INVALID_KTO;
 #ifdef __ALPHA
-                  pz =   (kto[1]-'0')
-                  +  ((kto[2]<'5') ? (kto[2]-'0')*2 : (kto[2]-'0')*2-9)
-                  +   (kto[3]-'0')
-                  +  ((kto[4]<'5') ? (kto[4]-'0')*2 : (kto[4]-'0')*2-9)
-                  +   (kto[5]-'0')
-                  +  ((kto[6]<'5') ? (kto[6]-'0')*2 : (kto[6]-'0')*2-9);
+               pz =   (kto[1]-'0')
+               +  ((kto[2]<'5') ? (kto[2]-'0')*2 : (kto[2]-'0')*2-9)
+               +   (kto[3]-'0')
+               +  ((kto[4]<'5') ? (kto[4]-'0')*2 : (kto[4]-'0')*2-9)
+               +   (kto[5]-'0')
+               +  ((kto[6]<'5') ? (kto[6]-'0')*2 : (kto[6]-'0')*2-9);
 #else
-               pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
-               if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
-               if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-               if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
+            pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
+            if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
+            if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
+            if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
 #endif
-               MOD_10_80;   /* pz%=10 */
-               if(pz)pz=10-pz;
-               CHECK_PZX8;
-            }
+            MOD_10_80;   /* pz%=10 */
+            if(pz)pz=10-pz;
+            CHECK_PZX8;
          }
 
       /* Variante 2 */
@@ -19296,7 +19412,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          return NOT_IMPLEMENTED;
    }
 }
-#line 18095 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18211 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /*
  * ######################################################################
@@ -19418,11 +19534,11 @@ DLL_EXPORT int kto_check_pz(char *pz,char *kto,char *blz)
  * ###########################################################################
  */
 
-#line 18217 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18333 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
 {
    char *ptr,*dptr,xkto[32];
-   int i,p1=0,kto_len,pz;
+   int i,p1=0,kto_len,pz,fuehrende_nullen;
    int idx,pz_methode,untermethode=0;
    RETVAL *retvals=NULL;
 
@@ -19443,11 +19559,11 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
    if(kto_len<1 || kto_len>10)return INVALID_KTO_LENGTH;
    for(ptr--,i=kto_len;i-->0;*dptr--= *ptr--);
    kto=xkto;
+   for(fuehrende_nullen=i=0;i<3;i++)if(kto[i]=='0')fuehrende_nullen++; else break;
 
    switch(pz_methode){
       case 13:
             /* Methode 13a */
-         if(kto[0]!='0' || kto[1]!='0')*uk_cnt=-1; /* 9- oder 10-stelliges Konto: Unterkonto angegeben */
          pz =(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
          if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
          if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
@@ -19455,7 +19571,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
          MOD_10_80;   /* pz%=10 */
          if(pz)pz=10-pz;
          CHECK_PZX8;
-         if(*uk_cnt==-1)return FALSE;   /* Methode 13b nur möglich, falls 1. und 2. Stelle '0' sind */
+         if(fuehrende_nullen<2)return FALSE;   /* Methode 13b nur möglich, falls 1. und 2. Stelle '0' sind */
 
             /* Methode 13b: 2-stelliges Unterkonto weggelassen */
          *uk_cnt=2;
@@ -19469,18 +19585,18 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
          CHECK_PZ10;
 
       case 26:
-         if(*kto=='0' && *(kto+1)=='0'){
-            /* Unterkontonummer ausgelassen */
-         *uk_cnt=2;
-         pz = (kto[2]-'0') * 2
-            + (kto[3]-'0') * 7
-            + (kto[4]-'0') * 6
-            + (kto[5]-'0') * 5
-            + (kto[6]-'0') * 4
-            + (kto[7]-'0') * 3
-            + (kto[8]-'0') * 2;
+         if(fuehrende_nullen>=2){
+               /* Unterkontonummer ausgelassen */
+            *uk_cnt=2;
+            pz = (kto[2]-'0') * 2
+               + (kto[3]-'0') * 7
+               + (kto[4]-'0') * 6
+               + (kto[5]-'0') * 5
+               + (kto[6]-'0') * 4
+               + (kto[7]-'0') * 3
+               + (kto[8]-'0') * 2;
 
-         MOD_11_176;   /* pz%=11 */
+            MOD_11_176;   /* pz%=11 */
             if(pz<=1)
                pz=0;
             else
@@ -19580,7 +19696,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
 
       case 63:
          if(*kto!='0')return INVALID_KTO;
-         if(*(kto+1)=='0' && *(kto+2)=='0'){ /* Unterkonto weggelassen */
+         if(*(kto+1)=='0' && *(kto+2)=='0'){ /* wahrscheinlich Unterkonto weggelassen */
             *uk_cnt=2;
             pz=(kto[3]-'0')+(kto[5]-'0')+(kto[7]-'0');
             if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
@@ -19588,7 +19704,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
             if(kto[8]<'5')pz+=(kto[8]-'0')*2; else pz+=(kto[8]-'0')*2-9;
             MOD_10_80;   /* pz%=10 */
             if(pz)pz=10-pz;
-            CHECK_PZ10;
+            CHECK_PZX10;
          }
          pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
          if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
@@ -19632,8 +19748,8 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
 
                /* Methode C7c */
 
-               /* evl. Unterkonto weggelassen; das kommt wohl eher vor als
-                * 7-stellige Nummern (Hinweis T.F.); stimmt auch mit
+               /* wahrscheinlich Unterkonto weggelassen; das kommt wohl eher
+                * vor als 7-stellige Nummern (Hinweis T.F.); stimmt auch mit
                 * http://www.kontonummern.de/check.php überein.
                */
                *uk_cnt=2;
@@ -19646,16 +19762,14 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
                CHECK_PZX10;
                *uk_cnt=0; /* Bedingung nicht erfüllt, Unterkto. zurücksetzen */
             }
-            else{
-                  /* Methode C7a */
-               pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
-               if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
-               if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-               if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-               MOD_10_80;   /* pz%=10 */
-               if(pz)pz=10-pz;
-               CHECK_PZX8;
-            }
+               /* Methode C7a */
+            pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
+            if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
+            if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
+            if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
+            MOD_10_80;   /* pz%=10 */
+            if(pz)pz=10-pz;
+            CHECK_PZX8;
          }
 
             /* Methode C7b */
@@ -19758,7 +19872,7 @@ DLL_EXPORT int kto_check_blz_dbg(char *blz,char *kto,RETVAL *retvals)
  * # Copyright (C) 2007 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
  */
-#line 18557 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18671 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT int kto_check_pz_dbg(char *pz,char *kto,char *blz,RETVAL *retvals)
 {
    int untermethode,pz_methode;
@@ -19957,7 +20071,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case INVALID_IBAN_LENGTH: return "Die Länge der IBAN für das angegebene Länderkürzel ist falsch";
       case LUT2_NO_ACCOUNT_GIVEN: return "Keine Bankverbindung/IBAN angegeben";
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ungültiges Zeichen ( ()+-/&.,\' ) für die Volltextsuche gefunden";
-      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen SIe lut_suche_multiple() zur Suche nach mehreren Worten";
+      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ungültig";
       case LUT_SUCHE_INVALID_CMD: return "Suche: im Verknüpfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
       case LUT_SUCHE_INVALID_CNT: return "Suche: es müssen zwischen 1 und 26 Suchmuster angegeben werden";
@@ -19970,7 +20084,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case KTO_CHECK_DEFAULT_BLOCK_FULL: return "Die maximale Anzahl Einträge für den Default-Block wurde erreicht";
       case KTO_CHECK_NO_DEFAULT_BLOCK: return "Es wurde noch kein Default-Block angelegt";
       case KTO_CHECK_KEY_NOT_FOUND: return "Der angegebene Schlüssel wurde im Default-Block nicht gefunden";
-      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datensätze sind nicht mehr gültig; dieser ist  aber jünger als der andere";
+      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datensätze sind nicht mehr gültig, dieser ist aber jünger als der andere";
       case DTA_SRC_KTO_DIFFERENT: return "Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_SRC_BLZ_DIFFERENT: return "Die Auftraggeber-Bankleitzahl des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_CR_LF_IN_FILE: return "Die DTA-Datei enthält (unzulässige) Zeilenvorschübe";
@@ -20061,7 +20175,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case OK_GELOESCHT: return "ok (die BLZ wurde allerdings gelöscht)";
       case BLZ_GELOESCHT: return "die Bankleitzahl wurde gelöscht";
       case INVALID_BLZ_FILE: return "Fehler in der blz.txt Datei (falsche Zeilenlänge)";
-      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert";
+      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion, die library wurde mit THREAD_SAFE=0 kompiliert";
       case FATAL_ERROR: return "schwerer Fehler im Konto_check-Modul";
       case INVALID_KTO_LENGTH: return "ein Konto muß zwischen 1 und 10 Stellen haben";
       case FILE_WRITE_ERROR: return "kann Datei nicht schreiben";
@@ -20079,31 +20193,31 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case OK: return "ok";
       case EE: if(eep)return (char *)eep; else return "";
       case OK_NO_CHK: return "ok, ohne Prüfung";
-      case OK_TEST_BLZ_USED: return "ok; für den Test wurde eine Test-BLZ verwendet";
+      case OK_TEST_BLZ_USED: return "ok, für den Test wurde eine Test-BLZ verwendet";
       case LUT2_VALID: return "Der Datensatz ist aktuell gültig";
       case LUT2_NO_VALID_DATE: return "Der Datensatz enthält kein Gültigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
-      case LUT1_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
+      case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
       case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
-      case LUT_V2_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
-      case KTO_CHECK_VALUE_REPLACED: return "ok; der Wert für den Schlüssel wurde überschrieben";
-      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
-      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer";
-      case OK_SLOT_CNT_MIN_USED: return "ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
-      case SOME_KEYS_NOT_FOUND: return "ok; ein(ige) Schlüssel wurden nicht gefunden";
+      case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
+      case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert für den Schlüssel wurde überschrieben";
+      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
+      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok, die Kontonummer enthält eine Unterkontonummer";
+      case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
+      case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schlüssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
       case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (außer den IBAN-Regeln) geladen";
-      case OK_NACHFOLGE_BLZ_USED: return "ok; für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
-      case OK_KTO_REPLACED: return "ok; die Kontonummer wurde allerdings ersetzt";
-      case OK_BLZ_REPLACED: return "ok; die Bankleitzahl wurde allerdings ersetzt";
-      case OK_BLZ_KTO_REPLACED: return "ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
-      case OK_IBAN_WITHOUT_KC_TEST: return "ok; die Bankverbindung ist (ohne Test) als richtig anzusehen";
-      case OK_INVALID_FOR_IBAN: return "ok; für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
-      case OK_HYPO_REQUIRES_KTO: return "ok; für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt";
-      case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer";
-      case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angefügt";
+      case OK_NACHFOLGE_BLZ_USED: return "ok, für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
+      case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
+      case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
+      case OK_BLZ_KTO_REPLACED: return "ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
+      case OK_IBAN_WITHOUT_KC_TEST: return "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen";
+      case OK_INVALID_FOR_IBAN: return "ok, für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
+      case OK_HYPO_REQUIRES_KTO: return "ok, für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt";
+      case OK_KTO_REPLACED_NO_PZ: return "ok, die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer";
+      case OK_UNTERKONTO_ATTACHED: return "ok, es wurde ein (weggelassenes) Unterkonto angefügt";
       default: return "ungültiger Rückgabewert";
-#line 18741 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18855 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20135,7 +20249,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case INVALID_IBAN_LENGTH: return "Die L„ nge der IBAN fr das angegebene L„ nderkrzel ist falsch";
       case LUT2_NO_ACCOUNT_GIVEN: return "Keine Bankverbindung/IBAN angegeben";
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ungltiges Zeichen ( ()+-/&.,\' ) fr die Volltextsuche gefunden";
-      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen SIe lut_suche_multiple() zur Suche nach mehreren Worten";
+      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ungltig";
       case LUT_SUCHE_INVALID_CMD: return "Suche: im Verknpfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
       case LUT_SUCHE_INVALID_CNT: return "Suche: es mssen zwischen 1 und 26 Suchmuster angegeben werden";
@@ -20148,7 +20262,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case KTO_CHECK_DEFAULT_BLOCK_FULL: return "Die maximale Anzahl Eintr„ ge fr den Default-Block wurde erreicht";
       case KTO_CHECK_NO_DEFAULT_BLOCK: return "Es wurde noch kein Default-Block angelegt";
       case KTO_CHECK_KEY_NOT_FOUND: return "Der angegebene Schlssel wurde im Default-Block nicht gefunden";
-      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datens„ tze sind nicht mehr gltig; dieser ist  aber jnger als der andere";
+      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datens„ tze sind nicht mehr gltig, dieser ist aber jnger als der andere";
       case DTA_SRC_KTO_DIFFERENT: return "Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_SRC_BLZ_DIFFERENT: return "Die Auftraggeber-Bankleitzahl des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_CR_LF_IN_FILE: return "Die DTA-Datei enth„ lt (unzul„ ssige) Zeilenvorschbe";
@@ -20239,7 +20353,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case OK_GELOESCHT: return "ok (die BLZ wurde allerdings gel”scht)";
       case BLZ_GELOESCHT: return "die Bankleitzahl wurde gel”scht";
       case INVALID_BLZ_FILE: return "Fehler in der blz.txt Datei (falsche Zeilenl„ nge)";
-      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert";
+      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion, die library wurde mit THREAD_SAFE=0 kompiliert";
       case FATAL_ERROR: return "schwerer Fehler im Konto_check-Modul";
       case INVALID_KTO_LENGTH: return "ein Konto muá zwischen 1 und 10 Stellen haben";
       case FILE_WRITE_ERROR: return "kann Datei nicht schreiben";
@@ -20257,31 +20371,31 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case OK: return "ok";
       case EE: if(eep)return (char *)eep; else return "";
       case OK_NO_CHK: return "ok, ohne Prfung";
-      case OK_TEST_BLZ_USED: return "ok; fr den Test wurde eine Test-BLZ verwendet";
+      case OK_TEST_BLZ_USED: return "ok, fr den Test wurde eine Test-BLZ verwendet";
       case LUT2_VALID: return "Der Datensatz ist aktuell gltig";
       case LUT2_NO_VALID_DATE: return "Der Datensatz enth„ lt kein Gltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
-      case LUT1_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
+      case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
       case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
-      case LUT_V2_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
-      case KTO_CHECK_VALUE_REPLACED: return "ok; der Wert fr den Schlssel wurde berschrieben";
-      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
-      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok; die Kontonummer enth„ lt eine Unterkontonummer";
-      case OK_SLOT_CNT_MIN_USED: return "ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
-      case SOME_KEYS_NOT_FOUND: return "ok; ein(ige) Schlssel wurden nicht gefunden";
+      case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
+      case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert fr den Schlssel wurde berschrieben";
+      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
+      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok, die Kontonummer enth„ lt eine Unterkontonummer";
+      case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
+      case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schlssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
       case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (auáer den IBAN-Regeln) geladen";
-      case OK_NACHFOLGE_BLZ_USED: return "ok; fr die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
-      case OK_KTO_REPLACED: return "ok; die Kontonummer wurde allerdings ersetzt";
-      case OK_BLZ_REPLACED: return "ok; die Bankleitzahl wurde allerdings ersetzt";
-      case OK_BLZ_KTO_REPLACED: return "ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
-      case OK_IBAN_WITHOUT_KC_TEST: return "ok; die Bankverbindung ist (ohne Test) als richtig anzusehen";
-      case OK_INVALID_FOR_IBAN: return "ok; fr IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
-      case OK_HYPO_REQUIRES_KTO: return "ok; fr die BIC-Bestimmung der ehemaligen Hypo-Bank fr IBAN wird i.A. zus„ tzlich die Kontonummer ben”tigt";
-      case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prfziffer";
-      case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angefgt";
+      case OK_NACHFOLGE_BLZ_USED: return "ok, fr die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
+      case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
+      case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
+      case OK_BLZ_KTO_REPLACED: return "ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
+      case OK_IBAN_WITHOUT_KC_TEST: return "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen";
+      case OK_INVALID_FOR_IBAN: return "ok, fr IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
+      case OK_HYPO_REQUIRES_KTO: return "ok, fr die BIC-Bestimmung der ehemaligen Hypo-Bank fr IBAN wird i.A. zus„ tzlich die Kontonummer ben”tigt";
+      case OK_KTO_REPLACED_NO_PZ: return "ok, die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prfziffer";
+      case OK_UNTERKONTO_ATTACHED: return "ok, es wurde ein (weggelassenes) Unterkonto angefgt";
       default: return "ungltiger Rckgabewert";
-#line 18758 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18872 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20313,7 +20427,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case INVALID_IBAN_LENGTH: return "Die L&auml;nge der IBAN f&uuml;r das angegebene L&auml;nderk&uuml;rzel ist falsch";
       case LUT2_NO_ACCOUNT_GIVEN: return "Keine Bankverbindung/IBAN angegeben";
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ung&uuml;ltiges Zeichen ( ()+-/&.,\' ) f&uuml;r die Volltextsuche gefunden";
-      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen SIe lut_suche_multiple() zur Suche nach mehreren Worten";
+      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ung&uuml;ltig";
       case LUT_SUCHE_INVALID_CMD: return "Suche: im Verkn&uuml;pfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
       case LUT_SUCHE_INVALID_CNT: return "Suche: es m&uuml;ssen zwischen 1 und 26 Suchmuster angegeben werden";
@@ -20326,7 +20440,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case KTO_CHECK_DEFAULT_BLOCK_FULL: return "Die maximale Anzahl Eintr&auml;ge f&uuml;r den Default-Block wurde erreicht";
       case KTO_CHECK_NO_DEFAULT_BLOCK: return "Es wurde noch kein Default-Block angelegt";
       case KTO_CHECK_KEY_NOT_FOUND: return "Der angegebene Schl&uuml;ssel wurde im Default-Block nicht gefunden";
-      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datens&auml;tze sind nicht mehr g&uuml;ltig; dieser ist  aber j&uuml;nger als der andere";
+      case LUT2_NO_LONGER_VALID_BETTER: return "Beide Datens&auml;tze sind nicht mehr g&uuml;ltig, dieser ist aber j&uuml;nger als der andere";
       case DTA_SRC_KTO_DIFFERENT: return "Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_SRC_BLZ_DIFFERENT: return "Die Auftraggeber-Bankleitzahl des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_CR_LF_IN_FILE: return "Die DTA-Datei enth&auml;lt (unzul&auml;ssige) Zeilenvorsch&uuml;be";
@@ -20417,7 +20531,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case OK_GELOESCHT: return "ok (die BLZ wurde allerdings gel&ouml;scht)";
       case BLZ_GELOESCHT: return "die Bankleitzahl wurde gel&ouml;scht";
       case INVALID_BLZ_FILE: return "Fehler in der blz.txt Datei (falsche Zeilenl&auml;nge)";
-      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert";
+      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion, die library wurde mit THREAD_SAFE=0 kompiliert";
       case FATAL_ERROR: return "schwerer Fehler im Konto_check-Modul";
       case INVALID_KTO_LENGTH: return "ein Konto mu&szlig; zwischen 1 und 10 Stellen haben";
       case FILE_WRITE_ERROR: return "kann Datei nicht schreiben";
@@ -20435,31 +20549,31 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case OK: return "ok";
       case EE: if(eeh)return (char *)eeh; else return "";
       case OK_NO_CHK: return "ok, ohne Pr&uuml;fung";
-      case OK_TEST_BLZ_USED: return "ok; f&uuml;r den Test wurde eine Test-BLZ verwendet";
+      case OK_TEST_BLZ_USED: return "ok, f&uuml;r den Test wurde eine Test-BLZ verwendet";
       case LUT2_VALID: return "Der Datensatz ist aktuell g&uuml;ltig";
       case LUT2_NO_VALID_DATE: return "Der Datensatz enth&auml;lt kein G&uuml;ltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
-      case LUT1_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
+      case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
       case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
-      case LUT_V2_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
-      case KTO_CHECK_VALUE_REPLACED: return "ok; der Wert f&uuml;r den Schl&uuml;ssel wurde &uuml;berschrieben";
-      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
-      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok; die Kontonummer enth&auml;lt eine Unterkontonummer";
-      case OK_SLOT_CNT_MIN_USED: return "ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
-      case SOME_KEYS_NOT_FOUND: return "ok; ein(ige) Schl&uuml;ssel wurden nicht gefunden";
+      case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
+      case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert f&uuml;r den Schl&uuml;ssel wurde &uuml;berschrieben";
+      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
+      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok, die Kontonummer enth&auml;lt eine Unterkontonummer";
+      case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
+      case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schl&uuml;ssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
       case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (au&szlig;er den IBAN-Regeln) geladen";
-      case OK_NACHFOLGE_BLZ_USED: return "ok; f&uuml;r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
-      case OK_KTO_REPLACED: return "ok; die Kontonummer wurde allerdings ersetzt";
-      case OK_BLZ_REPLACED: return "ok; die Bankleitzahl wurde allerdings ersetzt";
-      case OK_BLZ_KTO_REPLACED: return "ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
-      case OK_IBAN_WITHOUT_KC_TEST: return "ok; die Bankverbindung ist (ohne Test) als richtig anzusehen";
-      case OK_INVALID_FOR_IBAN: return "ok; f&uuml;r IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
-      case OK_HYPO_REQUIRES_KTO: return "ok; f&uuml;r die BIC-Bestimmung der ehemaligen Hypo-Bank f&uuml;r IBAN wird i.A. zus&auml;tzlich die Kontonummer ben&ouml;tigt";
-      case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Pr&uuml;fziffer";
-      case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angef&uuml;gt";
+      case OK_NACHFOLGE_BLZ_USED: return "ok, f&uuml;r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
+      case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
+      case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
+      case OK_BLZ_KTO_REPLACED: return "ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
+      case OK_IBAN_WITHOUT_KC_TEST: return "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen";
+      case OK_INVALID_FOR_IBAN: return "ok, f&uuml;r IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
+      case OK_HYPO_REQUIRES_KTO: return "ok, f&uuml;r die BIC-Bestimmung der ehemaligen Hypo-Bank f&uuml;r IBAN wird i.A. zus&auml;tzlich die Kontonummer ben&ouml;tigt";
+      case OK_KTO_REPLACED_NO_PZ: return "ok, die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Pr&uuml;fziffer";
+      case OK_UNTERKONTO_ATTACHED: return "ok, es wurde ein (weggelassenes) Unterkonto angef&uuml;gt";
       default: return "ung&uuml;ltiger R&uuml;ckgabewert";
-#line 18775 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18889 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20491,7 +20605,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case INVALID_IBAN_LENGTH: return "Die LÃ¤nge der IBAN fÃ¼r das angegebene LÃ¤nderkÃ¼rzel ist falsch";
       case LUT2_NO_ACCOUNT_GIVEN: return "Keine Bankverbindung/IBAN angegeben";
       case LUT2_VOLLTEXT_INVALID_CHAR: return "UngÃ¼ltiges Zeichen ( ()+-/&.,\' ) fÃ¼r die Volltextsuche gefunden";
-      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen SIe lut_suche_multiple() zur Suche nach mehreren Worten";
+      case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ungÃ¼ltig";
       case LUT_SUCHE_INVALID_CMD: return "Suche: im VerknÃ¼pfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
       case LUT_SUCHE_INVALID_CNT: return "Suche: es mÃ¼ssen zwischen 1 und 26 Suchmuster angegeben werden";
@@ -20504,7 +20618,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case KTO_CHECK_DEFAULT_BLOCK_FULL: return "Die maximale Anzahl EintrÃ¤ge fÃ¼r den Default-Block wurde erreicht";
       case KTO_CHECK_NO_DEFAULT_BLOCK: return "Es wurde noch kein Default-Block angelegt";
       case KTO_CHECK_KEY_NOT_FOUND: return "Der angegebene SchlÃ¼ssel wurde im Default-Block nicht gefunden";
-      case LUT2_NO_LONGER_VALID_BETTER: return "Beide DatensÃ¤tze sind nicht mehr gÃ¼ltig; dieser ist  aber jÃ¼nger als der andere";
+      case LUT2_NO_LONGER_VALID_BETTER: return "Beide DatensÃ¤tze sind nicht mehr gÃ¼ltig, dieser ist aber jÃ¼nger als der andere";
       case DTA_SRC_KTO_DIFFERENT: return "Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_SRC_BLZ_DIFFERENT: return "Die Auftraggeber-Bankleitzahl des C-Datensatzes unterscheidet sich von der des A-Satzes";
       case DTA_CR_LF_IN_FILE: return "Die DTA-Datei enthÃ¤lt (unzulÃ¤ssige) ZeilenvorschÃ¼be";
@@ -20595,7 +20709,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case OK_GELOESCHT: return "ok (die BLZ wurde allerdings gelÃ¶scht)";
       case BLZ_GELOESCHT: return "die Bankleitzahl wurde gelÃ¶scht";
       case INVALID_BLZ_FILE: return "Fehler in der blz.txt Datei (falsche ZeilenlÃ¤nge)";
-      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert";
+      case LIBRARY_IS_NOT_THREAD_SAFE: return "undefinierte Funktion, die library wurde mit THREAD_SAFE=0 kompiliert";
       case FATAL_ERROR: return "schwerer Fehler im Konto_check-Modul";
       case INVALID_KTO_LENGTH: return "ein Konto muÃŸ zwischen 1 und 10 Stellen haben";
       case FILE_WRITE_ERROR: return "kann Datei nicht schreiben";
@@ -20613,31 +20727,31 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case OK: return "ok";
       case EE: if(eep)return (char *)eep; else return "";
       case OK_NO_CHK: return "ok, ohne PrÃ¼fung";
-      case OK_TEST_BLZ_USED: return "ok; fÃ¼r den Test wurde eine Test-BLZ verwendet";
+      case OK_TEST_BLZ_USED: return "ok, fÃ¼r den Test wurde eine Test-BLZ verwendet";
       case LUT2_VALID: return "Der Datensatz ist aktuell gÃ¼ltig";
       case LUT2_NO_VALID_DATE: return "Der Datensatz enthÃ¤lt kein GÃ¼ltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
-      case LUT1_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
+      case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
       case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
-      case LUT_V2_FILE_GENERATED: return "ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
-      case KTO_CHECK_VALUE_REPLACED: return "ok; der Wert fÃ¼r den SchlÃ¼ssel wurde Ã¼berschrieben";
-      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
-      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok; die Kontonummer enthÃ¤lt eine Unterkontonummer";
-      case OK_SLOT_CNT_MIN_USED: return "ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
-      case SOME_KEYS_NOT_FOUND: return "ok; ein(ige) SchlÃ¼ssel wurden nicht gefunden";
+      case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
+      case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert fÃ¼r den SchlÃ¼ssel wurde Ã¼berschrieben";
+      case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
+      case OK_UNTERKONTO_GIVEN: return "wahrscheinlich ok, die Kontonummer enthÃ¤lt eine Unterkontonummer";
+      case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt";
+      case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) SchlÃ¼ssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
       case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (auÃŸer den IBAN-Regeln) geladen";
-      case OK_NACHFOLGE_BLZ_USED: return "ok; fÃ¼r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
-      case OK_KTO_REPLACED: return "ok; die Kontonummer wurde allerdings ersetzt";
-      case OK_BLZ_REPLACED: return "ok; die Bankleitzahl wurde allerdings ersetzt";
-      case OK_BLZ_KTO_REPLACED: return "ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
-      case OK_IBAN_WITHOUT_KC_TEST: return "ok; die Bankverbindung ist (ohne Test) als richtig anzusehen";
-      case OK_INVALID_FOR_IBAN: return "ok; fÃ¼r IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
-      case OK_HYPO_REQUIRES_KTO: return "ok; fÃ¼r die BIC-Bestimmung der ehemaligen Hypo-Bank fÃ¼r IBAN wird i.A. zusÃ¤tzlich die Kontonummer benÃ¶tigt";
-      case OK_KTO_REPLACED_NO_PZ: return "ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine PrÃ¼fziffer";
-      case OK_UNTERKONTO_ATTACHED: return "ok; es wurde ein (weggelassenes) Unterkonto angefÃ¼gt";
+      case OK_NACHFOLGE_BLZ_USED: return "ok, fÃ¼r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
+      case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
+      case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
+      case OK_BLZ_KTO_REPLACED: return "ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt";
+      case OK_IBAN_WITHOUT_KC_TEST: return "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen";
+      case OK_INVALID_FOR_IBAN: return "ok, fÃ¼r IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert";
+      case OK_HYPO_REQUIRES_KTO: return "ok, fÃ¼r die BIC-Bestimmung der ehemaligen Hypo-Bank fÃ¼r IBAN wird i.A. zusÃ¤tzlich die Kontonummer benÃ¶tigt";
+      case OK_KTO_REPLACED_NO_PZ: return "ok, die Kontonummer wurde ersetzt, die neue Kontonummer hat keine PrÃ¼fziffer";
+      case OK_UNTERKONTO_ATTACHED: return "ok, es wurde ein (weggelassenes) Unterkonto angefÃ¼gt";
       default: return "ungÃ¼ltiger RÃ¼ckgabewert";
-#line 18792 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18906 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20815,7 +20929,7 @@ DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
       case OK_KTO_REPLACED_NO_PZ: return "OK_KTO_REPLACED_NO_PZ";
       case OK_UNTERKONTO_ATTACHED: return "OK_UNTERKONTO_ATTACHED";
       default: return "UNDEFINED_RETVAL";
-#line 18809 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18923 "ruby/ext/konto_check_raw/konto_check.lxx"
    }
 }
 
@@ -20871,7 +20985,7 @@ DLL_EXPORT int get_lut_info2_b(char *lutname,int *version,char **prolog_p,char *
    }
    else
       **user_info_p=0;
-#line 18850 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 18964 "ruby/ext/konto_check_raw/konto_check.lxx"
    FREE(prolog);
    return OK;
 }
@@ -21007,11 +21121,15 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          else
             return "03.06.2013 (Aenderungen vom 09.09.2013 enthalten aber noch nicht aktiviert)";
       case 5:
-        return "09.09.2013";              /* Datum der IBAN-Regeln */
+#if DB_NEUE_VERSION>0
+        return "09.09.2013 (Regel 20/Deutsche Bank: Version 1.6 vom 30.8.2013)";  /* Datum der IBAN-Regeln */
+#else
+        return "09.09.2013";
+#endif
       case 6:
-        return "26. August 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "4. September 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -21157,7 +21275,7 @@ DLL_EXPORT int dump_lutfile(char *outputname,UINT4 *required)
       default:
          break;
    }
-#line 19075 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 19193 "ruby/ext/konto_check_raw/konto_check.lxx"
    fputc('\n',out);
    while(--i)fputc('=',out);
    fputc('\n',out);
@@ -21442,7 +21560,9 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
          return bic;
       }
    }
-   return lut_bic(blz2,0,retval);
+   bic=lut_bic(blz2,0,retval);
+   if(!strncmp(bic,"        ",8))bic="";
+   return bic;
 }
 
 /* Funktion iban_gen(), iban_bic_gen() und iban_bic_gen1 +§§§1 */
@@ -21520,7 +21640,7 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
  * ###########################################################################
  */
 
-#line 19438 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 19558 "ruby/ext/konto_check_raw/konto_check.lxx"
 DLL_EXPORT char *iban_gen(char *blz,char *kto,int *retval)
 {
    return iban_bic_gen(blz,kto,NULL,NULL,NULL,retval);
@@ -21628,8 +21748,9 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
       }
 
          /* IBAN-Regeln anwenden; u.U. wird BLZ und/oder Konto ersetzt */
-      if((ret_regel=iban_regel_cvt(blz,kto,&bic,regel))<0){
+      if((ret_regel=iban_regel_cvt(blz,kto,&bic,regel))<OK){
          if(!bic)bic=lut_bic(blz,0,NULL);
+         if(!strncmp(bic,"        ",8))bic="";
          if(retval)*retval=ret_regel;
          if(bicp)*bicp=bic;
          return NULL;
@@ -21666,7 +21787,7 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
       ret_old=kto_check(blz,kto,NULL); /* alte Bankverbindung testen */
       sprintf(blz=blz_n,"%8d",blz_i);
       ret_neu=kto_check(blz,kto,NULL)  /* neue BLZ, altes Konto testen */;
-      if(ret_old==OK && ret_neu==FALSE){  /* u.U. andere Prüfziffermethode; Konten müssen dann angepasst werden */
+      if(ret_old==OK && ret_neu<OK){  /* u.U. andere Prüfziffermethode; Konten müssen dann angepasst werden */
          if(retval)*retval=OLD_BLZ_OK_NEW_NOT;
          return NULL;
       }
@@ -21680,6 +21801,7 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
        */
    if(bicp){
       if(!bic)bic=lut_bic(blz,0,NULL);
+      if(!strncmp(bic,"        ",8))bic="";
       *bicp=bic;
    }
    if(blz2)strcpy(blz2,blz);
@@ -22257,7 +22379,7 @@ DLL_EXPORT int ipi_check(char *zweck)
  * # Copyright (C) 2009,2011 Michael Plugge <m.plugge@hs-mannheim.de>        #
  * ###########################################################################
  */
-#line 20175 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 20297 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion volltext_zeichen() +§§§2 */
 /* Diese Funktion gibt für Zeichen die bei der Volltextsuche gültig sind
@@ -23090,7 +23212,7 @@ static int qcmp_sortc(const void *ap,const void *bp)
       return a-b;
 }
 
-#line 21008 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21130 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion qcmp_bic() +§§§3 */
 static int qcmp_bic(const void *ap,const void *bp)
@@ -23182,7 +23304,7 @@ static int qcmp_plz(const void *ap,const void *bp)
    else 
       return a-b;
 }
-#line 21023 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21145 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion init_blzf() +§§§2
  * Diese Funktion initialisiert das Array mit den Bankleitzahlen für alle
@@ -23250,7 +23372,7 @@ DLL_EXPORT int konto_check_idx2blz(int idx,int *zweigstelle,int *retval)
 }
 
 /* Funktion suche_int1() +§§§2 */
-#line 21091 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21213 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int suche_int1(int a1,int a2,int *anzahl,int **start_idx,int **zweigstellen_base,int **blz_base,
       int **base_name,int **base_sort,int(*cmp)(const void *, const void *),int cnt,int such_idx)
 {
@@ -23301,7 +23423,7 @@ static int suche_int1(int a1,int a2,int *anzahl,int **start_idx,int **zweigstell
 }
 
 /* Funktion suche_int2() +§§§2 */
-#line 21142 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21264 "ruby/ext/konto_check_raw/konto_check.lxx"
 static int suche_int2(int a1,int a2,int *anzahl,int **start_idx,int **zweigstellen_base,int **blz_base,
       int **base_name,int **base_sort,int(*cmp)(const void *, const void *),int such_idx,int pz_suche)
 {
@@ -23695,7 +23817,7 @@ DLL_EXPORT int lut_suche(int such_id,char *such_cmd,UINT4 *such_cnt,UINT4 **fili
          if(!isalpha(*ptr))return LUT_SUCHE_INVALID_CMD;
          i=tolower(*ptr)-'a';
          s1=lut_suche_multiple_and(s1,ergebnis[i].start_idx,ergebnis[i].cnt,NULL,0,NULL,&ret);
-         if(ret<0)return ret;
+         if(ret<OK)return ret;
       }
    }
    if(typ==SUCHE_STD)
@@ -23859,7 +23981,7 @@ static int cmp_suche_sort(const void *ap,const void *bp)
 DLL_EXPORT int lut_suche_sort1(int anzahl,int *blz_base,int *zweigstellen_base,int *idx,int *anzahl_o,int **idx_op,int **cnt_op,int uniq)
 {
    int i,j,last_idx,*idx_a,*cnt_o;
-#line 21701 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 21823 "ruby/ext/konto_check_raw/konto_check.lxx"
 
    if(idx_op)*idx_op=NULL;
    if(cnt_op)*cnt_op=NULL;
@@ -24145,7 +24267,7 @@ DLL_EXPORT int lut_suche_plz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int2(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&plz,&sort_plz,qcmp_plz,LUT2_PLZ_SORT,0);
 }
 
-#line 21961 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 22083 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion kto_check_set_default() und kto_check_set_default_bin() +§§§1 */
 /* ###########################################################################
@@ -25168,7 +25290,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       default: return "??";
    }
 }
-#line 22627 "ruby/ext/konto_check_raw/konto_check.lxx"
+#line 22749 "ruby/ext/konto_check_raw/konto_check.lxx"
 
 /* Funktion lut_keine_iban_berechnung() +§§§1 */
 /*
