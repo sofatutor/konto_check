@@ -1,6 +1,5 @@
 /* vim: ft=c:set si:set fileencoding=iso-8859-1
  */
-#line 9 "konto_check_h.lx"
 
 /*
  * ##########################################################################
@@ -89,6 +88,14 @@
     * (bei 0 werden sie abhängig vom Datum aktiviert).
    */ 
 #define FORCE_AENDERUNGEN_2013_09 0
+
+   /* die neue Version der Regel 20 wird zum 9. Dezember in den offiziellen IBAN-Regeln veröffentlicht;
+    * die Bundesbank hat jedoch schon die Regelversion am 28. August veröffentlicht, mit der Bitte, sie
+    * möglichst schon zum 9. September einzusetzen. Durch die neue Regelversion werden die Fälle mit dem
+    * Rückgabewert IBAN_AMBIGUOUS_KTO komplett eliminiert.
+    */
+
+#define DB_NEUE_VERSION 1  /* bei 1: neue Version der DB-Regel benutzen */
 
 /* Debug-Version für iban_gen in Perl aktivieren (zur Ausgabe der benutzten
  * Prüfziffermethode in iban_gen()). Dies ist nur möglich, falls das Makro
@@ -253,7 +260,7 @@
 #endif
 
    /* maximale Länge für Default-Suchpfad und Dateiname der LUT-Datei */
-#define LUT_PATH_LEN 128
+#define LUT_PATH_LEN 512
 
 /*
  * ######################################################################
@@ -516,7 +523,6 @@ extern const char *lut2_feld_namen[256];
 #define OK_HYPO_REQUIRES_KTO                    23
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
-#line 308 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
@@ -959,6 +965,7 @@ DLL_EXPORT int kto_check_write_default(char *lutfile,int block_id);
 DLL_EXPORT int lut_cleanup(void);
 
    /* IBAN-Sachen */
+DLL_EXPORT int ci_check(char *ci);
 DLL_EXPORT int iban_check(char *iban,int *retval);
 DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto);
 DLL_EXPORT char *iban_gen(char *kto,char *blz,int *retval);
