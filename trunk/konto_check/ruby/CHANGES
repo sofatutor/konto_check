@@ -1,3 +1,10 @@
+important changes in version 5.1:
+   - new function ci_check() for testing a Credit Identifier (Gläubiger-Identifikationsnummer)
+   - new version of IBAN rule 20 (Deutsche Bank)
+   - load missing LUT blocks for IBAN calculations automagically
+   - bug fixes in check methodss 13b, 63, C7
+   - various bug fixes
+
 important changes in version 5.0:
    - implemented changes for IBAN rules, new IBAN rules 48-54
    - implemented changes for check methods 57 and 95

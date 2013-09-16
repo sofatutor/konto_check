@@ -2829,7 +2829,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"LUT2_NO_ACCOUNT_GIVEN",INT2FIX(LUT2_NO_ACCOUNT_GIVEN));
       /* (-119) Ungültiges Zeichen ( ()+-/&.,\' ) für die Volltextsuche gefunden */
    rb_define_const(KontoCheck,"LUT2_VOLLTEXT_INVALID_CHAR",INT2FIX(LUT2_VOLLTEXT_INVALID_CHAR));
-      /* (-118) Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen SIe lut_suche_multiple() zur Suche nach mehreren Worten */
+      /* (-118) Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten */
    rb_define_const(KontoCheck,"LUT2_VOLLTEXT_SINGLE_WORD_ONLY",INT2FIX(LUT2_VOLLTEXT_SINGLE_WORD_ONLY));
       /* (-117) die angegebene Suchresource ist ungültig */
    rb_define_const(KontoCheck,"LUT_SUCHE_INVALID_RSC",INT2FIX(LUT_SUCHE_INVALID_RSC));
@@ -2855,7 +2855,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"KTO_CHECK_NO_DEFAULT_BLOCK",INT2FIX(KTO_CHECK_NO_DEFAULT_BLOCK));
       /* (-106) Der angegebene Schlüssel wurde im Default-Block nicht gefunden */
    rb_define_const(KontoCheck,"KTO_CHECK_KEY_NOT_FOUND",INT2FIX(KTO_CHECK_KEY_NOT_FOUND));
-      /* (-105) Beide Datensätze sind nicht mehr gültig; dieser ist  aber jünger als der andere */
+      /* (-105) Beide Datensätze sind nicht mehr gültig, dieser ist aber jünger als der andere */
    rb_define_const(KontoCheck,"LUT2_NO_LONGER_VALID_BETTER",INT2FIX(LUT2_NO_LONGER_VALID_BETTER));
       /* (-104) Die Auftraggeber-Kontonummer des C-Datensatzes unterscheidet sich von der des A-Satzes */
    rb_define_const(KontoCheck,"DTA_SRC_KTO_DIFFERENT",INT2FIX(DTA_SRC_KTO_DIFFERENT));
@@ -3037,7 +3037,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"BLZ_GELOESCHT",INT2FIX(BLZ_GELOESCHT));
       /* (-15) Fehler in der blz.txt Datei (falsche Zeilenlänge) */
    rb_define_const(KontoCheck,"INVALID_BLZ_FILE",INT2FIX(INVALID_BLZ_FILE));
-      /* (-14) undefinierte Funktion; die library wurde mit THREAD_SAFE=0 kompiliert */
+      /* (-14) undefinierte Funktion, die library wurde mit THREAD_SAFE=0 kompiliert */
    rb_define_const(KontoCheck,"LIBRARY_IS_NOT_THREAD_SAFE",INT2FIX(LIBRARY_IS_NOT_THREAD_SAFE));
       /* (-13) schwerer Fehler im Konto_check-Modul */
    rb_define_const(KontoCheck,"FATAL_ERROR",INT2FIX(FATAL_ERROR));
@@ -3071,7 +3071,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"OK",INT2FIX(OK));
       /* (2) ok, ohne Prüfung */
    rb_define_const(KontoCheck,"OK_NO_CHK",INT2FIX(OK_NO_CHK));
-      /* (3) ok; für den Test wurde eine Test-BLZ verwendet */
+      /* (3) ok, für den Test wurde eine Test-BLZ verwendet */
    rb_define_const(KontoCheck,"OK_TEST_BLZ_USED",INT2FIX(OK_TEST_BLZ_USED));
       /* (4) Der Datensatz ist aktuell gültig */
    rb_define_const(KontoCheck,"LUT2_VALID",INT2FIX(LUT2_VALID));
@@ -3079,42 +3079,42 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"LUT2_NO_VALID_DATE",INT2FIX(LUT2_NO_VALID_DATE));
       /* (6) Die Datei ist im alten LUT-Format (1.0/1.1) */
    rb_define_const(KontoCheck,"LUT1_SET_LOADED",INT2FIX(LUT1_SET_LOADED));
-      /* (7) ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert */
+      /* (7) ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert */
    rb_define_const(KontoCheck,"LUT1_FILE_GENERATED",INT2FIX(LUT1_FILE_GENERATED));
       /* (8) In der DTAUS-Datei wurden kleinere Fehler gefunden */
    rb_define_const(KontoCheck,"DTA_FILE_WITH_WARNINGS",INT2FIX(DTA_FILE_WITH_WARNINGS));
-      /* (9) ok; es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch) */
+      /* (9) ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch) */
    rb_define_const(KontoCheck,"LUT_V2_FILE_GENERATED",INT2FIX(LUT_V2_FILE_GENERATED));
-      /* (10) ok; der Wert für den Schlüssel wurde überschrieben */
+      /* (10) ok, der Wert für den Schlüssel wurde überschrieben */
    rb_define_const(KontoCheck,"KTO_CHECK_VALUE_REPLACED",INT2FIX(KTO_CHECK_VALUE_REPLACED));
-      /* (11) wahrscheinlich ok; die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten */
+      /* (11) wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_POSSIBLE",INT2FIX(OK_UNTERKONTO_POSSIBLE));
-      /* (12) wahrscheinlich ok; die Kontonummer enthält eine Unterkontonummer */
+      /* (12) wahrscheinlich ok, die Kontonummer enthält eine Unterkontonummer */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_GIVEN",INT2FIX(OK_UNTERKONTO_GIVEN));
-      /* (13) ok; die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt */
+      /* (13) ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt */
    rb_define_const(KontoCheck,"OK_SLOT_CNT_MIN_USED",INT2FIX(OK_SLOT_CNT_MIN_USED));
-      /* (14) ok; ein(ige) Schlüssel wurden nicht gefunden */
+      /* (14) ok, ein(ige) Schlüssel wurden nicht gefunden */
    rb_define_const(KontoCheck,"SOME_KEYS_NOT_FOUND",INT2FIX(SOME_KEYS_NOT_FOUND));
       /* (15) Die Bankverbindung wurde nicht getestet */
    rb_define_const(KontoCheck,"LUT2_KTO_NOT_CHECKED",INT2FIX(LUT2_KTO_NOT_CHECKED));
       /* (16) Es wurden fast alle BLocks (außer den IBAN-Regeln) geladen */
    rb_define_const(KontoCheck,"LUT2_OK_WITHOUT_IBAN_RULES",INT2FIX(LUT2_OK_WITHOUT_IBAN_RULES));
-      /* (17) ok; für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt */
+      /* (17) ok, für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt */
    rb_define_const(KontoCheck,"OK_NACHFOLGE_BLZ_USED",INT2FIX(OK_NACHFOLGE_BLZ_USED));
-      /* (18) ok; die Kontonummer wurde allerdings ersetzt */
+      /* (18) ok, die Kontonummer wurde allerdings ersetzt */
    rb_define_const(KontoCheck,"OK_KTO_REPLACED",INT2FIX(OK_KTO_REPLACED));
-      /* (19) ok; die Bankleitzahl wurde allerdings ersetzt */
+      /* (19) ok, die Bankleitzahl wurde allerdings ersetzt */
    rb_define_const(KontoCheck,"OK_BLZ_REPLACED",INT2FIX(OK_BLZ_REPLACED));
-      /* (20) ok; die Bankleitzahl und Kontonummer wurde allerdings ersetzt */
+      /* (20) ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt */
    rb_define_const(KontoCheck,"OK_BLZ_KTO_REPLACED",INT2FIX(OK_BLZ_KTO_REPLACED));
-      /* (21) ok; die Bankverbindung ist (ohne Test) als richtig anzusehen */
+      /* (21) ok, die Bankverbindung ist (ohne Test) als richtig anzusehen */
    rb_define_const(KontoCheck,"OK_IBAN_WITHOUT_KC_TEST",INT2FIX(OK_IBAN_WITHOUT_KC_TEST));
-      /* (22) ok; für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert */
+      /* (22) ok, für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert */
    rb_define_const(KontoCheck,"OK_INVALID_FOR_IBAN",INT2FIX(OK_INVALID_FOR_IBAN));
-      /* (23) ok; für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt */
+      /* (23) ok, für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt */
    rb_define_const(KontoCheck,"OK_HYPO_REQUIRES_KTO",INT2FIX(OK_HYPO_REQUIRES_KTO));
-      /* (24) ok; die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer */
+      /* (24) ok, die Kontonummer wurde ersetzt, die neue Kontonummer hat keine Prüfziffer */
    rb_define_const(KontoCheck,"OK_KTO_REPLACED_NO_PZ",INT2FIX(OK_KTO_REPLACED_NO_PZ));
-      /* (25) ok; es wurde ein (weggelassenes) Unterkonto angefügt */
+      /* (25) ok, es wurde ein (weggelassenes) Unterkonto angefügt */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_ATTACHED",INT2FIX(OK_UNTERKONTO_ATTACHED));
 }
