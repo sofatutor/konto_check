@@ -1,5 +1,6 @@
 /* vim: ft=c:set si:set fileencoding=iso-8859-1
  */
+#line 9 "konto_check_h.lx"
 
 /*
  * ##########################################################################
@@ -271,7 +272,7 @@
 #define DEFAULT_LUT_FIELDS_NUM   9
 #define DEFAULT_LUT_FIELDS       lut_set_9
 #define DEFAULT_LUT_VERSION      3
-#define DEFAULT_SLOTS            40
+#define DEFAULT_SLOTS            60
 #define DEFAULT_INIT_LEVEL       5
 #define LAST_LUT_BLOCK           100
 
@@ -321,6 +322,7 @@
 #define LUT2_VOLLTEXT_TXT            23
 #define LUT2_VOLLTEXT_IDX            24
 #define LUT2_IBAN_REGEL              25
+#define LUT2_IBAN_REGEL_SORT         26
 
 #define LUT2_2_BLZ                  101
 #define LUT2_2_FILIALEN             102
@@ -347,6 +349,7 @@
 #define LUT2_2_VOLLTEXT_TXT         123
 #define LUT2_2_VOLLTEXT_IDX         124
 #define LUT2_2_IBAN_REGEL           125
+#define LUT2_2_IBAN_REGEL_SORT      126
 
 #define LUT2_DEFAULT                501
 
@@ -363,6 +366,7 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define FALSE_UNTERKONTO_ATTACHED             -135
 #define BLZ_BLACKLISTED                       -134
 #define BLZ_MARKED_AS_DELETED                 -133
 #define IBAN_CHKSUM_OK_SOMETHING_WRONG        -132
@@ -523,6 +527,7 @@ extern const char *lut2_feld_namen[256];
 #define OK_HYPO_REQUIRES_KTO                    23
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
+#line 316 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
@@ -614,7 +619,7 @@ typedef struct{
  * #                                                                        #
  * ##########################################################################
  */
-#define SLOT_CNT_MIN 50
+#define SLOT_CNT_MIN 60
 
 /*
  * ##########################################################################
@@ -920,6 +925,7 @@ DLL_EXPORT int lut_iban_regel_i(int b,int zweigstelle,int *retval);
 #define LUT_SUCHE_BLZ         6
 #define LUT_SUCHE_PLZ         7
 #define LUT_SUCHE_PZ          8
+#define LUT_SUCHE_REGEL       9
 
    /* Defaultwert für sort/uniq bei Suchfunktionen (=> nur eine Zweigstelle
     * zurückgeben) (betrifft nur PHP, Perl und Ruby, bei denen der Parameter
@@ -942,6 +948,7 @@ DLL_EXPORT int lut_suche_ort(char *such_name,int *anzahl,int **start_idx,int **z
 DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int **zweigstellen_base,int **base_name,int **blz_base);
 DLL_EXPORT int lut_suche_pz(int such1,int such2,int *anzahl,int **start_idx,int **zweigstellen_base,int **base_name,int **blz_base);
 DLL_EXPORT int lut_suche_plz(int such1,int such2,int *anzahl,int **start_idx,int **zweigstellen_base,int **base_name,int **blz_base);
+DLL_EXPORT int lut_suche_regel(int such1,int such2,int *anzahl,int **start_idx,int **zweigstellen_base,int **base_name,int **blz_base);
 DLL_EXPORT int lut_suche_volltext(char *such_wort,int *anzahl,int *base_name_idx,char ***base_name,int *zweigstellen_anzahl,int **start_idx,int **zweigstellen_base,int **blz_base);
 DLL_EXPORT int lut_suche_multiple(char *such_worte,int uniq,char *such_cmd,UINT4 *anzahl,UINT4 **zweigstellen,UINT4 **blz);
 DLL_EXPORT int lut_suche_sort1(int anzahl,int *blz_base,int *zweigstellen_base,int *idx,int *anzahl_o,int **idx_op,int **cnt_o,int uniq);
