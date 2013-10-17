@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.2 (development)"
 #endif
-#define VERSION_DATE "2013-09-13"
+#define VERSION_DATE "2013-10-16"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -100,7 +100,6 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
-#include "cp.h"
 
    /* Flag, um die Änderungen zum 9.9.2013 zu aktivieren */
 #if 0
@@ -510,7 +509,7 @@ static const int tab1[]={0,4,3,2,6},tab2[]={7,1,5,9,8};
 
    /* Inhalt der verschiedenen LUT2-Blocktypen */
 static const char *lut_block_name1[400],*lut_block_name2[400];
-static int lut_block_idx[400];
+static int lut_block_idx[400],lut_blocklen_max;
 
    /* Suchpfad und Defaultnamen für LUT-Dateien */
 static const char *lut_searchpath[]={DEFAULT_LUT_PATH};
@@ -520,11 +519,11 @@ static const int lut_name_cnt=sizeof(default_lutname)/sizeof(char *);
 
   /* Infos über geladene Blocks (nur für interne Blocks mit Typ <400) */
 static char *lut2_block_data[400],*current_info;
-static int lut2_block_status[400],lut2_block_len[400],lut2_cnt,lut2_cnt_hs;
-static UINT4 current_info_len,current_v1,current_v2;
+static int lut2_block_status[400],lut2_block_len[400],
+           lut2_cnt,lut2_cnt_hs;
+static UINT4 current_info_len,current_v1,current_v2,lut_blocks_missing,set_offset;
 static int lut_id_status,lut_init_level,current_lut_set,current_lut_level,lut_init_level_tmp=-1;
 static char lut_id[36],*current_lutfile;
-
 
    /* Speicherbereich und Variablen für den Default-Buffer */
 #define INITIAL_DEFAULT_BUFSIZE 4096   /* initiale Buffergröße (dynamisch) */
@@ -2771,7 +2770,7 @@ DLL_EXPORT int lut_info(char *lut_name,char **info1,char **info2,int *valid1,int
             sprintf(ptr,"%s\nin den Speicher geladene Blocks:\n   ",current_info);
             while(*ptr)ptr++;
             ptr1=*info1+current_info_len+8000;
-            for(i=j=0;i<SET_OFFSET && ptr<ptr1;i++)if(lut2_block_status[i]==OK){
+            for(i=j=0;i<SET_OFFSET && ptr<ptr1;i++)if(lut2_block_status[i+set_offset]==OK){
                while(*ptr)ptr++;
                if(j>0)*ptr++=',';
                *ptr++=' ';
@@ -3321,13 +3320,14 @@ DLL_EXPORT int lut_init(char *lut_name,int required,int set)
 DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,int incremental)
 {
    char *ptr,*dptr,*data,*eptr,*prolog,*info,*user_info,*hs=NULL,*info1,*info2,*ci=NULL,name_buffer[LUT_PATH_LEN];
-   int b,h,i,j,k,v1,v2,retval,release_data,alles_ok,slotdir[MAX_SLOTS],*iptr,*rptr,xrequired[MAX_SLOTS],have_iban_rules,own_iban_2;
-   UINT4 len,typ,typ1,set_offset=0,slot_cnt;
+   int b,h,i,j,k,v1,v2,retval,release_data,alles_ok,slotdir[MAX_SLOTS],*iptr,*rptr,xrequired[MAX_SLOTS],own_iban_2;
+   UINT4 len,typ,typ1,slot_cnt;
    FILE *lut;
    struct stat s_buf;
 
+   set_offset=0;
    if(!required)required=lut_set_9;   /* falls nichts angegeben, alle Felder einlesen */
-   have_iban_rules=own_iban_2=0;
+   own_iban_2=0;
 
       /* falls schon einmal initialisiert wurde (BLZ und PZ-Methoden gelesen),
        * eine Millisekunde warten, damit evl. laufende Tests sicher beendet
@@ -3553,6 +3553,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
             lut2_block_status[typ]=lut2_block_status[typ1]=retval;
             alles_ok=lut2_block_len[typ]=0;
             lut2_block_data[typ]=NULL;
+            lut_blocks_missing++;
             continue;
 
          case LUT2_BLOCK_NOT_IN_FILE:
@@ -3560,15 +3561,23 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                /* falls die IBAN Blackliste nicht enthalten ist, im anderen Block nachsehen
                 * und evl. von da nachladen (die Liste ändert sich nicht so oft).
                 */
-            if(typ==LUT2_OWN_IBAN && !own_iban_2){
-               own_iban_2=1;  /* Flag, daß schon ein Versuch mit dem Block gemacht wurde (sonst gibt es eine Endlosschleife) */
-               *--rptr=LUT2_2_OWN_IBAN;
-               continue;
+            if(typ==LUT2_OWN_IBAN){
+               if(!own_iban_2){
+                  own_iban_2=1;  /* Flag, daß schon ein Versuch mit dem Block gemacht wurde (sonst gibt es eine Endlosschleife) */
+                  *--rptr=LUT2_2_OWN_IBAN;
+                  continue;
+               }
+               else
+                  lut_blocks_missing++;
             }
-            if(typ==LUT2_2_OWN_IBAN && !own_iban_2){
-               own_iban_2=1;
-               *--rptr=LUT2_OWN_IBAN;
-               continue;
+            if(typ==LUT2_2_OWN_IBAN){
+               if(!own_iban_2){
+                  own_iban_2=1;
+                  *--rptr=LUT2_OWN_IBAN;
+                  continue;
+               }
+               else
+                  lut_blocks_missing++;
             }
 
                /* Sonderfall LUT2_NAME und LUT2_NAME_KURZ: die beiden Blocks
@@ -3577,7 +3586,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                 */
             if(typ==LUT2_NAME_NAME_KURZ){
                *--rptr=LUT2_NAME_KURZ; /* beim nächsten Block den Kurznamen einlesen */
-               typ=LUT2_NAME;
+               typ=typ1=LUT2_NAME;
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_NAME,&len,&data);
                if(i==OK){  /* was gefunden; eintragen und Block verarbeiten */
@@ -3586,10 +3595,13 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
                }
+               else
+                  lut_blocks_missing++;
             }
             if(typ==LUT2_2_NAME_NAME_KURZ){ /* wie oben, nur sekundärer Datenblock */
                *--rptr=LUT2_2_NAME_KURZ; /* beim nächsten Block den Kurznamen einlesen */
                typ=LUT2_2_NAME;
+               typ1=LUT2_NAME;
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_2_NAME,&len,&data);
                if(i==OK){  /* was gefunden; eintragen und Block verarbeiten */
@@ -3598,35 +3610,50 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
                }
+               else
+                  lut_blocks_missing++;
             }
             if(typ==LUT2_NAME || typ==LUT2_NAME_KURZ){
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_NAME_NAME_KURZ,&len,&data);
                if(i==OK){  /* was gefunden; Typ ändern, dann weiter wie bei OK */
-                  typ=LUT2_NAME_NAME_KURZ;
+                  typ=typ1=LUT2_NAME_NAME_KURZ;
                   lut2_block_status[typ]=lut2_block_status[typ1]=retval;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
                }
+               else
+                  lut_blocks_missing++;
             }
             if(typ==LUT2_2_NAME || typ==LUT2_2_NAME_KURZ){
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_2_NAME_NAME_KURZ,&len,&data);
                if(i==OK){  /* was gefunden; Typ ändern, dann weiter wie bei OK */
                   typ=LUT2_2_NAME_NAME_KURZ;
+                  typ1=LUT2_NAME_NAME_KURZ;
                   lut2_block_status[typ]=lut2_block_status[typ1]=retval;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
                }
+               else
+                  lut_blocks_missing++;
             }
                /* Fehler bei dem Block; eintragen, dann weitere Blocks einlesen */
             lut2_block_status[typ]=lut2_block_status[typ1]=retval;
-               /* für fehlendes LUT2_OWN_IBAN bzw. LUT2_IBAN_REGEL keine Warnung erzeugen */
-            if(typ!=LUT2_OWN_IBAN && typ!=LUT2_2_OWN_IBAN && typ!=LUT2_IBAN_REGEL && typ!=LUT2_2_IBAN_REGEL)alles_ok=0;
+
+               /* für fehlendes LUT2_OWN_IBAN keine Warnung erzeugen. Bei
+                * LUT2_IBAN_REGEL gibt es jetzt (seit Version 5.2) eine
+                * Warnung, da sie für die IBAN-Funktionen mittlerweile ziemlig
+                * unerläßlich ist. Falls LUT2_OWN_IBAN nicht geladen werden konnte,
+                * wird der Block in der Funktion lut_blocks() als nicht geladen
+                * angegeben; bei lut_init() wird dagegen OK zurückgegeben.
+                */
+            if(typ!=LUT2_OWN_IBAN && typ!=LUT2_2_OWN_IBAN)alles_ok=0;
             lut2_block_len[typ]=lut2_block_len[typ1]=0;
             lut2_block_data[typ]=lut2_block_data[typ1]=NULL;
+            lut_blocks_missing++;
             continue;
 
          case KTO_CHECK_UNSUPPORTED_COMPRESSION:
@@ -3751,10 +3778,8 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
             C2UL(own_iban_cnt,ptr);
             if(!(own_iban=calloc(own_iban_cnt,sizeof(int))))
                lut2_block_status[typ]=lut2_block_status[typ1]=ERROR_MALLOC;
-            else{
+            else
                for(i=0;i<own_iban_cnt;i++)C2UL(own_iban[i],ptr);
-               have_iban_rules=1;   /* gleiche Funktionalität wie IBAN-Regeln */
-            }
             break;
 
          case LUT2_NAME:  /* Bezeichnung des Kreditinstitutes (ohne Rechtsform) */
@@ -3817,6 +3842,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
             if(!(name=calloc(lut2_cnt,sizeof(char*))) || !(name_kurz=calloc(lut2_cnt,sizeof(char*))))
                lut2_block_status[typ]=lut2_block_status[typ1]=ERROR_MALLOC;
             else{
+               if(name_name_kurz_data==name_name_kurz_raw)name_name_kurz_raw=NULL;
                FREE(name_name_kurz_data);
                FREE(name_name_kurz_raw);
                if(keep_raw_data_flag){
@@ -3894,7 +3920,6 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                   C2UM(j,ptr);
                   iban_regel[i]=j;
                }
-               have_iban_rules=1;
             }
             break;
 
@@ -4034,14 +4059,67 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
    fclose(lut);
    init_in_progress=0;
    init_status&=7;
-   if(alles_ok){
-      if(have_iban_rules)
-         return OK;  /* alle Blocks geladen */
-      else
-         return LUT2_OK_WITHOUT_IBAN_RULES;  /* Warnung/positiv (nur IBAN-Block fehlt => ret=16) */
-   }
+
+   if(alles_ok)
+      return OK;  /* alle Blocks geladen */
    else
       RETURN(LUT2_PARTIAL_OK);   /* Warnung bzw. Fehler/negativ (angeforderte Blocks fehlen => ret=-38) */
+}
+
+DLL_EXPORT int lut_blocks(int mode,char **lut_filename,char **lut_blocks_ok,char **lut_blocks_fehler)
+{
+   char **startptr,*ptr,*dptr;
+   int i;
+
+   if(lut_filename)*lut_filename=NULL;
+   if(lut_blocks_ok)*lut_blocks_ok=NULL;
+   if(lut_blocks_fehler)*lut_blocks_fehler=NULL;
+
+   if((init_status&7)<7)return LUT2_NOT_INITIALIZED;
+   switch(mode){
+      default:
+      case 1:
+         startptr=(char**)lut_block_name1;
+         break;
+      case 2:
+         startptr=(char**)lut_block_name2;
+         break;
+      case 3:
+         startptr=(char**)lut2_feld_namen;
+         break;
+   }
+
+   if(lut_filename){
+      if(!current_lutfile)return LUT2_NOT_INITIALIZED;
+      if(!(*lut_filename=dptr=malloc(strlen(current_lutfile)+4)))return ERROR_MALLOC;
+      strcpy(dptr,current_lutfile);
+   }
+   if(lut_blocks_fehler){
+      if(!(*lut_blocks_fehler=dptr=malloc(lut_blocklen_max+4)))return ERROR_MALLOC;
+      if(!lut_blocks_missing)
+         strcpy(dptr,"fehlende Blocks: keine");
+      else{
+         for(i=0;i<SET_OFFSET;i++)if(lut2_block_status[i+set_offset]<0){
+            for(ptr=startptr[i+set_offset];(*dptr=*ptr++);dptr++);
+            *dptr++=',';
+            *dptr++=' ';
+         }
+         *(dptr-2)=0;
+      }
+   }
+   if(lut_blocks_ok){
+      if(!(*lut_blocks_ok=dptr=malloc(lut_blocklen_max+4)))return ERROR_MALLOC;
+      for(i=0;i<SET_OFFSET;i++)if(lut2_block_status[i+set_offset]==OK){
+         for(ptr=startptr[i+set_offset];(*dptr=*ptr++);dptr++);
+         *dptr++=',';
+         *dptr++=' ';
+      }
+      *(dptr-2)=0;
+   }
+   if(lut_blocks_missing)
+      return LUT2_BLOCKS_MISSING;
+   else
+      return OK;
 }
 
 /* Funktion current_lutfile_name() +§§§1 */
@@ -8456,6 +8534,7 @@ DLL_EXPORT int lut_cleanup(void)
    init_status|=16;     /* init_status wird bei der Prüfung getestet */
    *lut_id=0;
    lut_id_status=0;
+   lut_blocks_missing=0;
    lut_init_level=current_lut_level=current_lut_set=-1;
    if(init_status&8)INITIALIZE_WAIT;
 
@@ -8971,6 +9050,7 @@ static void init_atoi_table(void)
    lut_block_name2[124]="2. Volltext idx";
    lut_block_name2[125]="2. IBAN Regel";
    lut_block_name2[126]="2. IBAN Regel idx";
+   lut_blocklen_max=434;
    init_status|=1;
 }
 
@@ -19412,9 +19492,10 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * #                                                                    #
  * # Anmerkung (M.P.): nach der Multiplikation wird ein Wert von 2442   #
  * # subtrahiert; dies ist ein Vielfaches von 11, das sich bei der      #
- * # "Kontonummer" 0 ergibt und das Ergebnis nur unnötig vergrößert.    #
- * # Die Subtraktion ändert das Ergebnis nicht, bringt aber die Summe   #
- * # in einen Bereich, der für das Makros MOD_11_352 akzeptabel ist.    #
+ * # "Kontonummer" 0 ergibt. Durch die ASCII-Darstellung wird das       #
+ * # Ergebnis nur unnötig vergrößert; die Subtraktion ändert das        #
+ * # Endergebnis nicht, bringt aber die Summe in einen Bereich, der für #
+ * # das Makros MOD_11_352 akzeptabel ist.                              #
  * ######################################################################
  */
 
@@ -19525,56 +19606,58 @@ DLL_EXPORT int kto_check_blz(char *blz,char *kto)
 #endif
 }
 
-/* Funktion kto_check_blz1() +§§§1 */
+/* Funktion kto_check_regel() +§§§1 */
 /* ###########################################################################
- * # Die Funktion kto_check_blz1() entspricht der Funktion kto_check_blz().  #
- * # Der einzige Unterschied ist, daß vor dem Test geprüft wird, ob für die  #
- * # BLZ/Konto-Kombination eine IBAN-Regel angewendet werden muß (z.B. bei   #
- * # Spendenkonten etc.). U.U. wird die BLZ und/oder Kontonummer ersetzt     #
- * # und die Berechnung mit den modifizierten Werten gemacht. Die Werte für  #
- * # BLZ und Kontonummer werden nicht zurückgegeben; das kann mittels der    #
- * # Funktion kto_check_blz2() erfolgen.                                     #
+ * # Die Funktion kto_check_regel() entspricht der Funktion                  #
+ * # kto_check_blz(). Der einzige Unterschied ist, daß vor dem Test geprüft  #
+ * # wird, ob für die  BLZ/Konto-Kombination eine IBAN-Regel angewendet      #
+ * # werden muß (z.B. bei Spendenkonten etc.). U.U. wird die BLZ und/oder    #
+ * # Kontonummer ersetzt  und die Berechnung mit den modifizierten Werten    #
+ * # gemacht. Die Werte für BLZ und Kontonummer werden nicht zurückgegeben;  #
+ * # das kann mittels der Funktion kto_check_blz2() erfolgen.                #
  * #                                                                         #
  * # Parameter:                                                              #
  * #    blz:        Bankleitzahl (immer 8-stellig)                           #
  * #    kto:        Kontonummer                                              #
  * #                                                                         #
- * # Copyright (C) 2007 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * # Copyright (C) 2013 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
  */
 
-#if 0
-DLL_EXPORT int kto_check_blz1(char *blz,char *kto)
+DLL_EXPORT int kto_check_regel(char *blz,char *kto)
 {
 #if USE_IBAN_RULES
-   char blz_n[10],kto_n[16];
-   int ret_regel,regel;
+   char *blz_o,blz_n[10],kto_o[16],kto_n[16],*ptr,*dptr;
+   const char *bicp;
+   int ret,ret_regel,regel;
 
-   for(ptr=blz,dptr=blz_n;(*dptr++=*ptr++););
+   memcpy(blz_n,blz,9);
    for(ptr=kto;*ptr;ptr++);   /* Ende von kto suchen */
    ptr--;
    memcpy(kto_n,"0000000000",10);
    kto_n[10]=0;
    for(dptr=kto_n+9;ptr>=kto;)*dptr--=*ptr--;
+
+       /* alte Versionen von kto und BLZ für Vergleich merken */
+   memcpy(kto_o,kto_n,16);
+   blz_o=blz;
    kto=kto_n;
    blz=blz_n;
-   regel=lut_iban_regel(b,0,&ret);
-   if((ret_regel=iban_regel_cvt(blz,kto,&bic,regel))<OK)return ret_regel;
-
-FALSE_UNTERKONTO_ATTACHED            # -135 # falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)
-BLZ_BLACKLISTED                      # -134 # Die BLZ findet sich in der Ausschlussliste für IBAN-Berechnungen
-NO_IBAN_CALCULATION                  # -124 # Für die Bankverbindung ist keine IBAN-Berechnung erlaubt
-IBAN_RULE_NOT_IMPLEMENTED            # -126 # Die IBAN-Regel ist noch nicht implementiert
-IBAN_RULE_UNKNOWN                    # -125 # Die IBAN-Regel ist nicht bekannt
-NO_IBAN_CALCULATION                  # -124 # Für die Bankverbindung ist keine IBAN-Berechnung erlaubt
-OLD_BLZ_OK_NEW_NOT                   # -123 # Die Bankverbindung ist mit der alten BLZ stimmig, mit der Nachfolge-BLZ nicht
-LUT2_IBAN_REGEL_NOT_INITIALIZED      # -122 # Das Feld IBAN-Regel wurde nicht initialisiert
-
+   regel=lut_iban_regel(blz,0,&ret);
+   if((ret_regel=iban_regel_cvt(blz,kto,&bicp,regel))<OK)return ret_regel;
+   ret=kto_check_blz(blz,kto);
+   if(strcmp(blz,blz_o) || strcmp(kto,kto_o)){  /* BLZ und/oder Kto ersetzt */
+      if(ret_regel>3)   /* ret_regel<1 wurde schon oben zurückgegeben */
+         return ret_regel;
+      else
+         return ret;
+   }
+   else  /* BLZ und Kto gleich */
+      return ret;
 #else
    return kto_check_blz(blz,kto);
 #endif
 }
-#endif
 
 /* Funktion kto_check_pz() +§§§1 */
 /* ###########################################################################
@@ -20153,6 +20236,7 @@ DLL_EXPORT const char *kto_check_retval2txt(int retval)
 DLL_EXPORT const char *kto_check_retval2iso(int retval)
 {
    switch(retval){
+      case LUT2_BLOCKS_MISSING: return "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden";
       case FALSE_UNTERKONTO_ATTACHED: return "falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)";
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste für IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig";
@@ -20305,7 +20389,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (60) hochgesetzt";
       case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schlüssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
-      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (außer den IBAN-Regeln) geladen";
+      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle Blocks (außer den IBAN-Regeln) geladen";
       case OK_NACHFOLGE_BLZ_USED: return "ok, für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
       case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
       case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
@@ -20331,6 +20415,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
 DLL_EXPORT const char *kto_check_retval2dos(int retval)
 {
    switch(retval){
+      case LUT2_BLOCKS_MISSING: return "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden";
       case FALSE_UNTERKONTO_ATTACHED: return "falsch, es wurde ein Unterkonto hinzugefgt (IBAN-Regel)";
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste fr IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gel”scht markiert und somit ungltig";
@@ -20483,7 +20568,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (60) hochgesetzt";
       case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schlssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
-      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (auáer den IBAN-Regeln) geladen";
+      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle Blocks (auáer den IBAN-Regeln) geladen";
       case OK_NACHFOLGE_BLZ_USED: return "ok, fr die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
       case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
       case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
@@ -20509,6 +20594,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
 DLL_EXPORT const char *kto_check_retval2html(int retval)
 {
    switch(retval){
+      case LUT2_BLOCKS_MISSING: return "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden";
       case FALSE_UNTERKONTO_ATTACHED: return "falsch, es wurde ein Unterkonto hinzugef&uuml;gt (IBAN-Regel)";
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste f&uuml;r IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gel&ouml;scht markiert und somit ung&uuml;ltig";
@@ -20661,7 +20747,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (60) hochgesetzt";
       case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) Schl&uuml;ssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
-      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (au&szlig;er den IBAN-Regeln) geladen";
+      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle Blocks (au&szlig;er den IBAN-Regeln) geladen";
       case OK_NACHFOLGE_BLZ_USED: return "ok, f&uuml;r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
       case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
       case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
@@ -20687,6 +20773,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
 DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 {
    switch(retval){
+      case LUT2_BLOCKS_MISSING: return "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden";
       case FALSE_UNTERKONTO_ATTACHED: return "falsch, es wurde ein Unterkonto hinzugefÃ¼gt (IBAN-Regel)";
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste fÃ¼r IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gelÃ¶scht markiert und somit ungÃ¼ltig";
@@ -20839,7 +20926,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case OK_SLOT_CNT_MIN_USED: return "ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (60) hochgesetzt";
       case SOME_KEYS_NOT_FOUND: return "ok, ein(ige) SchlÃ¼ssel wurden nicht gefunden";
       case LUT2_KTO_NOT_CHECKED: return "Die Bankverbindung wurde nicht getestet";
-      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle BLocks (auÃŸer den IBAN-Regeln) geladen";
+      case LUT2_OK_WITHOUT_IBAN_RULES: return "Es wurden fast alle Blocks (auÃŸer den IBAN-Regeln) geladen";
       case OK_NACHFOLGE_BLZ_USED: return "ok, fÃ¼r die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt";
       case OK_KTO_REPLACED: return "ok, die Kontonummer wurde allerdings ersetzt";
       case OK_BLZ_REPLACED: return "ok, die Bankleitzahl wurde allerdings ersetzt";
@@ -20865,6 +20952,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
 {
    switch(retval){
+      case LUT2_BLOCKS_MISSING: return "LUT2_BLOCKS_MISSING";
       case FALSE_UNTERKONTO_ATTACHED: return "FALSE_UNTERKONTO_ATTACHED";
       case BLZ_BLACKLISTED: return "BLZ_BLACKLISTED";
       case BLZ_MARKED_AS_DELETED: return "BLZ_MARKED_AS_DELETED";
@@ -21153,7 +21241,7 @@ DLL_EXPORT int get_lut_info(char **info,char *lut_name)
 
 DLL_EXPORT void kc_free(char *ptr)
 {
-   free(ptr);
+   if(ptr)free(ptr);
 }
 
 DLL_EXPORT void *kc_alloc(int size,int *retval)
@@ -21228,7 +21316,7 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
         return "09.09.2013";
 #endif
       case 6:
-        return "13. September 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "16. Oktober 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -21923,6 +22011,7 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
           * Unterkonto weggelassen worden sein. Näheres dazu in der Funktion
           * kto_check_blz_x().
           *
+          * *** (alter Code, mit den IBAN-Regeln ist dieser Kommentar nicht mehr aktuell) ***
           * Falls dies der Fall war (uk_cnt>0) wird es hier wieder an der
           * richtigen Stelle eingefügt; es wird allerdings als Fehler angesehen
           * (mit dem Fehlercode OK_UNTERKONTO_ATTACHED). Falls ein Unterkonto
@@ -24309,7 +24398,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22187 "konto_check.lxx"
+#line 22274 "konto_check.lxx"
 /* Funktion lut_suche_bic() +§§§2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
@@ -25050,7 +25139,7 @@ static int convert_encoding(char **data,UINT4 *len)
 DLL_EXPORT const char *pz2str(int pz,int *ret)
 {
    if(ret){
-      if(pz>=141)
+      if(pz>=142)
          *ret=NOT_DEFINED;
       else
          *ret=OK;
@@ -25456,7 +25545,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
 DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int set)
 {
    char *ptr,*ptr1,*dptr,*dptr1,*sptr,*buffer,line[1024];
-   int *ibuffer,i,size,retval,set_offset,fertig=0,bufsize;
+   int *ibuffer,i,size,retval,fertig=0,bufsize;
    UINT4 cnt;
    FILE *in,*lut;
    struct stat sbuf;
@@ -25575,7 +25664,7 @@ XI kto_check_blz(char *blz,char *kto)EXCLUDED
 XI kto_check_pz(char *pz,char *kto,char *blz)EXCLUDED
 XI kto_check(char *pz_or_blz,char *kto,char *lut_name)EXCLUDED
 XI kto_check_t(char *pz_or_blz,char *kto,char *lut_name,KTO_CHK_CTX *ctx)EXCLUDED
-const XC kto_check_str(char *pz_or_blz,char *kto,char *lut_name)EXCLUDED_S
+XCC kto_check_str(char *pz_or_blz,char *kto,char *lut_name)EXCLUDED_S
 XI cleanup_kto(void)EXCLUDED
 XI cleanup_kto_t(KTO_CHK_CTX *ctx)EXCLUDED
 XI generate_lut(char *inputname,char *outputname,char *user_info,int lut_version)EXCLUDED
@@ -25598,7 +25687,7 @@ XI generate_lut2_p(char *inputname,char *outputname,char *user_info,char *guelti
 XI generate_lut2(char *inputname,char *outputname,const char *user_info,char *gueltigkeit,
       UINT4 *felder,UINT4 slots,UINT4 lut_version,UINT4 set)EXCLUDED
 XI copy_lutfile(char *old_name,char *new_name,int new_slots)EXCLUDED
-const XC current_lutfile_name(int *set,int *level,int *retval)EXCLUDED_S;
+XCC current_lutfile_name(int *set,int *level,int *retval)EXCLUDED_S;
 XI lut_init(char *lut_name,int required,int set)EXCLUDED
 XI kto_check_init(char *lut_name,int *required,int **status,int set,int incremental)EXCLUDED
 XI kto_check_init_p(char *lut_name,int required,int set,int incremental)EXCLUDED
@@ -25638,16 +25727,16 @@ XI lut_iban_regel_i(int b,int zweigstelle,int *retval)EXCLUDED
 XI lut_cleanup(void)EXCLUDED
 XI kto_check_encoding(int mode)EXCLUDED
 XI keep_raw_data(int mode)EXCLUDED
-const XC kto_check_encoding_str(int mode)EXCLUDED_S
-const XC kto_check_retval2txt(int retval)EXCLUDED_S
-const XC kto_check_retval2txt_short(int retval)EXCLUDED_S
-const XC kto_check_retval2html(int retval)EXCLUDED_S
-const XC kto_check_retval2dos(int retval)EXCLUDED_S
-const XC kto_check_retval2utf8(int retval)EXCLUDED_S
+XCC kto_check_encoding_str(int mode)EXCLUDED_S
+XCC kto_check_retval2txt(int retval)EXCLUDED_S
+XCC kto_check_retval2txt_short(int retval)EXCLUDED_S
+XCC kto_check_retval2html(int retval)EXCLUDED_S
+XCC kto_check_retval2dos(int retval)EXCLUDED_S
+XCC kto_check_retval2utf8(int retval)EXCLUDED_S
 XI rebuild_blzfile(char *inputname,char *outputname,UINT4 set)EXCLUDED
 XI ci_check(char *ci)EXCLUDED
 XI iban_check(char *iban,int *retval)EXCLUDED
-const XC iban2bic(char *iban,int *retval,char *blz,char *kto)EXCLUDED_S
+XCC iban2bic(char *iban,int *retval,char *blz,char *kto)EXCLUDED_S
 XC iban_gen(char *kto,char *blz,int *retval)EXCLUDED_S
 XC char *iban_bic_gen(char *blz,char *kto,const char **bic,char *blz2,char *kto2,int *retval)EXCLUDED_S
 XC char *iban_bic_gen1(char *blz,char *kto,const char **bic,int *retval)EXCLUDED_S
@@ -25678,6 +25767,7 @@ XI lut_suche(int such_id,char *such_cmd,UINT4 *such_cnt,UINT4 **filiale,UINT4 **
 XI lut_suche_multiple(char *such_str,int uniq,char *such_cmd,UINT4 *anzahl,UINT4 **zweigstellen,UINT4 **blz)EXCLUDED
 XI lut_suche_sort1(int anzahl,int *blz_base,int *zweigstellen_base,int *idx,int *anzahl_o,int **idx_op,int **cnt_op,int uniq)EXCLUDED
 XI lut_suche_sort2(int anzahl,int *blz,int *zweigstellen,int *anzahl_o,int **blz_op,int **zweigstellen_op,int **cnt_o,int uniq)EXCLUDED
+XI lut_blocks(int mode,int *retval)EXCLUDED
 XI kto_check_init_default(char *lut_name,int block_id)EXCLUDED
 XI kto_check_default_keys(char ***keys,int *cnt)EXCLUDED
 XI kto_check_set_default(char *key,char *val)EXCLUDED
