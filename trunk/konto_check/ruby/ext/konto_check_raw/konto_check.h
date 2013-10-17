@@ -366,6 +366,7 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define LUT2_BLOCKS_MISSING                   -136
 #define FALSE_UNTERKONTO_ATTACHED             -135
 #define BLZ_BLACKLISTED                       -134
 #define BLZ_MARKED_AS_DELETED                 -133
@@ -957,6 +958,7 @@ DLL_EXPORT int lut_suche_init(int uniq);
 DLL_EXPORT int lut_suche_free(int id);
 DLL_EXPORT int lut_suche_set(int such_id,int idx,int typ,int i1,int i2,char *txt);
 DLL_EXPORT int lut_suche(int such_id,char *such_cmd,UINT4 *such_cnt,UINT4 **filiale,UINT4 **blz);
+DLL_EXPORT int lut_blocks(int mode,char **lut_filename,char **lut_blocks_ok,char **lut_blocks_fehler);
 
    /* (Benutzerdefinierte) Default-Werte in der LUT-Datei lesen und schreiben */
 #define DEFAULT_CNT 50                 /* Anzahl Einträge (fest) */
@@ -1006,6 +1008,9 @@ const DLL_EXPORT char *pz2str(int pz,int *ret);
    /* "aktuelles" Datum für die Testumgebung (um einen Datumswechsel zu simulieren) */
 DLL_EXPORT_V extern UINT4 current_date;
 #endif
+
+   /* String mit den LUT-Blocks, die nicht geladen werden konnten */
+DLL_EXPORT_V extern char *lut_blocks_missing;
 
 /*
  * ######################################################################

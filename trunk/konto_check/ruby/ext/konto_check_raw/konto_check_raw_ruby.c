@@ -2797,6 +2797,10 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-136) ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden */
+   rb_define_const(KontoCheck,"LUT2_BLOCKS_MISSING",INT2FIX(LUT2_BLOCKS_MISSING));
+      /* (-135) falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel) */
+   rb_define_const(KontoCheck,"FALSE_UNTERKONTO_ATTACHED",INT2FIX(FALSE_UNTERKONTO_ATTACHED));
       /* (-134) Die BLZ findet sich in der Ausschlussliste für IBAN-Berechnungen */
    rb_define_const(KontoCheck,"BLZ_BLACKLISTED",INT2FIX(BLZ_BLACKLISTED));
       /* (-133) Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig */
@@ -3091,13 +3095,13 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"OK_UNTERKONTO_POSSIBLE",INT2FIX(OK_UNTERKONTO_POSSIBLE));
       /* (12) wahrscheinlich ok, die Kontonummer enthält eine Unterkontonummer */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_GIVEN",INT2FIX(OK_UNTERKONTO_GIVEN));
-      /* (13) ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (50) hochgesetzt */
+      /* (13) ok, die Anzahl Slots wurde auf SLOT_CNT_MIN (60) hochgesetzt */
    rb_define_const(KontoCheck,"OK_SLOT_CNT_MIN_USED",INT2FIX(OK_SLOT_CNT_MIN_USED));
       /* (14) ok, ein(ige) Schlüssel wurden nicht gefunden */
    rb_define_const(KontoCheck,"SOME_KEYS_NOT_FOUND",INT2FIX(SOME_KEYS_NOT_FOUND));
       /* (15) Die Bankverbindung wurde nicht getestet */
    rb_define_const(KontoCheck,"LUT2_KTO_NOT_CHECKED",INT2FIX(LUT2_KTO_NOT_CHECKED));
-      /* (16) Es wurden fast alle BLocks (außer den IBAN-Regeln) geladen */
+      /* (16) Es wurden fast alle Blocks (außer den IBAN-Regeln) geladen */
    rb_define_const(KontoCheck,"LUT2_OK_WITHOUT_IBAN_RULES",INT2FIX(LUT2_OK_WITHOUT_IBAN_RULES));
       /* (17) ok, für die BLZ wurde allerdings die Nachfolge-BLZ eingesetzt */
    rb_define_const(KontoCheck,"OK_NACHFOLGE_BLZ_USED",INT2FIX(OK_NACHFOLGE_BLZ_USED));
