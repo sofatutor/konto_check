@@ -727,6 +727,39 @@ DLL_EXPORT int kto_check_pz(char *pz,char *kto,char *blz);
 DLL_EXPORT int kto_check_pz_dbg(char *pz,char *kto,char *blz,RETVAL *retvals);
 #endif
 
+/* ###########################################################################
+ * # Die Funktion kto_check_regel() entspricht der Funktion                  #
+ * # kto_check_blz(). Der einzige Unterschied ist, daß vor dem Test geprüft  #
+ * # wird, ob für die  BLZ/Konto-Kombination eine IBAN-Regel angewendet      #
+ * # werden muß (z.B. bei Spendenkonten etc.). U.U. wird die BLZ und/oder    #
+ * # Kontonummer ersetzt  und die Berechnung mit den modifizierten Werten    #
+ * # gemacht. Die Werte für BLZ und Kontonummer werden nicht zurückgegeben;  #
+ * # das kann mittels der Funktion kto_check_blz2() erfolgen.                #
+ * #                                                                         #
+ * # Die Funktion kto_check_regel_dbg() ist das Gegenstück zu                #
+ * # kto_check_blz_dbg(); bei dieser Funktion werden zusätzlich noch einige  #
+ * # interne Werte zurückgegeben. Die beiden Variablen blz2 und kto2         #
+ * # müssen auf einen Speicherbereich von mindestens 9 bzw. 11 Byte zeigen;  #
+ * # in diese Speicherbereiche werden die neue BLZ bzw. Kontonummer          #
+ * # geschrieben. Praktischerweise sollten dies lokale Variablen der         #
+ * # aufrufenden Funktion sein.                                              #
+ * #                                                                         #
+ * # Parameter:                                                              #
+ * #    blz:        Bankleitzahl (immer 8-stellig)                           #
+ * #    kto:        Kontonummer                                              #
+ * #    blz2:       benutzte BLZ (evl. durch die Regeln modifiziert)         #
+ * #    kto2:       benutzte Kontonummer (evl. modifiziert)                  #
+ * #    bic:        BIC der benutzten Bank                                   #
+ * #    Regel:      benutzte IBAN-Regel                                      #
+ * #    retvals:    Struktur, in der die benutzte Prüfziffermethode und die  #
+ * #                berechnete Prüfziffer zurückgegeben werden               #
+ * #                                                                         #
+ * # Copyright (C) 2013 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+DLL_EXPORT int kto_check_regel(char *blz,char *kto);
+DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,const char **bic,int *regel,RETVAL *retvals);
+
 /*
  * ######################################################################
  * # cleanup_kto(): Aufräumarbeiten                                     #
