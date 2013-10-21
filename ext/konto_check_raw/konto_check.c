@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.2 (development)"
 #endif
-#define VERSION_DATE "2013-10-16"
+#define VERSION_DATE "2013-10-21"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -3590,7 +3590,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_NAME,&len,&data);
                if(i==OK){  /* was gefunden; eintragen und Block verarbeiten */
-                  lut2_block_status[typ]=lut2_block_status[typ1]=retval;
+                  lut2_block_status[typ]=lut2_block_status[typ1]=i;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
@@ -3605,7 +3605,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                FREE(data);
                i=read_lut_block_int(lut,0,LUT2_2_NAME,&len,&data);
                if(i==OK){  /* was gefunden; eintragen und Block verarbeiten */
-                  lut2_block_status[typ]=lut2_block_status[typ1]=retval;
+                  lut2_block_status[typ]=lut2_block_status[typ1]=i;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
@@ -3618,7 +3618,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                i=read_lut_block_int(lut,0,LUT2_NAME_NAME_KURZ,&len,&data);
                if(i==OK){  /* was gefunden; Typ ändern, dann weiter wie bei OK */
                   typ=typ1=LUT2_NAME_NAME_KURZ;
-                  lut2_block_status[typ]=lut2_block_status[typ1]=retval;
+                  lut2_block_status[typ]=lut2_block_status[typ1]=i;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
@@ -3632,7 +3632,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
                if(i==OK){  /* was gefunden; Typ ändern, dann weiter wie bei OK */
                   typ=LUT2_2_NAME_NAME_KURZ;
                   typ1=LUT2_NAME_NAME_KURZ;
-                  lut2_block_status[typ]=lut2_block_status[typ1]=retval;
+                  lut2_block_status[typ]=lut2_block_status[typ1]=i;
                   lut2_block_len[typ]=lut2_block_len[typ1]=len;
                   lut2_block_data[typ]=lut2_block_data[typ1]=data;
                   break;
@@ -4339,6 +4339,7 @@ DLL_EXPORT const char *lut_name(char *b,int zweigstelle,int *retval)
    if(!name)INVALID_C(LUT2_NAME_NOT_INITIALIZED);
    if((idx=lut_index(b))<0)INVALID_C(idx);
    CHECK_OFFSET_S;
+
    return name[startidx[idx]+zweigstelle];
 }
 
@@ -8287,6 +8288,132 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
          else if(k1==22 && k2==10531180){strcpy(kto,"0201053180"); RETURN_OK_KTO_REPLACED;}
          RETURN_OK;
 
+         /* BHW Kreditservice GmbH */
+      case 55:
+         if(b!=25410200){
+            strcpy(blz,"25410200");
+            *bicp="BHWBDE2HXXX";
+            return OK_BLZ_REPLACED;
+         }
+         RETURN_OK;
+
+         /* SEB AG */
+      case 56:
+         switch(b){
+            case 10010111:
+            case 13010111:
+            case 16010111:
+            case 20010111:
+            case 21010111:
+            case 21210111:
+            case 23010111:
+            case 25010111:
+            case 25410111:
+            case 25910111:
+            case 26010111:
+            case 26510111:
+            case 27010111:
+            case 28010111:
+            case 29010111:
+            case 29210111:
+            case 30010111:
+            case 31010111:
+            case 33010111:
+            case 35010111:
+            case 35211012:
+            case 36010111:
+            case 36210111:
+            case 37010111:
+            case 38010111:
+            case 39010111:
+            case 40010111:
+            case 41010111:
+            case 42010111:
+            case 42610112:
+            case 43010111:
+            case 44010111:
+            case 46010111:
+            case 48010111:
+            case 50010111:
+            case 50510111:
+            case 51010111:
+            case 51310111:
+            case 51410111:
+            case 52010111:
+            case 54210111:
+            case 55010111:
+            case 57010111:
+            case 58510111:
+            case 59010111:
+            case 60010111:
+            case 63010111:
+            case 65310111:
+            case 66010111:
+            case 66610111:
+            case 67010111:
+            case 67210111:
+            case 68010111:
+            case 68310111:
+            case 69010111:
+            case 70010111:
+            case 72010111:
+            case 75010111:
+            case 76010111:
+            case 79010111:
+            case 79510111:
+            case 81010111:
+            case 82010111:
+            case 86010111:
+                  /* das Konto muß zur IBAN-Ermittlung generell 10 Stellen haben */
+               if(k1<10)return INVALID_KTO;
+            default:
+               break;
+         }
+
+            /* Spendenkonten */
+         if(k1==0)switch(k2){
+            case       36: strcpy(kto,"1010240003"); return OK_KTO_REPLACED;
+            case       50: strcpy(kto,"1328506100"); return OK_KTO_REPLACED;
+            case       99: strcpy(kto,"1826063000"); return OK_KTO_REPLACED;
+            case      110: strcpy(kto,"1015597802"); return OK_KTO_REPLACED;
+            case      240: strcpy(kto,"1010240000"); return OK_KTO_REPLACED;
+            case      333: strcpy(kto,"1011296100"); return OK_KTO_REPLACED;
+            case      555: strcpy(kto,"1600220800"); return OK_KTO_REPLACED;
+            case      556: strcpy(kto,"1000556100"); return OK_KTO_REPLACED;
+            case      606: strcpy(kto,"1967153801"); return OK_KTO_REPLACED;
+            case      700: strcpy(kto,"1070088000"); return OK_KTO_REPLACED;
+            case      777: strcpy(kto,"1006015200"); return OK_KTO_REPLACED;
+            case      999: strcpy(kto,"1010240001"); return OK_KTO_REPLACED;
+            case     1234: strcpy(kto,"1369152400"); return OK_KTO_REPLACED;
+            case     1313: strcpy(kto,"1017500000"); return OK_KTO_REPLACED;
+            case     1888: strcpy(kto,"1241113000"); return OK_KTO_REPLACED;
+            case     1953: strcpy(kto,"1026500901"); return OK_KTO_REPLACED;
+            case     1998: strcpy(kto,"1547620500"); return OK_KTO_REPLACED;
+            case     2007: strcpy(kto,"1026500907"); return OK_KTO_REPLACED;
+            case     4004: strcpy(kto,"1635100100"); return OK_KTO_REPLACED;
+            case     4444: strcpy(kto,"1304610900"); return OK_KTO_REPLACED;
+            case     5000: strcpy(kto,"1395676000"); return OK_KTO_REPLACED;
+            case     5510: strcpy(kto,"1611754300"); return OK_KTO_REPLACED;
+            case     6060: strcpy(kto,"1000400200"); return OK_KTO_REPLACED;
+            case     6800: strcpy(kto,"1296401301"); return OK_KTO_REPLACED;
+            case    55555: strcpy(kto,"1027758200"); return OK_KTO_REPLACED;
+            case    60000: strcpy(kto,"1005007001"); return OK_KTO_REPLACED;
+            case    66666: strcpy(kto,"1299807801"); return OK_KTO_REPLACED;
+            case   102030: strcpy(kto,"1837501600"); return OK_KTO_REPLACED;
+            case   121212: strcpy(kto,"1249461502"); return OK_KTO_REPLACED;
+            case   130500: strcpy(kto,"1413482100"); return OK_KTO_REPLACED;
+            case   202020: strcpy(kto,"1213431002"); return OK_KTO_REPLACED;
+            case   414141: strcpy(kto,"1010555101"); return OK_KTO_REPLACED;
+            case   666666: strcpy(kto,"1798758900"); return OK_KTO_REPLACED;
+            case  5000000: strcpy(kto,"1403124100"); return OK_KTO_REPLACED;
+         }
+         else if(k1==5 && k2==500500){
+            strcpy(kto,"1045720000");
+            return OK_KTO_REPLACED;
+         }
+         RETURN_OK;
+
+
          /* Lumpensammler für Regeln */
       default: 
          return IBAN_RULE_UNKNOWN;
@@ -8792,7 +8919,7 @@ static void init_atoi_table(void)
 
 #if 0
       /* Änderungen zum 9.9.2013 aktivieren */
-   if(time(NULL)>1378677600)pz_aenderungen_aktivieren=1;
+   if(time(NULL)>1386543600)pz_aenderungen_aktivieren=1;
 #endif
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
@@ -19606,23 +19733,88 @@ DLL_EXPORT int kto_check_blz(char *blz,char *kto)
 #endif
 }
 
-/* Funktion kto_check_regel() +§§§1 */
+/* Funktion kto_check_regel() und kto_check_regel_dbg +§§§1 */
 /* ###########################################################################
  * # Die Funktion kto_check_regel() entspricht der Funktion                  #
  * # kto_check_blz(). Der einzige Unterschied ist, daß vor dem Test geprüft  #
  * # wird, ob für die  BLZ/Konto-Kombination eine IBAN-Regel angewendet      #
  * # werden muß (z.B. bei Spendenkonten etc.). U.U. wird die BLZ und/oder    #
  * # Kontonummer ersetzt  und die Berechnung mit den modifizierten Werten    #
- * # gemacht. Die Werte für BLZ und Kontonummer werden nicht zurückgegeben;  #
- * # das kann mittels der Funktion kto_check_blz2() erfolgen.                #
+ * # gemacht.                                                                #
+ * #                                                                         #
+ * # Die Funktion kto_check_regel_dbg() ist das Gegenstück zu                #
+ * # kto_check_blz_dbg(); bei dieser Funktion werden zusätzlich noch einige  #
+ * # interne Werte zurückgegeben. Die beiden Variablen blz2 und kto2         #
+ * # müssen auf einen Speicherbereich von mindestens 9 bzw. 11 Byte zeigen;  #
+ * # in diese Speicherbereiche werden die neue BLZ bzw. Kontonummer          #
+ * # geschrieben. Es bietet sich an, für diese Aufgabe lokale Variablen der  #
+ * # aufrufenden Funktion zu wählen.                                         #
  * #                                                                         #
  * # Parameter:                                                              #
  * #    blz:        Bankleitzahl (immer 8-stellig)                           #
  * #    kto:        Kontonummer                                              #
+ * #    blz2:       benutzte BLZ (evl. durch die Regeln modifiziert)         #
+ * #    kto2:       benutzte Kontonummer (evl. modifiziert)                  #
+ * #    bic:        BIC der benutzten Bank                                   #
+ * #    Regel:      benutzte IBAN-Regel                                      #
+ * #    retvals:    Struktur, in der die benutzte Prüfziffermethode und die  #
+ * #                berechnete Prüfziffer zurückgegeben werden               #
  * #                                                                         #
  * # Copyright (C) 2013 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
  */
+
+#if DEBUG>0    /* es werden einige Funktionen benutzt, die nur in der Debug-Variante enthalten sind */
+DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,const char **bic,int *regel,RETVAL *retvals)
+{
+#if USE_IBAN_RULES
+   char *blz_o,buffer[32],kto_o[16],*blz_n,*kto_n,*ptr,*dptr;
+   const char *bicp;
+   int ret,ret_regel,r;
+
+   if(regel)*regel=0;
+   if(blz2 && kto2){
+      blz_n=blz2;
+      kto_n=kto2;
+   }
+   else{
+      blz_n=buffer;
+      kto_n=buffer+10;
+   }
+   memcpy(blz_n,blz,9);
+   for(ptr=kto;*ptr;ptr++);   /* Ende von kto suchen */
+   ptr--;
+   memcpy(kto_n,"0000000000",10);
+   kto_n[10]=0;
+   for(dptr=kto_n+9;ptr>=kto;)*dptr--=*ptr--;
+
+       /* alte Versionen von kto und BLZ für Vergleich merken */
+   memcpy(kto_o,kto_n,11);
+   blz_o=blz;
+   kto=kto_n;
+   blz=blz_n;
+   r=lut_iban_regel(blz,0,&ret);
+   if(regel && ret>0)*regel=r;
+   if((ret_regel=iban_regel_cvt(blz,kto,&bicp,r))<OK)return ret_regel;
+   if(!bicp)bicp=lut_bic(blz,0,NULL);
+   if(bic)*bic=bicp;
+   ret=kto_check_blz_dbg(blz,kto,retvals);
+   if(strcmp(blz,blz_o) || strcmp(kto,kto_o)){  /* BLZ und/oder Kto ersetzt */
+      if(ret_regel>3)   /* ret_regel<1 wurde schon oben zurückgegeben */
+         return ret_regel;
+      else
+         return ret;
+   }
+   else  /* BLZ und Kto gleich */
+      return ret;
+#else
+   if(regel)*regel=0;
+   return kto_check_regel_dbg(blz,kto,retvals);
+#endif
+}
+#else   /* !DEBUG */
+DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,const char **bic,int *regel,RETVAL *retvals){return DEBUG_ONLY_FUNCTION;}
+#endif   /* DEBUG */
 
 DLL_EXPORT int kto_check_regel(char *blz,char *kto)
 {
@@ -19983,8 +20175,6 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
    }
 }
 
-#if DEBUG>0
-
 /* Funktion kto_check_blz_dbg() +§§§1 */
 /* ###########################################################################
  * # Die Funktion kto_check_blz_dbg() ist die Debug-Version von              #
@@ -20003,6 +20193,7 @@ static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
  * ###########################################################################
  */
 
+#if DEBUG>0
 DLL_EXPORT int kto_check_blz_dbg(char *blz,char *kto,RETVAL *retvals)
 {
    char *ptr;
@@ -21303,20 +21494,20 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 4:                              /* Datum der Prüfziffermethode */
 #if 0
          if(pz_aenderungen_aktivieren)
-            return "09.09.2013";
+            return "09.12.2013";
          else
-            return "03.06.2013 (Aenderungen vom 09.09.2013 enthalten aber noch nicht aktiviert)";
+            return "03.06.2013 (Aenderungen vom 09.12.2013 enthalten aber noch nicht aktiviert)";
 #else
-         return "09.09.2013";
+         return "09.12.2013";
 #endif
       case 5:
 #if DB_NEUE_VERSION>0
-        return "09.09.2013 (Regel 20/Deutsche Bank: Version 1.6 aus der Bundesbank-Mail vom 30.8.2013)";  /* Datum der IBAN-Regeln */
+        return "09.09.2013 (Regel 20 / Deutsche Bank: Version 1.6 aus der Bundesbank-Mail vom 30.8.2013)";  /* Datum der IBAN-Regeln */
 #else
         return "09.09.2013";
 #endif
       case 6:
-        return "16. Oktober 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "21. Oktober 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -24398,7 +24589,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22274 "konto_check.lxx"
+#line 22465 "konto_check.lxx"
 /* Funktion lut_suche_bic() +§§§2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
