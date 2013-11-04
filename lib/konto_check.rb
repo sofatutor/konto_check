@@ -60,7 +60,7 @@ module KontoCheck
 #mögliche Suchschlüssel für die Funktion KontoCheck::suche()
 #
 #:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz
-  SEARCH_KEYS = [:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz, :volltext, :multiple]
+  SEARCH_KEYS = [:ort, :plz, :pz, :bic, :blz, :namen, :namen_kurz, :regel, :volltext, :multiple]
 #Aliasnamen für einige Suchschlüssel der Funktion KontoCheck::suche()
 #
 #:bankleitzahl, :city, :zip, :name, :kurzname, :shortname, :pruefziffer
@@ -72,6 +72,7 @@ module KontoCheck
     :kurzname     => :namen_kurz,
     :shortname    => :namen_kurz,
     :pruefziffer  => :pz,
+    :regel        => :regel,
     :vt           => :volltext,
     :fulltext     => :volltext,
     :m            => :multiple,
@@ -430,6 +431,29 @@ module KontoCheck
       KontoCheckRaw::init(*args)
     end
 
+#===KontoCheck::lut_blocks( )
+#=====KontoCheckRaw::lut_blocks1( )
+#=====KontoCheckRaw::lut_blocks( mode)
+#Die Funktion gibt Auskunft, ob bei der Initialisierung alle angeforderten
+#Blocks der LUT-Datei geladen wurden. Die korrespondierende Funktion
+#KontoCheckRaw::lut_blocks( mode) gibt noch einige weitere Infos über die
+#geladenen Blocks aus.
+#
+#====Aufruf:
+#ret=KontoCheck::lut_blocks( )
+#
+#====Rückgabe:
+#Rückgabe ist ein skalarer Wert, der Information über den Initialisierungsprozess gibt:
+#
+#* -136  LUT2_BLOCKS_MISSING       "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden"
+#*  -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+#*   -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+#*    1  OK                        "ok"
+
+    def lut_blocks()
+      KontoCheckRaw::lut_blocks1()
+    end
+
 #===KontoCheck::load_bank_data( datafile)
 #=====KontoCheckRaw::load_bank_data( datafile)
 #
@@ -618,6 +642,73 @@ module KontoCheck
 
     def valid_pz?(*args)
       KontoCheckRaw::konto_check_pz(*args)>0?true:false
+    end
+
+#===KontoCheck::konto_check_regel( blz,kto)
+#=====KontoCheck::konto_check_regel?( blz,kto)
+#=====KontoCheckRaw::konto_check_regel( blz,kto)
+#=====KontoCheckRaw::konto_check_regel_dbg( blz,kto)
+#Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Die Funktion gibt einen skalaren
+#Statuswert zurück, der das Ergebnis der Prüfung enthält. Vor dem Test werden die IBAN-Regeln angewendet,
+#dadurch werden u.U. Konto und BLZ ersetzt.
+#Falls nicht alle für IBAN-Berechnung notwendigen Blocks geladen sind, werden diese automatisch noch
+#nachgeladen. Dadurch tauchen hier auch die Rückgabewerte für die Initialisierung auf.
+#Mögliche Rückgabewerte sind:
+#
+#  -135  FALSE_UNTERKONTO_ATTACHED "falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)"
+#  -133  BLZ_MARKED_AS_DELETED     "Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig"
+#  -128  IBAN_INVALID_RULE         "Die BLZ passt nicht zur angegebenen IBAN-Regel"
+#  -127  IBAN_AMBIGUOUS_KTO        "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
+#  -125  IBAN_RULE_UNKNOWN         "Die IBAN-Regel ist nicht bekannt"
+#  -124  NO_IBAN_CALCULATION       "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
+#  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+#   -77  BAV_FALSE                 "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
+#   -69  MISSING_PARAMETER         "Für die aufgerufene Funktion fehlt ein notwendiger Parameter"
+#   -64  INIT_FATAL_ERROR          "Initialisierung fehlgeschlagen (init_wait geblockt)"
+#   -63  INCREMENTAL_INIT_NEEDS_INFO "Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei"
+#   -62  INCREMENTAL_INIT_FROM_DIFFERENT_FILE "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich"
+#   -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+#   -38  LUT2_PARTIAL_OK           "es wurden nicht alle Blocks geladen"
+#   -36  LUT2_Z_MEM_ERROR          "Memory error in den ZLIB-Routinen"
+#   -35  LUT2_Z_DATA_ERROR         "Datenfehler im komprimierten LUT-Block"
+#   -34  LUT2_BLOCK_NOT_IN_FILE    "Der Block ist nicht in der LUT-Datei enthalten"
+#   -33  LUT2_DECOMPRESS_ERROR     "Fehler beim Dekomprimieren eines LUT-Blocks"
+#   -31  LUT2_FILE_CORRUPTED       "Die LUT-Datei ist korrumpiert"
+#   -29  UNDEFINED_SUBMETHOD       "Die (Unter)Methode ist nicht definiert"
+#   -20  LUT_CRC_ERROR             "Prüfsummenfehler in der blz.lut Datei"
+#   -12  INVALID_KTO_LENGTH        "ein Konto muß zwischen 1 und 10 Stellen haben"
+#   -10  FILE_READ_ERROR           "kann Datei nicht lesen"
+#    -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+#    -7  INVALID_LUT_FILE          "die blz.lut Datei ist inkosistent/ungültig"
+#    -6  NO_LUT_FILE               "die blz.lut Datei wurde nicht gefunden"
+#    -5  INVALID_BLZ_LENGTH        "die Bankleitzahl ist nicht achtstellig"
+#    -4  INVALID_BLZ               "die Bankleitzahl ist ungültig"
+#    -3  INVALID_KTO               "das Konto ist ungültig"
+#    -2  NOT_IMPLEMENTED           "die Methode wurde noch nicht implementiert"
+#    -1  NOT_DEFINED               "die Methode ist nicht definiert"
+#     0  FALSE                     "falsch"
+#     1  OK                        "ok"
+#     1  OK                        "ok"
+#     2  OK_NO_CHK                 "ok, ohne Prüfung"
+#     6  LUT1_SET_LOADED           "Die Datei ist im alten LUT-Format (1.0/1.1)"
+#    18  OK_KTO_REPLACED           "ok, die Kontonummer wurde allerdings ersetzt"
+#    21  OK_IBAN_WITHOUT_KC_TEST   "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen"
+#    25  OK_UNTERKONTO_ATTACHED    "ok, es wurde ein (weggelassenes) Unterkonto angefügt"
+
+    def konto_check_regel(blz,kto)
+      KontoCheckRaw::konto_check_regel(blz,kto)
+    end
+
+#===KontoCheck::konto_check_regel?( blz,kto)
+#=====KontoCheck::konto_check_regel( blz,kto)
+#=====KontoCheckRaw::konto_check_regel( blz,kto)
+#=====KontoCheckRaw::konto_check_regel_dbg( blz,kto)
+#Diese Funktion testet, ob eine gegebene Prüfziffer/Kontonummer-Kombination
+#gültig ist (mit IBAN-Regeln). Der Rückgabewert dieser Funktion ist nur true
+#oder false (convenience function für KontoCheck::konto_check_regel()).
+
+    def konto_check_regel?(*args)
+      KontoCheckRaw::konto_check_regel(*args)>0?true:false
     end
 
 #==== KontoCheck::bank_valid( blz [,filiale])
@@ -921,6 +1012,7 @@ module KontoCheck
 #=====KontoCheckRaw::bank_suche_plz(plz1 [,plz2])
 #=====KontoCheckRaw::bank_suche_pz(pz1 [,pz2])
 #=====KontoCheckRaw::bank_suche_ort(suchort)
+#=====KontoCheckRaw::bank_suche_regel(regel1 [,regel2])
 #=====KontoCheckRaw::bank_suche_volltext(suchwort)
 #=====KontoCheckRaw::bank_suche_multiple(suchworte)
 #
@@ -964,6 +1056,7 @@ module KontoCheck
 #   s=KontoCheck::suche( :pz => 90 )              Prüfziffer numerisch
 #   s=KontoCheck::suche( :pz => '90' )            Prüfziffer als String
 #   s=KontoCheck::suche( :pz => ['95',98] )       Prüfzifferbereich gemischt String/numerisch auch möglich
+#   s=KontoCheck::suche( :regel => [20,25] )      IBAN-Regeln
 #   s=KontoCheck::suche( :name => 'postbank' ) 
 #   s=KontoCheck::suche( :ort => 'lingenfeld' )
 #   r=KontoCheck::suche( :volltext=>'südwest',:uniq=>1)      Volltextsuche mit uniq
@@ -992,11 +1085,147 @@ module KontoCheck
       raise 'no valid search key found' if key.length==0
       uniq=2 if uniq>0              # sortieren und uniq
       uniq=1 if sort>0 && uniq==0   # nur sortieren
-      printf("key: %s, value: %s, cmd: %s, uniq: %d\n",key,value,search_cmd,uniq)
       raw_results = KontoCheckRaw::send("bank_suche_#{key}",value,search_cmd,uniq)
       raw_results[1]
     end
     alias_method :search, :suche
+
+#===KontoCheck::bank_suche_bic( search_bic [,sort_uniq [,sort]])
+#=====KontoCheckRaw::bank_suche_bic( search_bic [,sort_uniq [,sort]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren BIC mit dem angegebenen Wert <search_bic> beginnen.
+#Die Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_bic(*args)
+      KontoCheckRaw::bank_suche_bic(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_namen( name [,sort_uniq [,sort]])
+#===KontoCheckRaw::bank_suche_namen( name [,sort_uniq [,sort]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert <name> beginnen.
+#Die Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_namen(*args)
+      KontoCheckRaw::bank_suche_namen(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_namen_kurz( name [,sort_uniq [,sort]])
+#===KontoCheckRaw::bank_suche_namen_kurz( name [,sort_uniq [,sort]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren Kurznamen mit dem angegebenen Wert <name> beginnen.
+#Die Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_namen_kurz(*args)
+      KontoCheckRaw::bank_suche_namen_kurz(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_ort( ort [,sort_uniq [,sort]])
+#===KontoCheckRaw::bank_suche_ort( ort [,sort_uniq [,sort]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren Sitz mit dem angegebenen Wert <ort> beginnen.
+#Die Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_ort(*args)
+      KontoCheckRaw::bank_suche_ort(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_blz( blz1 [,blz2 [,sort_uniq [,sort]]])
+#=====KontoCheckRaw::bank_suche_blz( blz1 [,blz2 [,sort_uniq [,sort]]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren BLZ gleich <blz1> ist oder (bei
+#Angabe von blz2) die im Bereich zwischen <blz1> und <blz2> liegen. Die
+#Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_blz(*args)
+      KontoCheckRaw::bank_suche_blz(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_plz( plz1 [,plz2 [,sort_uniq [,sort]]])
+#=====KontoCheckRaw::bank_suche_plz( plz1 [,plz2 [,sort_uniq [,sort]]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren PLZ gleich <plz1> ist oder (bei
+#Angabe von plz2) die im Bereich zwischen <plz1> und <plz2> liegen. Die
+#Rückgabe ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_plz(*args)
+      KontoCheckRaw::bank_suche_plz(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_pz( pz1 [,pz2 [,sort_uniq [,sort]]])
+#=====KontoCheckRaw::bank_suche_pz( pz1 [,pz2 [,sort_uniq [,sort]]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren Prüfziffer gleich <pz1> ist oder (bei
+#Angabe von pz2) die im Bereich zwischen <pz1> und <pz2> liegen. Die Rückgabe
+#ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_pz(*args)
+      KontoCheckRaw::bank_suche_pl(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_regel( regel1 [,regel2 [,sort_uniq [,sort]]])
+#=====KontoCheckRaw::bank_suche_regel( regel1 [,regel2 [,sort_uniq [,sort]]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, deren IBAN-Regel gleich <regel1> ist oder (bei
+#Angabe von regel2) die im Bereich zwischen <regel1> und <regel2> liegen. Die Rückgabe
+#ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_regel(*args)
+      KontoCheckRaw::bank_suche_regel(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_volltext( suchwort [,sort_uniq [,sort]])
+#=====KontoCheckRaw::bank_suche_volltext( suchwort [,sort_uniq [,sort]])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, bei denen in Name, Kurzname oder Ort das
+#angegebenen Wort <suchwort> vorkommt. Dabei wird immer nur ein einziges Wort
+#gesucht; mehrere Worte führen zu einer Fehlermeldung in der KontoCheckRaw-
+#Bibliothek. Eine solche Suche läßt sich durch die Funktion
+#KontoCheck::bank_suche_multiple( ) bewerkstelligen. Die Rückgabe ist ein Array
+#mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+    def bank_suche_volltext(*args)
+      KontoCheckRaw::bank_suche_volltext(*args)[1]
+    end
+
+
+#===KontoCheck::bank_suche_multiple( suchtext [,such_cmd] [,uniq])
+#===KontoCheckRaw::bank_suche_multiple( suchtext [,such_cmd] [,uniq])
+#=====KontoCheck::suche()
+#
+#Diese Funktion sucht alle Banken, die mehreren Kriterien entsprechen. Dabei
+#können bis zu 26 Teilsuchen definiert werden, die beliebig miteinander
+#verknüpft werden können (additiv, subtraktiv und multiplikativ). Eine nähere
+#Beschreibung der Funktion und der Parameter findet sich unter
+#KontoCheckRaw::bank_suche_multiple( ). Die Rückgabe ist ein Array
+#mit den Bankleitzahlen, die auf das Suchmuster passen.
+
+#
+#====Aufruf:
+#result=bank_suche_multiple(such_string [,such_cmd] [,uniq])
+
+    def bank_suche_multiple(*args)
+      KontoCheckRaw::bank_suche_multiple(*args)[1]
+    end
+
+
 
 #===KontoCheck::version( [mode] )
 #=====KontoCheckRaw::version( [mode] )

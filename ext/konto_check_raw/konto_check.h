@@ -77,10 +77,15 @@
  * # der Bankleitzahl 793 301 11 erstellt. Wir teilen Ihnen diese zusammen  #
  * # mit unserem BIC (Bank Identifier Code = Bankkennung) auf jedem         #
  * # Kontoauszug mit.                                                       #
+ * #                                                                        #
+ * # Update zur Flessa-Bank (abgerufen 28.10.13): Die obigen Bankleitzahlen #
+ * # haben in der aktuellen BLZ-Datei das Löschflag gesetzt und als         #
+ * # Nachfolge-BLZ die 79330111 eingetragen. Damit erübrigt sich die        #
+ * # Korrektur für die Flessa-Bank.                                         #
  * ##########################################################################
  */
 
-#define FLESSA_KORREKTUR 1
+#define FLESSA_KORREKTUR 0
 
 /* IBAN-Regeln benutzen (gültig ab 3.6.2013) */
 #define USE_IBAN_RULES 1
@@ -366,6 +371,9 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define LUT2_NOT_ALL_IBAN_BLOCKS_LOADED       -139
+#define LUT2_NOT_YET_VALID_PARTIAL_OK         -138
+#define LUT2_NO_LONGER_VALID_PARTIAL_OK       -137
 #define LUT2_BLOCKS_MISSING                   -136
 #define FALSE_UNTERKONTO_ATTACHED             -135
 #define BLZ_BLACKLISTED                       -134
@@ -528,7 +536,7 @@ extern const char *lut2_feld_namen[256];
 #define OK_HYPO_REQUIRES_KTO                    23
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
-#line 316 "konto_check_h.lx"
+#line 321 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
