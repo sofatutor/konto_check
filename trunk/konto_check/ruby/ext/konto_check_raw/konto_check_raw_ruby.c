@@ -567,6 +567,255 @@ static VALUE konto_check(int argc,VALUE* argv,VALUE self)
 }
 
 /**
+ * ===KontoCheckRaw::konto_check_regel( blz, kto)
+ * =====KontoCheckRaw::konto_check_regel_dbg( blz, kto)
+ * =====KontoCheck::konto_check_regel( blz, kto)
+ * =====KontoCheck::konto_check_regel?( blz, kto)
+ * Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält.
+ * Vor der Prüfung werden die IBAN-Regeln angewendet; dabei wird u.U.
+ * BLZ und/oder Kontonummer ersetzt.
+ *
+ * ====Aufruf:
+ * ret=KontoCheckRaw::konto_check_regel( blz, kto)
+ *
+ * ====Parameter:
+ * * blz: Die Bankleitzahl der zu testenden Bankverbindung
+ * * kto: Die Kontonummer der zu testenden Bankverbindung
+ * 
+ * ====Rückgabe:
+ * Rückgabe ist ein skalarer Statuswert, der das Ergebnis der Prüfung enthält.
+ * Es sind auch die Rückgabewerte der Initialisierung möglich (wegen iban_init()),
+ * deshalb gibt es so viele mögliche Rückgabewerte.
+ *
+ * ====Mögliche Statuscodes:
+ * *  -135  FALSE_UNTERKONTO_ATTACHED "falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)"
+ * *  -133  BLZ_MARKED_AS_DELETED     "Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig"
+ * *  -128  IBAN_INVALID_RULE         "Die BLZ passt nicht zur angegebenen IBAN-Regel"
+ * *  -127  IBAN_AMBIGUOUS_KTO        "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
+ * *  -125  IBAN_RULE_UNKNOWN         "Die IBAN-Regel ist nicht bekannt"
+ * *  -124  NO_IBAN_CALCULATION       "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
+ * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *   -77  BAV_FALSE                 "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
+ * *   -69  MISSING_PARAMETER         "Für die aufgerufene Funktion fehlt ein notwendiger Parameter"
+ * *   -64  INIT_FATAL_ERROR          "Initialisierung fehlgeschlagen (init_wait geblockt)"
+ * *   -63  INCREMENTAL_INIT_NEEDS_INFO "Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei"
+ * *   -62  INCREMENTAL_INIT_FROM_DIFFERENT_FILE "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich"
+ * *   -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+ * *   -38  LUT2_PARTIAL_OK           "es wurden nicht alle Blocks geladen"
+ * *   -36  LUT2_Z_MEM_ERROR          "Memory error in den ZLIB-Routinen"
+ * *   -35  LUT2_Z_DATA_ERROR         "Datenfehler im komprimierten LUT-Block"
+ * *   -34  LUT2_BLOCK_NOT_IN_FILE    "Der Block ist nicht in der LUT-Datei enthalten"
+ * *   -33  LUT2_DECOMPRESS_ERROR     "Fehler beim Dekomprimieren eines LUT-Blocks"
+ * *   -31  LUT2_FILE_CORRUPTED       "Die LUT-Datei ist korrumpiert"
+ * *   -29  UNDEFINED_SUBMETHOD       "Die (Unter)Methode ist nicht definiert"
+ * *   -20  LUT_CRC_ERROR             "Prüfsummenfehler in der blz.lut Datei"
+ * *   -12  INVALID_KTO_LENGTH        "ein Konto muß zwischen 1 und 10 Stellen haben"
+ * *   -10  FILE_READ_ERROR           "kann Datei nicht lesen"
+ * *    -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+ * *    -7  INVALID_LUT_FILE          "die blz.lut Datei ist inkosistent/ungültig"
+ * *    -6  NO_LUT_FILE               "die blz.lut Datei wurde nicht gefunden"
+ * *    -5  INVALID_BLZ_LENGTH        "die Bankleitzahl ist nicht achtstellig"
+ * *    -4  INVALID_BLZ               "die Bankleitzahl ist ungültig"
+ * *    -3  INVALID_KTO               "das Konto ist ungültig"
+ * *    -2  NOT_IMPLEMENTED           "die Methode wurde noch nicht implementiert"
+ * *    -1  NOT_DEFINED               "die Methode ist nicht definiert"
+ * *     0  FALSE                     "falsch"
+ * *     1  OK                        "ok"
+ * *     1  OK                        "ok"
+ * *     2  OK_NO_CHK                 "ok, ohne Prüfung"
+ * *     6  LUT1_SET_LOADED           "Die Datei ist im alten LUT-Format (1.0/1.1)"
+ * *    18  OK_KTO_REPLACED           "ok, die Kontonummer wurde allerdings ersetzt"
+ * *    21  OK_IBAN_WITHOUT_KC_TEST   "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen"
+ * *    25  OK_UNTERKONTO_ATTACHED    "ok, es wurde ein (weggelassenes) Unterkonto angefügt"
+ */
+static VALUE konto_check_regel(int argc,VALUE* argv,VALUE self)
+{
+   char kto[16],blz[16],error_msg[512];
+   int retval;
+
+   get_params(argc,argv,blz,kto,NULL,NULL,2);
+   if((retval=kto_check_regel(blz,kto))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
+   return INT2FIX(retval);
+}
+
+/**
+ * ===KontoCheckRaw::konto_check_regel_dbg( blz, kto)
+ * =====KontoCheckRaw::konto_check_regel( blz, kto)
+ * =====KontoCheck::konto_check_regel( blz, kto)
+ * =====KontoCheck::konto_check_regel?( blz, kto)
+ * Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält.
+ * Vor der Prüfung werden die IBAN-Regeln angewendet; dabei wird u.U.
+ * BLZ und/oder Kontonummer ersetzt. Die Funktion gibt viele Interna
+ * zurück und ist daher nur in der KontoCheckRaw:: Bibliothek enthalten.
+ *
+ * ====Aufruf:
+ * ret=KontoCheckRaw::konto_check_regel_dbg( blz, kto)
+ *
+ * ====Parameter:
+ * * blz: Die Bankleitzahl der zu testenden Bankverbindung
+ * * kto: Die Kontonummer der zu testenden Bankverbindung
+ * 
+ * ====Rückgabe:
+ * Rückgabe ist ein Array mit 10 Elementen, der das Ergebnis der Prüfung sowie eine Reihe
+ * interner Werte enthält. Für den Statuscode sind auch die Rückgabewerte der Initialisierung
+ * möglich (wegen iban_init()), deshalb gibt es so viele mögliche Werte.
+ * * das erste Element enthält den Statuscode
+ * * das zweite Element enthält die benutzte BLZ (die BLZ wird durch die IBAN-Regeln u.U. ersetzt)
+ * * das dritte Element enthält die benutzte Kontonummer (wird manchmal auch ersetzt)
+ * * das vierte Element enthält den BIC der Bank
+ * * das fünfte Element enthält die benutzte IBAN-Regel
+ * * das sechste Element enthält die Regel-Version
+ * * das siebte Element enthält Prüfziffermethode als Text
+ * * das achte Element enthält die Prüfziffermethode (numerisch)
+ * * das neunte Element enthält die Prüfziffer
+ * * das zehnte Element enthält die Position der Prüfziffer
+ *
+ * ====Mögliche Statuscodes:
+ * *  -135  FALSE_UNTERKONTO_ATTACHED "falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)"
+ * *  -133  BLZ_MARKED_AS_DELETED     "Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit ungültig"
+ * *  -128  IBAN_INVALID_RULE         "Die BLZ passt nicht zur angegebenen IBAN-Regel"
+ * *  -127  IBAN_AMBIGUOUS_KTO        "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
+ * *  -125  IBAN_RULE_UNKNOWN         "Die IBAN-Regel ist nicht bekannt"
+ * *  -124  NO_IBAN_CALCULATION       "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
+ * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *   -77  BAV_FALSE                 "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
+ * *   -69  MISSING_PARAMETER         "Für die aufgerufene Funktion fehlt ein notwendiger Parameter"
+ * *   -64  INIT_FATAL_ERROR          "Initialisierung fehlgeschlagen (init_wait geblockt)"
+ * *   -63  INCREMENTAL_INIT_NEEDS_INFO "Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei"
+ * *   -62  INCREMENTAL_INIT_FROM_DIFFERENT_FILE "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich"
+ * *   -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+ * *   -38  LUT2_PARTIAL_OK           "es wurden nicht alle Blocks geladen"
+ * *   -36  LUT2_Z_MEM_ERROR          "Memory error in den ZLIB-Routinen"
+ * *   -35  LUT2_Z_DATA_ERROR         "Datenfehler im komprimierten LUT-Block"
+ * *   -34  LUT2_BLOCK_NOT_IN_FILE    "Der Block ist nicht in der LUT-Datei enthalten"
+ * *   -33  LUT2_DECOMPRESS_ERROR     "Fehler beim Dekomprimieren eines LUT-Blocks"
+ * *   -31  LUT2_FILE_CORRUPTED       "Die LUT-Datei ist korrumpiert"
+ * *   -29  UNDEFINED_SUBMETHOD       "Die (Unter)Methode ist nicht definiert"
+ * *   -20  LUT_CRC_ERROR             "Prüfsummenfehler in der blz.lut Datei"
+ * *   -12  INVALID_KTO_LENGTH        "ein Konto muß zwischen 1 und 10 Stellen haben"
+ * *   -10  FILE_READ_ERROR           "kann Datei nicht lesen"
+ * *    -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+ * *    -7  INVALID_LUT_FILE          "die blz.lut Datei ist inkosistent/ungültig"
+ * *    -6  NO_LUT_FILE               "die blz.lut Datei wurde nicht gefunden"
+ * *    -5  INVALID_BLZ_LENGTH        "die Bankleitzahl ist nicht achtstellig"
+ * *    -4  INVALID_BLZ               "die Bankleitzahl ist ungültig"
+ * *    -3  INVALID_KTO               "das Konto ist ungültig"
+ * *    -2  NOT_IMPLEMENTED           "die Methode wurde noch nicht implementiert"
+ * *    -1  NOT_DEFINED               "die Methode ist nicht definiert"
+ * *     0  FALSE                     "falsch"
+ * *     1  OK                        "ok"
+ * *     1  OK                        "ok"
+ * *     2  OK_NO_CHK                 "ok, ohne Prüfung"
+ * *     6  LUT1_SET_LOADED           "Die Datei ist im alten LUT-Format (1.0/1.1)"
+ * *    18  OK_KTO_REPLACED           "ok, die Kontonummer wurde allerdings ersetzt"
+ * *    21  OK_IBAN_WITHOUT_KC_TEST   "ok, die Bankverbindung ist (ohne Test) als richtig anzusehen"
+ * *    25  OK_UNTERKONTO_ATTACHED    "ok, es wurde ein (weggelassenes) Unterkonto angefügt"
+ */
+static VALUE konto_check_regel_dbg(int argc,VALUE* argv,VALUE self)
+{
+   char kto[16],blz[16],kto2[16],blz2[16],error_msg[512];
+   const char *bic2;
+   int retval,regel;
+   RETVAL rv;
+
+   get_params(argc,argv,blz,kto,NULL,NULL,2);
+   if((retval=kto_check_regel_dbg(blz,kto,blz2,kto2,&bic2,&regel,&rv))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
+   return rb_ary_new3(10,INT2FIX(retval),rb_str_new2(blz2),rb_str_new2(kto2),rb_str_new2(bic2),INT2FIX(regel/100),INT2FIX(regel%100),
+         rv.methode?rb_str_new2(rv.methode):Qnil,INT2FIX(rv.pz_methode),INT2FIX(rv.pz),INT2FIX(rv.pz_pos));
+}
+
+/**
+ * ===KontoCheckRaw::lut_blocks( mode)
+ * =====KontoCheck::lut_blocks( mode)
+ * Die Funktion gibt Auskunft, ob bei der Initialisierung alle angeforderten
+ * Blocks der LUT-Datei geladen wurden und gibt den Dateinamen der LUT-Datei,
+ * eine Liste der geladenen Blocks sowie eine Liste der Blocks die nicht
+ * geladen werden konnten, zurück.
+ *
+ * ====Aufruf:
+ * ret=KontoCheckRaw::lut_blocks( mode)
+ *
+ * ====Parameter:
+ * * mode: Ausgabeformat (1..3)
+ * 
+ * ====Rückgabe:
+ * Rückgabe ist ein Array mit vier Elementen, das den Statuscode sowie drei Strings
+ * mit dem Dateinamen sowie den Blocklisten enthält:
+ * 
+ * * das erste Element enthält den Statuscode
+ * * das zweite Element enthält den Dateinamen der verwendeten LUT-Datei
+ * * das dritte Element enthält eine Liste der geladenen LUT-Blocks
+ * * das vierte Element enthält eine Liste der LUT-Blocks, die nicht geladen werden konnten
+ *
+ * ====Mögliche Statuscodes:
+ * * -136  LUT2_BLOCKS_MISSING       "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden"
+ * *  -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+ * *   -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+ * *    1  OK                        "ok"
+ */
+static VALUE lut_blocks_rb(int argc,VALUE* argv,VALUE self)
+{
+   char *lut_filename,*lut_blocks_ok,*lut_blocks_fehler;
+   int mode,retval;
+   VALUE mode_rb,filename_rb,blocks_ok_rb,blocks_fehler_rb;
+
+   rb_scan_args(argc,argv,"01",&mode_rb);
+   if(NIL_P(mode_rb))
+      mode=1;
+   else{
+      switch(TYPE(mode_rb)){
+         case RUBY_T_FLOAT:
+         case RUBY_T_FIXNUM:
+         case RUBY_T_BIGNUM:
+            mode=NUM2INT(mode_rb);
+            break;
+         default:
+            mode=1;
+            rb_raise(rb_eTypeError,"lut_blocks() requires an int parameter");
+            break;
+      }
+   }
+
+   if((retval=lut_blocks(mode,&lut_filename,&lut_blocks_ok,&lut_blocks_fehler))==LUT2_NOT_INITIALIZED || retval==ERROR_MALLOC)
+      filename_rb=blocks_ok_rb=blocks_fehler_rb=Qnil;
+   else{
+      filename_rb=rb_str_new2(lut_filename);
+      blocks_ok_rb=rb_str_new2(lut_blocks_ok);
+      blocks_fehler_rb=rb_str_new2(lut_blocks_fehler);
+      kc_free(lut_filename);
+      kc_free(lut_blocks_ok);
+      kc_free(lut_blocks_fehler);
+   }
+   return rb_ary_new3(4,INT2FIX(retval),filename_rb,blocks_ok_rb,blocks_fehler_rb);
+}
+
+/**
+ * ===KontoCheckRaw::lut_blocks1( )
+ * =====KontoCheckRaw::lut_blocks( mode)
+ * =====KontoCheck::lut_blocks( )
+ * Diese Funktion entspricht weitgehend der Funktion lut_blocks(); sie
+ * gibt allerdings nur den Statuscode zurück, keine Strings. Sie wird
+ * für die Funktion KontoCheck::lut_blocks() benutzt.
+ * 
+ * ====Parameter:
+ * * keine
+ * 
+ * ====Rückgabe:
+ * Rückgabe ist ein Integerwert, der Aufschluß über den aktuellen Stand der Initialisierung gibt.
+ *
+ * ====Mögliche Statuscodes:
+ * * -136  LUT2_BLOCKS_MISSING       "ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden"
+ * *  -40  LUT2_NOT_INITIALIZED      "die Programmbibliothek wurde noch nicht initialisiert"
+ * *   -9  ERROR_MALLOC              "kann keinen Speicher allokieren"
+ * *    1  OK                        "ok"
+ */
+static VALUE lut_blocks1_rb(int argc,VALUE* argv,VALUE self)
+{
+   rb_scan_args(argc,argv,"0");
+   return INT2FIX(lut_blocks(0,NULL,NULL,NULL));
+}
+
+/**
  * ===KontoCheckRaw::init( [p1 [,p2 [,set]]])
  * =====KontoCheck::init( [p1 [,p2 [,set]]])
  * Diese Funktion initialisiert die Bibliothek und lädt die gewünschten
@@ -1034,7 +1283,7 @@ static VALUE encoding_str_rb(int argc,VALUE* argv,VALUE self)
  * wieder freigegeben würden.
  *
  * Da diese Funktion etwas exotisch ist, ist sie nur in der KontoCheckRaw
- * Bibliothek enthalten, nicht in KontoCheck..
+ * Bibliothek enthalten, nicht in KontoCheck.
  * 
  * ====Aufruf:
  * retval=KontoCheck::encoding( mode)
@@ -1315,7 +1564,7 @@ static VALUE lut_info_rb(int argc,VALUE* argv,VALUE self)
  * Diese Funktion war die alte Initialisierungsroutine für konto_check; es ist
  * nun durch die Funktionen KontoCheck::init() und KontoCheck::generate_lutfile()
  * ersetzt. Zur Initialisierung  benutzte sie die Textdatei der Deutschen
- * Bundesbank und generiertge daraus eine LUT-Datei, die dann von der
+ * Bundesbank und generierte daraus eine LUT-Datei, die dann von der
  * Initialisierungsroutine der C-Bibliothek benutzt wurde.
  * 
  * Die init() Funktion ist wesentlich schneller (7...20 mal so schnell ohne
@@ -1470,12 +1719,14 @@ static VALUE iban2bic_rb(int argc,VALUE* argv,VALUE self)
  */
 static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
 {
-   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20],blz2[20],kto2[20],*bic;
+   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20],blz2[20],kto2[20];
+   const char *bic;
    int retval,regel;
    VALUE iban_rb,papier_rb,bic_rb,blz2_rb,kto2_rb;
 
    get_params(argc,argv,blz,kto,NULL,NULL,2);
    papier=iban_bic_gen(blz,kto,&bic,blz2,kto2,&retval);
+   regel=-1;
    if(retval==OK || retval==OK_UNTERKONTO_ATTACHED || retval==OK_UNTERKONTO_POSSIBLE || retval==OK_UNTERKONTO_GIVEN){
       for(ptr=papier,dptr=iban;*ptr;ptr++)if(*ptr!=' ')*dptr++=*ptr;
       *dptr=0;
@@ -1488,8 +1739,8 @@ static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
       regel=lut_iban_regel(blz,0,NULL)/100;
    }
    else
-      iban_rb=papier_rb=Qnil;
-   return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,regel);
+      iban_rb=papier_rb=blz2_rb=kto2_rb=bic_rb=Qnil;
+   return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,INT2FIX(regel));
 }
 
 /**
@@ -2196,7 +2447,7 @@ static VALUE bank_suche_int(int argc,VALUE* argv,VALUE self,int (*suchfkt_s)(cha
 {
    char such_name[128],**base_name,error_msg[512];
    int i,j,k,retval,such1,such2,anzahl,anzahl2,last_blz,uniq,*start_idx,*zweigstelle,*blz_base,*base_name_i;
-   int anzahl_o,*idx_o,*cnt_o;
+   int *idx_o,*cnt_o;
    VALUE ret_blz,ret_idx,ret_suche;
 
    if(suchfkt_s){
@@ -2205,6 +2456,7 @@ static VALUE bank_suche_int(int argc,VALUE* argv,VALUE self,int (*suchfkt_s)(cha
    }
    else{
       get_params_int(argc,argv,&such1,&such2,&uniq);
+      if(!such2)such2=such1;
       retval=(*suchfkt_i)(such1,such2,&anzahl,&start_idx,&zweigstelle,&base_name_i,&blz_base);
    }
    if(retval==KEY_NOT_FOUND)return rb_ary_new3(5,Qnil,Qnil,Qnil,INT2FIX(retval),INT2FIX(0));
@@ -2227,8 +2479,12 @@ static VALUE bank_suche_int(int argc,VALUE* argv,VALUE self,int (*suchfkt_s)(cha
          last_blz=blz_base[j];
       if(suchfkt_s)
          rb_ary_store(ret_suche,k,rb_str_new2(base_name[j]));
-      else
-         rb_ary_store(ret_suche,k,INT2FIX(base_name_i[j]));
+      else{
+         if(suchfkt_i==lut_suche_regel)
+            rb_ary_store(ret_suche,k,INT2FIX(base_name_i[j]/100));   /* nur die Regel ausgeben, ohne Version */
+         else
+            rb_ary_store(ret_suche,k,INT2FIX(base_name_i[j]));
+      }
       rb_ary_store(ret_blz,k,INT2FIX(blz_base[j]));
       rb_ary_store(ret_idx,k++,INT2FIX(zweigstelle[j]));
    }
@@ -2270,10 +2526,10 @@ static VALUE bank_suche_bic(int argc,VALUE* argv,VALUE self)
  * ===KontoCheckRaw::bank_suche_namen( name [,sort_uniq [,sort]])
  * =====KontoCheck::suche()
  *
- * Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert <search_bic> beginnen.
+ * Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert <name> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
  *
- * * Das erste Element ist ein Array mit den gefundenen Namenswerten
+ * * Das erste Element ist ein Array mit den gefundenen Namen
  * * Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
  * * Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
  * * das vierte Element ist der Statuscode (s.u.)
@@ -2300,7 +2556,7 @@ static VALUE bank_suche_namen(int argc,VALUE* argv,VALUE self)
  * Diese Funktion sucht alle Banken, deren Kurznamen mit dem angegebenen Wert <search_bic> beginnen.
  * Die Rückgabe ist ein Array mit fünf Elementen:
  *
- * * Das erste Element ist ein Array mit den gefundenen Namenswerten
+ * * Das erste Element ist ein Array mit den gefundenen Kurznamen
  * * Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
  * * Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
  * * das vierte Element ist der Statuscode (s.u.)
@@ -2325,10 +2581,10 @@ static VALUE bank_suche_namen_kurz(int argc,VALUE* argv,VALUE self)
  * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren PLZ gleich <plz1> ist oder (bei
- * Angabe von plz2) die im Bereich zwischen <plz1> und <plz2> liegen.. Die
+ * Angabe von plz2) die im Bereich zwischen <plz1> und <plz2> liegen. Die
  * Rückgabe ist ein Array mit fünf Elementen:
  *
- * * Das erste Element ist ein Array mit den gefundenen Namenswerten
+ * * Das erste Element ist ein Array mit den gefundenen Postleitzahlen
  * * Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
  * * Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
  * * das vierte Element ist der Statuscode (s.u.)
@@ -2353,7 +2609,7 @@ static VALUE bank_suche_plz(int argc,VALUE* argv,VALUE self)
  * ===== KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Prüfziffer gleich <pz1> ist oder (bei
- * Angabe von pz2) die im Bereich zwischen <pz1> und <pz2> liegen.. Die
+ * Angabe von pz2) die im Bereich zwischen <pz1> und <pz2> liegen. Die
  * Rückgabe ist ein Array mit fünf Elementen:
  *
  * * Das erste Element ist ein Array mit den gefundenen Prüfziffern
@@ -2381,7 +2637,7 @@ static VALUE bank_suche_pz(int argc,VALUE* argv,VALUE self)
  * =====KontoCheck::suche()
  *
  * Diese Funktion sucht alle Banken, deren Bankleitzahl gleich <blz1> ist oder (bei
- * Angabe von blz2) die im Bereich zwischen <blz1> und <blz2> liegen.. Die
+ * Angabe von blz2) die im Bereich zwischen <blz1> und <blz2> liegen. Die
  * Rückgabe ist ein Array mit fünf Elementen:
  *
  * * Das erste Element ist ein Array mit den gefundenen Bankleitzahlen
@@ -2432,6 +2688,34 @@ static VALUE bank_suche_ort(int argc,VALUE* argv,VALUE self)
 }
 
 /**
+ * === KontoCheckRaw::bank_suche_regel( regel1 [,regel2 [,sort_uniq [,sort]]])
+ * ===== KontoCheck::suche()
+ *
+ * Diese Funktion sucht alle Banken, deren IBAN-Regel gleich <regel1> ist oder
+ * (bei Angabe von regel2) die im Bereich zwischen <regel1> und <regel2>
+ * liegen. Die Rückgabe ist ein Array mit fünf Elementen:
+ *
+ * * Das erste Element ist ein Array mit den gefundenen Regeln
+ * * Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
+ * * Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
+ * * das vierte Element ist der Statuscode (s.u.)
+ * * das fünfte Element gibt die Anzahl der gefundenen Banken zurück.
+ *
+ * Mögliche Statuscodes:
+ *
+ *     -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
+ *     -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
+ *     -45  (LUT2_PZ_NOT_INITIALIZED)    "Das Feld Prüfziffer wurde nicht initialisiert"
+ *     -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
+ *      -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
+ *       1  (OK)                         "ok"
+ */
+static VALUE bank_suche_regel(int argc,VALUE* argv,VALUE self)
+{
+   return bank_suche_int(argc,argv,self,NULL,lut_suche_regel);
+}
+
+/**
  * ===KontoCheckRaw::bank_suche_volltext( suchwort [,sort_uniq [,sort]])
  * =====KontoCheck::suche()
  * 
@@ -2461,7 +2745,7 @@ static VALUE bank_suche_volltext(int argc,VALUE* argv,VALUE self)
 {
    char such_wort[128],**base_name,error_msg[512];
    int i,j,k,retval,anzahl,anzahl2,last_blz,uniq,*start_idx,*zweigstelle,*blz_base,base_name_idx,zweigstellen_anzahl;
-   int anzahl_o,*idx_o,*cnt_o;
+   int *idx_o,*cnt_o;
    VALUE ret_blz,ret_idx,ret_suche;
 
    get_params(argc,argv,such_wort,NULL,NULL,&uniq,7);
@@ -2752,6 +3036,8 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"free",free_rb,0);
    rb_define_module_function(KontoCheck,"konto_check",konto_check,-1);
    rb_define_module_function(KontoCheck,"konto_check_pz",konto_check_pz,-1);
+   rb_define_module_function(KontoCheck,"konto_check_regel",konto_check_regel,-1);
+   rb_define_module_function(KontoCheck,"konto_check_regel_dbg",konto_check_regel_dbg,-1);
    rb_define_module_function(KontoCheck,"bank_valid",bank_valid,-1);
    rb_define_module_function(KontoCheck,"bank_filialen",bank_filialen,-1);
    rb_define_module_function(KontoCheck,"bank_alles",bank_alles,-1);
@@ -2767,6 +3053,8 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"bank_loeschung",bank_loeschung,-1);
    rb_define_module_function(KontoCheck,"bank_nachfolge_blz",bank_nachfolge_blz,-1);
    rb_define_module_function(KontoCheck,"dump_lutfile",dump_lutfile_rb,-1);
+   rb_define_module_function(KontoCheck,"lut_blocks",lut_blocks_rb,-1);
+   rb_define_module_function(KontoCheck,"lut_blocks1",lut_blocks1_rb,-1);
    rb_define_module_function(KontoCheck,"lut_info",lut_info_rb,-1);
    rb_define_module_function(KontoCheck,"keep_raw_data",keep_raw_data_rb,1);
    rb_define_module_function(KontoCheck,"encoding",encoding_rb,-1);
@@ -2791,12 +3079,19 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"bank_suche_blz",bank_suche_blz,-1);
    rb_define_module_function(KontoCheck,"bank_suche_plz",bank_suche_plz,-1);
    rb_define_module_function(KontoCheck,"bank_suche_pz",bank_suche_pz,-1);
+   rb_define_module_function(KontoCheck,"bank_suche_regel",bank_suche_regel,-1);
    rb_define_module_function(KontoCheck,"bank_suche_volltext",bank_suche_volltext,-1);
    rb_define_module_function(KontoCheck,"bank_suche_multiple",bank_suche_multiple,-1);
    rb_define_module_function(KontoCheck,"version",version_rb,-1);
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-139) es konnten nicht alle Datenblocks die für die IBAN-Berechnung notwendig sind geladen werden */
+   rb_define_const(KontoCheck,"LUT2_NOT_ALL_IBAN_BLOCKS_LOADED",INT2FIX(LUT2_NOT_ALL_IBAN_BLOCKS_LOADED));
+      /* (-138) Der Datensatz ist noch nicht gültig, außerdem konnten nicht alle Blocks geladen werden */
+   rb_define_const(KontoCheck,"LUT2_NOT_YET_VALID_PARTIAL_OK",INT2FIX(LUT2_NOT_YET_VALID_PARTIAL_OK));
+      /* (-137) Der Datensatz ist nicht mehr gültig, außerdem konnten nicht alle Blocks geladen werdeng */
+   rb_define_const(KontoCheck,"LUT2_NO_LONGER_VALID_PARTIAL_OK",INT2FIX(LUT2_NO_LONGER_VALID_PARTIAL_OK));
       /* (-136) ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks nicht geladen werden */
    rb_define_const(KontoCheck,"LUT2_BLOCKS_MISSING",INT2FIX(LUT2_BLOCKS_MISSING));
       /* (-135) falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel) */

@@ -106,6 +106,8 @@
     
     <li><a href="#method-c-bank_suche_pz">::bank_suche_pz</a>
     
+    <li><a href="#method-c-bank_suche_regel">::bank_suche_regel</a>
+    
     <li><a href="#method-c-bank_suche_volltext">::bank_suche_volltext</a>
     
     <li><a href="#method-c-bank_valid">::bank_valid</a>
@@ -142,7 +144,15 @@
     
     <li><a href="#method-c-konto_check_pz">::konto_check_pz</a>
     
+    <li><a href="#method-c-konto_check_regel">::konto_check_regel</a>
+    
+    <li><a href="#method-c-konto_check_regel_dbg">::konto_check_regel_dbg</a>
+    
     <li><a href="#method-c-load_bank_data">::load_bank_data</a>
+    
+    <li><a href="#method-c-lut_blocks">::lut_blocks</a>
+    
+    <li><a href="#method-c-lut_blocks1">::lut_blocks1</a>
     
     <li><a href="#method-c-lut_info">::lut_info</a>
     
@@ -820,6 +830,12 @@ Blocks nicht geladen werden</p>
         <dd class="description"><p>(-51) Das Feld Bankname wurde nicht initialisiert</p>
         
       
+        <dt id="LUT2_NOT_ALL_IBAN_BLOCKS_LOADED">LUT2_NOT_ALL_IBAN_BLOCKS_LOADED
+        
+        <dd class="description"><p>(-139) es konnten nicht alle Datenblocks die für die IBAN-Berechnung
+notwendig sind geladen werden</p>
+        
+      
         <dt id="LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED
         
         <dd class="description"><p>(-40) die Programmbibliothek wurde noch nicht initialisiert</p>
@@ -828,6 +844,12 @@ Blocks nicht geladen werden</p>
         <dt id="LUT2_NOT_YET_VALID">LUT2_NOT_YET_VALID
         
         <dd class="description"><p>(-59) Der Datensatz ist noch nicht gültig</p>
+        
+      
+        <dt id="LUT2_NOT_YET_VALID_PARTIAL_OK">LUT2_NOT_YET_VALID_PARTIAL_OK
+        
+        <dd class="description"><p>(-138) Der Datensatz ist noch nicht gültig, außerdem konnten nicht alle
+Blocks geladen werden</p>
         
       
         <dt id="LUT2_NO_ACCOUNT_GIVEN">LUT2_NO_ACCOUNT_GIVEN
@@ -844,6 +866,12 @@ Blocks nicht geladen werden</p>
         
         <dd class="description"><p>(-105) Beide Datensätze sind nicht mehr gültig, dieser ist aber jünger als
 der andere</p>
+        
+      
+        <dt id="LUT2_NO_LONGER_VALID_PARTIAL_OK">LUT2_NO_LONGER_VALID_PARTIAL_OK
+        
+        <dd class="description"><p>(-137) Der Datensatz ist nicht mehr gültig, außerdem konnten nicht alle
+Blocks geladen werdeng</p>
         
       
         <dt id="LUT2_NO_SLOT_FREE">LUT2_NO_SLOT_FREE
@@ -1931,7 +1959,7 @@ gefundenen Bankleitzahlen</p>
 
 <p>Diese Funktion sucht alle Banken, deren Bankleitzahl gleich &lt;blz1&gt;
 ist oder (bei Angabe von blz2) die im Bereich zwischen &lt;blz1&gt; und
-&lt;blz2&gt; liegen.. Die Rückgabe ist ein Array mit fünf Elementen:</p>
+&lt;blz2&gt; liegen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 <ul><li>
 <p>Das erste Element ist ein Array mit den gefundenen Bankleitzahlen</p>
 </li><li>
@@ -2167,9 +2195,9 @@ href="KontoCheckRaw.html#SOME_KEYS_NOT_FOUND">SOME_KEYS_NOT_FOUND</a>)
 <h5 id="method-c-bank_suche_namen-label-KontoCheck%3A%3Asuche%28%29"><a href="KontoCheck.html#method-c-suche">KontoCheck.suche</a></h5>
 
 <p>Diese Funktion sucht alle Banken, deren Namen mit dem angegebenen Wert
-&lt;search_bic&gt; beginnen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
+&lt;name&gt; beginnen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 <ul><li>
-<p>Das erste Element ist ein Array mit den gefundenen Namenswerten</p>
+<p>Das erste Element ist ein Array mit den gefundenen Namen</p>
 </li><li>
 <p>Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das
 Suchmuster passen</p>
@@ -2226,7 +2254,7 @@ gefundenen Bankleitzahlen</p>
 <p>Diese Funktion sucht alle Banken, deren Kurznamen mit dem angegebenen Wert
 &lt;search_bic&gt; beginnen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 <ul><li>
-<p>Das erste Element ist ein Array mit den gefundenen Namenswerten</p>
+<p>Das erste Element ist ein Array mit den gefundenen Kurznamen</p>
 </li><li>
 <p>Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das
 Suchmuster passen</p>
@@ -2339,9 +2367,9 @@ gefundenen Bankleitzahlen</p>
 
 <p>Diese Funktion sucht alle Banken, deren PLZ gleich &lt;plz1&gt; ist oder
 (bei Angabe von plz2) die im Bereich zwischen &lt;plz1&gt; und &lt;plz2&gt;
-liegen.. Die Rückgabe ist ein Array mit fünf Elementen:</p>
+liegen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 <ul><li>
-<p>Das erste Element ist ein Array mit den gefundenen Namenswerten</p>
+<p>Das erste Element ist ein Array mit den gefundenen Postleitzahlen</p>
 </li><li>
 <p>Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das
 Suchmuster passen</p>
@@ -2397,7 +2425,7 @@ gefundenen Bankleitzahlen</p>
 
 <p>Diese Funktion sucht alle Banken, deren Prüfziffer gleich &lt;pz1&gt; ist
 oder (bei Angabe von pz2) die im Bereich zwischen &lt;pz1&gt; und
-&lt;pz2&gt; liegen.. Die Rückgabe ist ein Array mit fünf Elementen:</p>
+&lt;pz2&gt; liegen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 <ul><li>
 <p>Das erste Element ist ein Array mit den gefundenen Prüfziffern</p>
 </li><li>
@@ -2436,6 +2464,64 @@ gefundenen Bankleitzahlen</p>
 
         
       </div><!-- bank_suche_pz-method -->
+
+    
+      <div id="method-c-bank_suche_regel" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bank_suche_regel</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-bank_suche_regel-label-KontoCheckRaw%3A%3Abank_suche_regel%28+regel1+%5B%2Cregel2+%5B%2Csort_uniq+%5B%2Csort%5D%5D%5D%29"><a href="KontoCheckRaw.html#method-c-bank_suche_regel">::bank_suche_regel</a>( regel1 [,regel2 [,sort_uniq [,sort]]])</h3>
+
+<h5 id="method-c-bank_suche_regel-label-KontoCheck%3A%3Asuche%28%29"><a href="KontoCheck.html#method-c-suche">KontoCheck.suche</a></h5>
+
+<p>Diese Funktion sucht alle Banken, deren IBAN-Regel gleich &lt;regel1&gt;
+ist oder (bei Angabe von regel2) die im Bereich zwischen &lt;regel1&gt; und
+&lt;regel2&gt; liegen. Die Rückgabe ist ein Array mit fünf Elementen:</p>
+<ul><li>
+<p>Das erste Element ist ein Array mit den gefundenen Regeln</p>
+</li><li>
+<p>Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das
+Suchmuster passen</p>
+</li><li>
+<p>Das dritte Element ist ein Array mit den Zweigstellen-Indizes der
+gefundenen Bankleitzahlen</p>
+</li><li>
+<p>das vierte Element ist der Statuscode (s.u.)</p>
+</li><li>
+<p>das fünfte Element gibt die Anzahl der gefundenen Banken zurück.</p>
+</li></ul>
+
+<p>Mögliche Statuscodes:</p>
+
+<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
+-70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
+-45  (LUT2_PZ_NOT_INITIALIZED)    &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
+-40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
+ -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
+  1  (OK)                         &quot;ok&quot;</pre>
+          
+
+          
+          <div class="method-source-code" id="bank_suche_regel-source">
+            <pre>static VALUE bank_suche_regel(int argc,VALUE* argv,VALUE self)
+{
+   return bank_suche_int(argc,argv,self,NULL,lut_suche_regel);
+}</pre>
+          </div><!-- bank_suche_regel-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- bank_suche_regel-method -->
 
     
       <div id="method-c-bank_suche_volltext" class="method-detail ">
@@ -2483,7 +2569,7 @@ zurückgegeben. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 {
    char such_wort[128],**base_name,error_msg[512];
    int i,j,k,retval,anzahl,anzahl2,last_blz,uniq,*start_idx,*zweigstelle,*blz_base,base_name_idx,zweigstellen_anzahl;
-   int anzahl_o,*idx_o,*cnt_o;
+   int *idx_o,*cnt_o;
    VALUE ret_blz,ret_idx,ret_suche;
 
    get_params(argc,argv,such_wort,NULL,NULL,&amp;uniq,7);
@@ -3713,12 +3799,14 @@ href="KontoCheckRaw.html#OK_UNTERKONTO_ATTACHED">OK_UNTERKONTO_ATTACHED</a>)
           <div class="method-source-code" id="iban_gen-source">
             <pre>static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
 {
-   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20],blz2[20],kto2[20],*bic;
+   char iban[128],*papier,*ptr,*dptr,blz[20],kto[20],blz2[20],kto2[20];
+   const char *bic;
    int retval,regel;
    VALUE iban_rb,papier_rb,bic_rb,blz2_rb,kto2_rb;
 
    get_params(argc,argv,blz,kto,NULL,NULL,2);
    papier=iban_bic_gen(blz,kto,&amp;bic,blz2,kto2,&amp;retval);
+   regel=-1;
    if(retval==OK || retval==OK_UNTERKONTO_ATTACHED || retval==OK_UNTERKONTO_POSSIBLE || retval==OK_UNTERKONTO_GIVEN){
       for(ptr=papier,dptr=iban;*ptr;ptr++)if(*ptr!=' ')*dptr++=*ptr;
       *dptr=0;
@@ -3731,8 +3819,8 @@ href="KontoCheckRaw.html#OK_UNTERKONTO_ATTACHED">OK_UNTERKONTO_ATTACHED</a>)
       regel=lut_iban_regel(blz,0,NULL)/100;
    }
    else
-      iban_rb=papier_rb=Qnil;
-   return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,regel);
+      iban_rb=papier_rb=blz2_rb=kto2_rb=bic_rb=Qnil;
+   return rb_ary_new3(7,iban_rb,papier_rb,INT2FIX(retval),bic_rb,blz2_rb,kto2_rb,INT2FIX(regel));
 }</pre>
           </div><!-- iban_gen-source -->
           
@@ -4119,7 +4207,7 @@ benötigt, die andernfalls wieder freigegeben würden.</p>
 
 <p>Da diese Funktion etwas exotisch ist, ist sie nur in der <a
 href="KontoCheckRaw.html">KontoCheckRaw</a> Bibliothek enthalten, nicht in
-<a href="KontoCheck.html">KontoCheck</a>..</p>
+<a href="KontoCheck.html">KontoCheck</a>.</p>
 
 <h4 id="method-c-keep_raw_data-label-Aufruf%3A">Aufruf:</h4>
 
@@ -4379,6 +4467,441 @@ href="KontoCheckRaw.html#INVALID_KTO_LENGTH">INVALID_KTO_LENGTH</a>)
       </div><!-- konto_check_pz-method -->
 
     
+      <div id="method-c-konto_check_regel" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">konto_check_regel</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-konto_check_regel-label-KontoCheckRaw%3A%3Akonto_check_regel%28+blz%2C+kto%29"><a href="KontoCheckRaw.html#method-c-konto_check_regel">::konto_check_regel</a>( blz, kto)</h3>
+
+<h5 id="method-c-konto_check_regel-label-KontoCheckRaw%3A%3Akonto_check_regel_dbg%28+blz%2C+kto%29"><a href="KontoCheckRaw.html#method-c-konto_check_regel_dbg">::konto_check_regel_dbg</a>( blz, kto)</h5>
+
+<h5 id="method-c-konto_check_regel-label-KontoCheck%3A%3Akonto_check_regel%28+blz%2C+kto%29"><a href="KontoCheck.html#method-c-konto_check_regel">KontoCheck.konto_check_regel</a>( blz, kto)</h5>
+
+<h5 id="method-c-konto_check_regel-label-KontoCheck%3A%3Akonto_check_regel%3F%28+blz%2C+kto%29"><a href="KontoCheck.html#method-c-konto_check_regel-3F">KontoCheck.konto_check_regel?</a>( blz, kto)</h5>
+
+<p>Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Vor
+der Prüfung werden die IBAN-Regeln angewendet; dabei wird u.U. BLZ und/oder
+Kontonummer ersetzt.</p>
+
+<h4 id="method-c-konto_check_regel-label-Aufruf%3A">Aufruf:</h4>
+
+<p>ret=<a
+href="KontoCheckRaw.html#method-c-konto_check_regel">::konto_check_regel</a>(
+blz, kto)</p>
+
+<h4 id="method-c-konto_check_regel-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>blz: Die Bankleitzahl der zu testenden Bankverbindung</p>
+</li><li>
+<p>kto: Die Kontonummer der zu testenden Bankverbindung</p>
+</li></ul>
+
+<h4 id="method-c-konto_check_regel-label-R%C3%BCckgabe%3A">Rückgabe:</h4>
+
+<p>Rückgabe ist ein skalarer Statuswert, der das Ergebnis der Prüfung enthält.
+Es sind auch die Rückgabewerte der Initialisierung möglich (wegen
+iban_init()), deshalb gibt es so viele mögliche Rückgabewerte.</p>
+
+<h4 id="method-c-konto_check_regel-label-M%C3%B6gliche+Statuscodes%3A">Mögliche Statuscodes:</h4>
+<ul><li>
+<p>-135  <a
+href="KontoCheckRaw.html#FALSE_UNTERKONTO_ATTACHED">FALSE_UNTERKONTO_ATTACHED</a>
+"falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)"</p>
+</li><li>
+<p>-133  <a
+href="KontoCheckRaw.html#BLZ_MARKED_AS_DELETED">BLZ_MARKED_AS_DELETED</a>  
+"Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit
+ungültig"</p>
+</li><li>
+<p>-128  <a href="KontoCheckRaw.html#IBAN_INVALID_RULE">IBAN_INVALID_RULE</a> 
+"Die BLZ passt nicht zur angegebenen IBAN-Regel"</p>
+</li><li>
+<p>-127  <a
+href="KontoCheckRaw.html#IBAN_AMBIGUOUS_KTO">IBAN_AMBIGUOUS_KTO</a>       
+"Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"</p>
+</li><li>
+<p>-125  <a href="KontoCheckRaw.html#IBAN_RULE_UNKNOWN">IBAN_RULE_UNKNOWN</a> 
+"Die IBAN-Regel ist nicht bekannt"</p>
+</li><li>
+<p>-124  <a
+href="KontoCheckRaw.html#NO_IBAN_CALCULATION">NO_IBAN_CALCULATION</a>      
+"Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"</p>
+</li><li>
+<p>-112  <a
+href="KontoCheckRaw.html#KTO_CHECK_UNSUPPORTED_COMPRESSION">KTO_CHECK_UNSUPPORTED_COMPRESSION</a>
+"die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht
+eingebunden"</p>
+</li><li>
+<p>-77  <a href="KontoCheckRaw.html#BAV_FALSE">BAV_FALSE</a>                
+"BAV denkt, das Konto ist falsch (<a
+href="KontoCheckRaw.html#method-c-konto_check">::konto_check</a> hält es
+für richtig)"</p>
+</li><li>
+<p>-69  <a href="KontoCheckRaw.html#MISSING_PARAMETER">MISSING_PARAMETER</a>  
+"Für die aufgerufene Funktion fehlt ein notwendiger Parameter"</p>
+</li><li>
+<p>-64  <a href="KontoCheckRaw.html#INIT_FATAL_ERROR">INIT_FATAL_ERROR</a>    
+"Initialisierung fehlgeschlagen (init_wait geblockt)"</p>
+</li><li>
+<p>-63  <a
+href="KontoCheckRaw.html#INCREMENTAL_INIT_NEEDS_INFO">INCREMENTAL_INIT_NEEDS_INFO</a>
+"Ein inkrementelles Initialisieren benötigt einen Info-Block in der
+LUT-Datei"</p>
+</li><li>
+<p>-62  <a
+href="KontoCheckRaw.html#INCREMENTAL_INIT_FROM_DIFFERENT_FILE">INCREMENTAL_INIT_FROM_DIFFERENT_FILE</a>
+"Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht
+möglich"</p>
+</li><li>
+<p>-40  <a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>    
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-38  <a href="KontoCheckRaw.html#LUT2_PARTIAL_OK">LUT2_PARTIAL_OK</a>      
+"es wurden nicht alle Blocks geladen"</p>
+</li><li>
+<p>-36  <a href="KontoCheckRaw.html#LUT2_Z_MEM_ERROR">LUT2_Z_MEM_ERROR</a>    
+"Memory error in den ZLIB-Routinen"</p>
+</li><li>
+<p>-35  <a href="KontoCheckRaw.html#LUT2_Z_DATA_ERROR">LUT2_Z_DATA_ERROR</a>  
+"Datenfehler im komprimierten LUT-Block"</p>
+</li><li>
+<p>-34  <a
+href="KontoCheckRaw.html#LUT2_BLOCK_NOT_IN_FILE">LUT2_BLOCK_NOT_IN_FILE</a>
+"Der Block ist nicht in der LUT-Datei enthalten"</p>
+</li><li>
+<p>-33  <a
+href="KontoCheckRaw.html#LUT2_DECOMPRESS_ERROR">LUT2_DECOMPRESS_ERROR</a>  
+"Fehler beim Dekomprimieren eines LUT-Blocks"</p>
+</li><li>
+<p>-31  <a
+href="KontoCheckRaw.html#LUT2_FILE_CORRUPTED">LUT2_FILE_CORRUPTED</a>      
+"Die LUT-Datei ist korrumpiert"</p>
+</li><li>
+<p>-29  <a
+href="KontoCheckRaw.html#UNDEFINED_SUBMETHOD">UNDEFINED_SUBMETHOD</a>      
+"Die (Unter)Methode ist nicht definiert"</p>
+</li><li>
+<p>-20  <a href="KontoCheckRaw.html#LUT_CRC_ERROR">LUT_CRC_ERROR</a>          
+"Prüfsummenfehler in der blz.lut Datei"</p>
+</li><li>
+<p>-12  <a href="KontoCheckRaw.html#INVALID_KTO_LENGTH">INVALID_KTO_LENGTH</a>
+"ein Konto muß zwischen 1 und 10 Stellen haben"</p>
+</li><li>
+<p>-10  <a href="KontoCheckRaw.html#FILE_READ_ERROR">FILE_READ_ERROR</a>      
+"kann Datei nicht lesen"</p>
+</li><li>
+<p>-9  <a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>             
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>-7  <a href="KontoCheckRaw.html#INVALID_LUT_FILE">INVALID_LUT_FILE</a>     
+"die blz.lut Datei ist inkosistent/ungültig"</p>
+</li><li>
+<p>-6  <a href="KontoCheckRaw.html#NO_LUT_FILE">NO_LUT_FILE</a>              
+"die blz.lut Datei wurde nicht gefunden"</p>
+</li><li>
+<p>-5  <a href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a> 
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  <a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>              
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>-3  <a href="KontoCheckRaw.html#INVALID_KTO">INVALID_KTO</a>              
+"das Konto ist ungültig"</p>
+</li><li>
+<p>-2  <a href="KontoCheckRaw.html#NOT_IMPLEMENTED">NOT_IMPLEMENTED</a>       
+"die Methode wurde noch nicht implementiert"</p>
+</li><li>
+<p>-1  <a href="KontoCheckRaw.html#NOT_DEFINED">NOT_DEFINED</a>              
+"die Methode ist nicht definiert"</p>
+</li><li>
+<p>0  <a href="KontoCheckRaw.html#FALSE">FALSE</a>                    
+"falsch"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li><li>
+<p>2  <a href="KontoCheckRaw.html#OK_NO_CHK">OK_NO_CHK</a>                
+"ok, ohne Prüfung"</p>
+</li><li>
+<p>6  <a href="KontoCheckRaw.html#LUT1_SET_LOADED">LUT1_SET_LOADED</a>        
+"Die Datei ist im alten LUT-Format (1.0/1.1)"</p>
+</li><li>
+<p>18  <a href="KontoCheckRaw.html#OK_KTO_REPLACED">OK_KTO_REPLACED</a>       
+"ok, die Kontonummer wurde allerdings ersetzt"</p>
+</li><li>
+<p>21  <a
+href="KontoCheckRaw.html#OK_IBAN_WITHOUT_KC_TEST">OK_IBAN_WITHOUT_KC_TEST</a>
+"ok, die Bankverbindung ist (ohne Test) als richtig anzusehen"</p>
+</li><li>
+<p>25  <a
+href="KontoCheckRaw.html#OK_UNTERKONTO_ATTACHED">OK_UNTERKONTO_ATTACHED</a>
+"ok, es wurde ein (weggelassenes) Unterkonto angefügt"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="konto_check_regel-source">
+            <pre>static VALUE konto_check_regel(int argc,VALUE* argv,VALUE self)
+{
+   char kto[16],blz[16],error_msg[512];
+   int retval;
+
+   get_params(argc,argv,blz,kto,NULL,NULL,2);
+   if((retval=kto_check_regel(blz,kto))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
+   return INT2FIX(retval);
+}</pre>
+          </div><!-- konto_check_regel-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- konto_check_regel-method -->
+
+    
+      <div id="method-c-konto_check_regel_dbg" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">konto_check_regel_dbg</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-konto_check_regel_dbg-label-KontoCheckRaw%3A%3Akonto_check_regel_dbg%28+blz%2C+kto%29"><a href="KontoCheckRaw.html#method-c-konto_check_regel_dbg">::konto_check_regel_dbg</a>( blz, kto)</h3>
+
+<h5 id="method-c-konto_check_regel_dbg-label-KontoCheckRaw%3A%3Akonto_check_regel%28+blz%2C+kto%29"><a href="KontoCheckRaw.html#method-c-konto_check_regel">::konto_check_regel</a>( blz, kto)</h5>
+
+<h5 id="method-c-konto_check_regel_dbg-label-KontoCheck%3A%3Akonto_check_regel%28+blz%2C+kto%29"><a href="KontoCheck.html#method-c-konto_check_regel">KontoCheck.konto_check_regel</a>( blz, kto)</h5>
+
+<h5 id="method-c-konto_check_regel_dbg-label-KontoCheck%3A%3Akonto_check_regel%3F%28+blz%2C+kto%29"><a href="KontoCheck.html#method-c-konto_check_regel-3F">KontoCheck.konto_check_regel?</a>( blz, kto)</h5>
+
+<p>Test, ob eine BLZ/Konto-Kombination eine gültige Prüfziffer enthält. Vor
+der Prüfung werden die IBAN-Regeln angewendet; dabei wird u.U. BLZ und/oder
+Kontonummer ersetzt. Die Funktion gibt viele Interna</p>
+<dl class="rdoc-list note-list"><dt>zurück und ist daher nur in der <a href="KontoCheckRaw.html">KontoCheckRaw</a>
+<dd>
+<p>Bibliothek enthalten.</p>
+</dd></dl>
+
+<h4 id="method-c-konto_check_regel_dbg-label-Aufruf%3A">Aufruf:</h4>
+
+<p>ret=<a
+href="KontoCheckRaw.html#method-c-konto_check_regel_dbg">::konto_check_regel_dbg</a>(
+blz, kto)</p>
+
+<h4 id="method-c-konto_check_regel_dbg-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>blz: Die Bankleitzahl der zu testenden Bankverbindung</p>
+</li><li>
+<p>kto: Die Kontonummer der zu testenden Bankverbindung</p>
+</li></ul>
+
+<h4 id="method-c-konto_check_regel_dbg-label-R%C3%BCckgabe%3A">Rückgabe:</h4>
+
+<p>Rückgabe ist ein Array mit 10 Elementen, der das Ergebnis der Prüfung sowie
+eine Reihe interner Werte enthält. Für den Statuscode sind auch die
+Rückgabewerte der Initialisierung möglich (wegen iban_init()), deshalb gibt
+es so viele mögliche Werte.</p>
+<ul><li>
+<p>das erste Element enthält den Statuscode</p>
+</li><li>
+<p>das zweite Element enthält die benutzte BLZ (die BLZ wird durch die
+IBAN-Regeln u.U. ersetzt)</p>
+</li><li>
+<p>das dritte Element enthält die benutzte Kontonummer (wird manchmal auch
+ersetzt)</p>
+</li><li>
+<p>das vierte Element enthält den BIC der Bank</p>
+</li><li>
+<p>das fünfte Element enthält die benutzte IBAN-Regel</p>
+</li><li>
+<p>das sechste Element enthält die Regel-Version</p>
+</li><li>
+<p>das siebte Element enthält Prüfziffermethode als Text</p>
+</li><li>
+<p>das achte Element enthält die Prüfziffermethode (numerisch)</p>
+</li><li>
+<p>das neunte Element enthält die Prüfziffer</p>
+</li><li>
+<p>das zehnte Element enthält die Position der Prüfziffer</p>
+</li></ul>
+
+<h4 id="method-c-konto_check_regel_dbg-label-M%C3%B6gliche+Statuscodes%3A">Mögliche Statuscodes:</h4>
+<ul><li>
+<p>-135  <a
+href="KontoCheckRaw.html#FALSE_UNTERKONTO_ATTACHED">FALSE_UNTERKONTO_ATTACHED</a>
+"falsch, es wurde ein Unterkonto hinzugefügt (IBAN-Regel)"</p>
+</li><li>
+<p>-133  <a
+href="KontoCheckRaw.html#BLZ_MARKED_AS_DELETED">BLZ_MARKED_AS_DELETED</a>  
+"Die BLZ ist in der Bundesbank-Datei als gelöscht markiert und somit
+ungültig"</p>
+</li><li>
+<p>-128  <a href="KontoCheckRaw.html#IBAN_INVALID_RULE">IBAN_INVALID_RULE</a> 
+"Die BLZ passt nicht zur angegebenen IBAN-Regel"</p>
+</li><li>
+<p>-127  <a
+href="KontoCheckRaw.html#IBAN_AMBIGUOUS_KTO">IBAN_AMBIGUOUS_KTO</a>       
+"Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"</p>
+</li><li>
+<p>-125  <a href="KontoCheckRaw.html#IBAN_RULE_UNKNOWN">IBAN_RULE_UNKNOWN</a> 
+"Die IBAN-Regel ist nicht bekannt"</p>
+</li><li>
+<p>-124  <a
+href="KontoCheckRaw.html#NO_IBAN_CALCULATION">NO_IBAN_CALCULATION</a>      
+"Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"</p>
+</li><li>
+<p>-112  <a
+href="KontoCheckRaw.html#KTO_CHECK_UNSUPPORTED_COMPRESSION">KTO_CHECK_UNSUPPORTED_COMPRESSION</a>
+"die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht
+eingebunden"</p>
+</li><li>
+<p>-77  <a href="KontoCheckRaw.html#BAV_FALSE">BAV_FALSE</a>                
+"BAV denkt, das Konto ist falsch (<a
+href="KontoCheckRaw.html#method-c-konto_check">::konto_check</a> hält es
+für richtig)"</p>
+</li><li>
+<p>-69  <a href="KontoCheckRaw.html#MISSING_PARAMETER">MISSING_PARAMETER</a>  
+"Für die aufgerufene Funktion fehlt ein notwendiger Parameter"</p>
+</li><li>
+<p>-64  <a href="KontoCheckRaw.html#INIT_FATAL_ERROR">INIT_FATAL_ERROR</a>    
+"Initialisierung fehlgeschlagen (init_wait geblockt)"</p>
+</li><li>
+<p>-63  <a
+href="KontoCheckRaw.html#INCREMENTAL_INIT_NEEDS_INFO">INCREMENTAL_INIT_NEEDS_INFO</a>
+"Ein inkrementelles Initialisieren benötigt einen Info-Block in der
+LUT-Datei"</p>
+</li><li>
+<p>-62  <a
+href="KontoCheckRaw.html#INCREMENTAL_INIT_FROM_DIFFERENT_FILE">INCREMENTAL_INIT_FROM_DIFFERENT_FILE</a>
+"Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht
+möglich"</p>
+</li><li>
+<p>-40  <a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>    
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-38  <a href="KontoCheckRaw.html#LUT2_PARTIAL_OK">LUT2_PARTIAL_OK</a>      
+"es wurden nicht alle Blocks geladen"</p>
+</li><li>
+<p>-36  <a href="KontoCheckRaw.html#LUT2_Z_MEM_ERROR">LUT2_Z_MEM_ERROR</a>    
+"Memory error in den ZLIB-Routinen"</p>
+</li><li>
+<p>-35  <a href="KontoCheckRaw.html#LUT2_Z_DATA_ERROR">LUT2_Z_DATA_ERROR</a>  
+"Datenfehler im komprimierten LUT-Block"</p>
+</li><li>
+<p>-34  <a
+href="KontoCheckRaw.html#LUT2_BLOCK_NOT_IN_FILE">LUT2_BLOCK_NOT_IN_FILE</a>
+"Der Block ist nicht in der LUT-Datei enthalten"</p>
+</li><li>
+<p>-33  <a
+href="KontoCheckRaw.html#LUT2_DECOMPRESS_ERROR">LUT2_DECOMPRESS_ERROR</a>  
+"Fehler beim Dekomprimieren eines LUT-Blocks"</p>
+</li><li>
+<p>-31  <a
+href="KontoCheckRaw.html#LUT2_FILE_CORRUPTED">LUT2_FILE_CORRUPTED</a>      
+"Die LUT-Datei ist korrumpiert"</p>
+</li><li>
+<p>-29  <a
+href="KontoCheckRaw.html#UNDEFINED_SUBMETHOD">UNDEFINED_SUBMETHOD</a>      
+"Die (Unter)Methode ist nicht definiert"</p>
+</li><li>
+<p>-20  <a href="KontoCheckRaw.html#LUT_CRC_ERROR">LUT_CRC_ERROR</a>          
+"Prüfsummenfehler in der blz.lut Datei"</p>
+</li><li>
+<p>-12  <a href="KontoCheckRaw.html#INVALID_KTO_LENGTH">INVALID_KTO_LENGTH</a>
+"ein Konto muß zwischen 1 und 10 Stellen haben"</p>
+</li><li>
+<p>-10  <a href="KontoCheckRaw.html#FILE_READ_ERROR">FILE_READ_ERROR</a>      
+"kann Datei nicht lesen"</p>
+</li><li>
+<p>-9  <a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>             
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>-7  <a href="KontoCheckRaw.html#INVALID_LUT_FILE">INVALID_LUT_FILE</a>     
+"die blz.lut Datei ist inkosistent/ungültig"</p>
+</li><li>
+<p>-6  <a href="KontoCheckRaw.html#NO_LUT_FILE">NO_LUT_FILE</a>              
+"die blz.lut Datei wurde nicht gefunden"</p>
+</li><li>
+<p>-5  <a href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a> 
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  <a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>              
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>-3  <a href="KontoCheckRaw.html#INVALID_KTO">INVALID_KTO</a>              
+"das Konto ist ungültig"</p>
+</li><li>
+<p>-2  <a href="KontoCheckRaw.html#NOT_IMPLEMENTED">NOT_IMPLEMENTED</a>       
+"die Methode wurde noch nicht implementiert"</p>
+</li><li>
+<p>-1  <a href="KontoCheckRaw.html#NOT_DEFINED">NOT_DEFINED</a>              
+"die Methode ist nicht definiert"</p>
+</li><li>
+<p>0  <a href="KontoCheckRaw.html#FALSE">FALSE</a>                    
+"falsch"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li><li>
+<p>2  <a href="KontoCheckRaw.html#OK_NO_CHK">OK_NO_CHK</a>                
+"ok, ohne Prüfung"</p>
+</li><li>
+<p>6  <a href="KontoCheckRaw.html#LUT1_SET_LOADED">LUT1_SET_LOADED</a>        
+"Die Datei ist im alten LUT-Format (1.0/1.1)"</p>
+</li><li>
+<p>18  <a href="KontoCheckRaw.html#OK_KTO_REPLACED">OK_KTO_REPLACED</a>       
+"ok, die Kontonummer wurde allerdings ersetzt"</p>
+</li><li>
+<p>21  <a
+href="KontoCheckRaw.html#OK_IBAN_WITHOUT_KC_TEST">OK_IBAN_WITHOUT_KC_TEST</a>
+"ok, die Bankverbindung ist (ohne Test) als richtig anzusehen"</p>
+</li><li>
+<p>25  <a
+href="KontoCheckRaw.html#OK_UNTERKONTO_ATTACHED">OK_UNTERKONTO_ATTACHED</a>
+"ok, es wurde ein (weggelassenes) Unterkonto angefügt"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="konto_check_regel_dbg-source">
+            <pre>static VALUE konto_check_regel_dbg(int argc,VALUE* argv,VALUE self)
+{
+   char kto[16],blz[16],kto2[16],blz2[16],error_msg[512];
+   const char *bic2;
+   int retval,regel;
+   RETVAL rv;
+
+   get_params(argc,argv,blz,kto,NULL,NULL,2);
+   if((retval=kto_check_regel_dbg(blz,kto,blz2,kto2,&amp;bic2,&amp;regel,&amp;rv))==LUT2_NOT_INITIALIZED || retval==MISSING_PARAMETER)RUNTIME_ERROR(retval);
+   return rb_ary_new3(10,INT2FIX(retval),rb_str_new2(blz2),rb_str_new2(kto2),rb_str_new2(bic2),INT2FIX(regel/100),INT2FIX(regel%100),
+         rv.methode?rb_str_new2(rv.methode):Qnil,INT2FIX(rv.pz_methode),INT2FIX(rv.pz),INT2FIX(rv.pz_pos));
+}</pre>
+          </div><!-- konto_check_regel_dbg-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- konto_check_regel_dbg-method -->
+
+    
       <div id="method-c-load_bank_data" class="method-detail ">
         
         <div class="method-heading">
@@ -4400,7 +4923,7 @@ nun durch die Funktionen <a
 href="KontoCheck.html#method-c-init">KontoCheck.init</a> und <a
 href="KontoCheck.html#method-c-generate_lutfile">KontoCheck.generate_lutfile</a>
 ersetzt. Zur Initialisierung  benutzte sie die Textdatei der Deutschen
-Bundesbank und generiertge daraus eine LUT-Datei, die dann von der
+Bundesbank und generierte daraus eine LUT-Datei, die dann von der
 Initialisierungsroutine der C-Bibliothek benutzt wurde.</p>
 
 <p>Die init() Funktion ist wesentlich schneller (7...20 mal so schnell ohne
@@ -4458,6 +4981,185 @@ nicht mehr unterstützt wird.</p>
 
         
       </div><!-- load_bank_data-method -->
+
+    
+      <div id="method-c-lut_blocks" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lut_blocks</span><span
+            class="method-args">(p1 = v1)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-lut_blocks-label-KontoCheckRaw%3A%3Alut_blocks%28+mode%29"><a href="KontoCheckRaw.html#method-c-lut_blocks">::lut_blocks</a>( mode)</h3>
+
+<h5 id="method-c-lut_blocks-label-KontoCheck%3A%3Alut_blocks%28+mode%29"><a href="KontoCheck.html#method-c-lut_blocks">KontoCheck.lut_blocks</a>( mode)</h5>
+
+<p>Die Funktion gibt Auskunft, ob bei der Initialisierung alle angeforderten
+Blocks der LUT-Datei geladen wurden und gibt den Dateinamen der LUT-Datei,
+eine Liste der geladenen Blocks sowie eine Liste der Blocks die nicht
+geladen werden konnten, zurück.</p>
+
+<h4 id="method-c-lut_blocks-label-Aufruf%3A">Aufruf:</h4>
+
+<p>ret=<a href="KontoCheckRaw.html#method-c-lut_blocks">::lut_blocks</a>(
+mode)</p>
+
+<h4 id="method-c-lut_blocks-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>mode: Ausgabeformat (1..3)</p>
+</li></ul>
+
+<h4 id="method-c-lut_blocks-label-R%C3%BCckgabe%3A">Rückgabe:</h4>
+
+<p>Rückgabe ist ein Array mit vier Elementen, das den Statuscode sowie drei
+Strings mit dem Dateinamen sowie den Blocklisten enthält:</p>
+<ul><li>
+<p>das erste Element enthält den Statuscode</p>
+</li><li>
+<p>das zweite Element enthält den Dateinamen der verwendeten LUT-Datei</p>
+</li><li>
+<p>das dritte Element enthält eine Liste der geladenen LUT-Blocks</p>
+</li><li>
+<p>das vierte Element enthält eine Liste der LUT-Blocks, die nicht geladen
+werden konnten</p>
+</li></ul>
+
+<h4 id="method-c-lut_blocks-label-M%C3%B6gliche+Statuscodes%3A">Mögliche Statuscodes:</h4>
+<ul><li>
+<p>-136  <a
+href="KontoCheckRaw.html#LUT2_BLOCKS_MISSING">LUT2_BLOCKS_MISSING</a>      
+"ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks
+nicht geladen werden"</p>
+</li><li>
+<p>-40  <a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>    
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  <a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>             
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="lut_blocks-source">
+            <pre>static VALUE lut_blocks_rb(int argc,VALUE* argv,VALUE self)
+{
+   char *lut_filename,*lut_blocks_ok,*lut_blocks_fehler;
+   int mode,retval;
+   VALUE mode_rb,filename_rb,blocks_ok_rb,blocks_fehler_rb;
+
+   rb_scan_args(argc,argv,&quot;01&quot;,&amp;mode_rb);
+   if(NIL_P(mode_rb))
+      mode=1;
+   else{
+      switch(TYPE(mode_rb)){
+         case RUBY_T_FLOAT:
+         case RUBY_T_FIXNUM:
+         case RUBY_T_BIGNUM:
+            mode=NUM2INT(mode_rb);
+            break;
+         default:
+            mode=1;
+            rb_raise(rb_eTypeError,&quot;lut_blocks() requires an int parameter&quot;);
+            break;
+      }
+   }
+
+   if((retval=lut_blocks(mode,&amp;lut_filename,&amp;lut_blocks_ok,&amp;lut_blocks_fehler))==LUT2_NOT_INITIALIZED || retval==ERROR_MALLOC)
+      filename_rb=blocks_ok_rb=blocks_fehler_rb=Qnil;
+   else{
+      filename_rb=rb_str_new2(lut_filename);
+      blocks_ok_rb=rb_str_new2(lut_blocks_ok);
+      blocks_fehler_rb=rb_str_new2(lut_blocks_fehler);
+      kc_free(lut_filename);
+      kc_free(lut_blocks_ok);
+      kc_free(lut_blocks_fehler);
+   }
+   return rb_ary_new3(4,INT2FIX(retval),filename_rb,blocks_ok_rb,blocks_fehler_rb);
+}</pre>
+          </div><!-- lut_blocks-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lut_blocks-method -->
+
+    
+      <div id="method-c-lut_blocks1" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lut_blocks1</span><span
+            class="method-args">()</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-lut_blocks1-label-KontoCheckRaw%3A%3Alut_blocks1%28+%29"><a href="KontoCheckRaw.html#method-c-lut_blocks1">::lut_blocks1</a>( )</h3>
+
+<h5 id="method-c-lut_blocks1-label-KontoCheckRaw%3A%3Alut_blocks%28+mode%29"><a href="KontoCheckRaw.html#method-c-lut_blocks">::lut_blocks</a>( mode)</h5>
+
+<h5 id="method-c-lut_blocks1-label-KontoCheck%3A%3Alut_blocks%28+%29"><a href="KontoCheck.html#method-c-lut_blocks">KontoCheck.lut_blocks</a>( )</h5>
+
+<p>Diese Funktion entspricht weitgehend der Funktion <a
+href="KontoCheckRaw.html#method-c-lut_blocks">::lut_blocks</a>(); sie gibt
+allerdings nur den Statuscode zurück, keine Strings. Sie wird für die
+Funktion <a
+href="KontoCheck.html#method-c-lut_blocks">KontoCheck.lut_blocks</a>
+benutzt.</p>
+
+<h4 id="method-c-lut_blocks1-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>keine</p>
+</li></ul>
+
+<h4 id="method-c-lut_blocks1-label-R%C3%BCckgabe%3A">Rückgabe:</h4>
+
+<p>Rückgabe ist ein Integerwert, der Aufschluß über den aktuellen Stand der
+Initialisierung gibt.</p>
+
+<h4 id="method-c-lut_blocks1-label-M%C3%B6gliche+Statuscodes%3A">Mögliche Statuscodes:</h4>
+<ul><li>
+<p>-136  <a
+href="KontoCheckRaw.html#LUT2_BLOCKS_MISSING">LUT2_BLOCKS_MISSING</a>      
+"ok, bei der Initialisierung konnten allerdings ein oder mehrere Blocks
+nicht geladen werden"</p>
+</li><li>
+<p>-40  <a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>    
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  <a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>             
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  <a href="KontoCheckRaw.html#OK">OK</a>                        "ok"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="lut_blocks1-source">
+            <pre>static VALUE lut_blocks1_rb(int argc,VALUE* argv,VALUE self)
+{
+   rb_scan_args(argc,argv,&quot;0&quot;);
+   return INT2FIX(lut_blocks(0,NULL,NULL,NULL));
+}</pre>
+          </div><!-- lut_blocks1-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- lut_blocks1-method -->
 
     
       <div id="method-c-lut_info" class="method-detail ">
