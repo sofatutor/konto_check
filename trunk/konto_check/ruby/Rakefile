@@ -28,7 +28,7 @@ begin
     gem.description = %Q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, generate IBANs, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
     gem.email = "info@provideal.net"
     gem.files=Dir.glob('lib/**/*.rb')+Dir.glob('ext/**/*.{c,h,rb}')
-    gem.homepage = "http://github.com/provideal/konto_check"
+    gem.homepage = "http://kontocheck.sourceforge.net"
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     gem.version = "5.2.0"

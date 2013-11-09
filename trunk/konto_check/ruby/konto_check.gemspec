@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Provideal Systems GmbH", "Jan Schwenzien", "Michael Plugge"]
-  s.date = "2013-11-04"
+  s.date = "2013-11-09"
   s.description = "Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, generate IBANs, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge."
   s.email = "info@provideal.net"
   s.extensions = ["ext/konto_check_raw/extconf.rb"]
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
     "ext/konto_check_raw/konto_check_raw_ruby.c",
     "lib/konto_check.rb"
   ]
-  s.homepage = "http://github.com/provideal/konto_check"
+  s.homepage = "http://kontocheck.sourceforge.net"
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.25"
   s.summary = "Checking german BICs/Bank account numbers and IBANs, generate IBANs, retrieve information about german Banks, search for Banks matching certain criteria"
