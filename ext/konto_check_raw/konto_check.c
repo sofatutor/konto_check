@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.2 (beta)"
 #endif
-#define VERSION_DATE "2013-11-04"
+#define VERSION_DATE "2013-11-09"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -8478,6 +8478,49 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
          /* SEB AG */
       case 56:
+            /* Spendenkonten */
+         if(k1==0)switch(k2){
+            case       36: strcpy(kto,"1010240003"); return OK_KTO_REPLACED;
+            case       50: strcpy(kto,"1328506100"); return OK_KTO_REPLACED;
+            case       99: strcpy(kto,"1826063000"); return OK_KTO_REPLACED;
+            case      110: strcpy(kto,"1015597802"); return OK_KTO_REPLACED;
+            case      240: strcpy(kto,"1010240000"); return OK_KTO_REPLACED;
+            case      333: strcpy(kto,"1011296100"); return OK_KTO_REPLACED;
+            case      555: strcpy(kto,"1600220800"); return OK_KTO_REPLACED;
+            case      556: strcpy(kto,"1000556100"); return OK_KTO_REPLACED;
+            case      606: strcpy(kto,"1967153801"); return OK_KTO_REPLACED;
+            case      700: strcpy(kto,"1070088000"); return OK_KTO_REPLACED;
+            case      777: strcpy(kto,"1006015200"); return OK_KTO_REPLACED;
+            case      999: strcpy(kto,"1010240001"); return OK_KTO_REPLACED;
+            case     1234: strcpy(kto,"1369152400"); return OK_KTO_REPLACED;
+            case     1313: strcpy(kto,"1017500000"); return OK_KTO_REPLACED;
+            case     1888: strcpy(kto,"1241113000"); return OK_KTO_REPLACED;
+            case     1953: strcpy(kto,"1026500901"); return OK_KTO_REPLACED;
+            case     1998: strcpy(kto,"1547620500"); return OK_KTO_REPLACED;
+            case     2007: strcpy(kto,"1026500907"); return OK_KTO_REPLACED;
+            case     4004: strcpy(kto,"1635100100"); return OK_KTO_REPLACED;
+            case     4444: strcpy(kto,"1304610900"); return OK_KTO_REPLACED;
+            case     5000: strcpy(kto,"1395676000"); return OK_KTO_REPLACED;
+            case     5510: strcpy(kto,"1611754300"); return OK_KTO_REPLACED;
+            case     6060: strcpy(kto,"1000400200"); return OK_KTO_REPLACED;
+            case     6800: strcpy(kto,"1296401301"); return OK_KTO_REPLACED;
+            case    55555: strcpy(kto,"1027758200"); return OK_KTO_REPLACED;
+            case    60000: strcpy(kto,"1005007001"); return OK_KTO_REPLACED;
+            case    66666: strcpy(kto,"1299807801"); return OK_KTO_REPLACED;
+            case   102030: strcpy(kto,"1837501600"); return OK_KTO_REPLACED;
+            case   121212: strcpy(kto,"1249461502"); return OK_KTO_REPLACED;
+            case   130500: strcpy(kto,"1413482100"); return OK_KTO_REPLACED;
+            case   202020: strcpy(kto,"1213431002"); return OK_KTO_REPLACED;
+            case   414141: strcpy(kto,"1010555101"); return OK_KTO_REPLACED;
+            case   666666: strcpy(kto,"1798758900"); return OK_KTO_REPLACED;
+            case  5000000: strcpy(kto,"1403124100"); return OK_KTO_REPLACED;
+         }
+         else if(k1==5 && k2==500500){
+            strcpy(kto,"1045720000");
+            return OK_KTO_REPLACED;
+         }
+
+            /* für die folgenden BLZs sind nur zehnstelllige Kontonummern erlaubt: */
          switch(b){
             case 10010111:
             case 13010111:
@@ -8543,54 +8586,12 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
             case 81010111:
             case 82010111:
             case 86010111:
-                  /* das Konto muß zur IBAN-Ermittlung generell 10 Stellen haben */
                if(k1<10)return INVALID_KTO;
             default:
                break;
          }
 
-            /* Spendenkonten */
-         if(k1==0)switch(k2){
-            case       36: strcpy(kto,"1010240003"); return OK_KTO_REPLACED;
-            case       50: strcpy(kto,"1328506100"); return OK_KTO_REPLACED;
-            case       99: strcpy(kto,"1826063000"); return OK_KTO_REPLACED;
-            case      110: strcpy(kto,"1015597802"); return OK_KTO_REPLACED;
-            case      240: strcpy(kto,"1010240000"); return OK_KTO_REPLACED;
-            case      333: strcpy(kto,"1011296100"); return OK_KTO_REPLACED;
-            case      555: strcpy(kto,"1600220800"); return OK_KTO_REPLACED;
-            case      556: strcpy(kto,"1000556100"); return OK_KTO_REPLACED;
-            case      606: strcpy(kto,"1967153801"); return OK_KTO_REPLACED;
-            case      700: strcpy(kto,"1070088000"); return OK_KTO_REPLACED;
-            case      777: strcpy(kto,"1006015200"); return OK_KTO_REPLACED;
-            case      999: strcpy(kto,"1010240001"); return OK_KTO_REPLACED;
-            case     1234: strcpy(kto,"1369152400"); return OK_KTO_REPLACED;
-            case     1313: strcpy(kto,"1017500000"); return OK_KTO_REPLACED;
-            case     1888: strcpy(kto,"1241113000"); return OK_KTO_REPLACED;
-            case     1953: strcpy(kto,"1026500901"); return OK_KTO_REPLACED;
-            case     1998: strcpy(kto,"1547620500"); return OK_KTO_REPLACED;
-            case     2007: strcpy(kto,"1026500907"); return OK_KTO_REPLACED;
-            case     4004: strcpy(kto,"1635100100"); return OK_KTO_REPLACED;
-            case     4444: strcpy(kto,"1304610900"); return OK_KTO_REPLACED;
-            case     5000: strcpy(kto,"1395676000"); return OK_KTO_REPLACED;
-            case     5510: strcpy(kto,"1611754300"); return OK_KTO_REPLACED;
-            case     6060: strcpy(kto,"1000400200"); return OK_KTO_REPLACED;
-            case     6800: strcpy(kto,"1296401301"); return OK_KTO_REPLACED;
-            case    55555: strcpy(kto,"1027758200"); return OK_KTO_REPLACED;
-            case    60000: strcpy(kto,"1005007001"); return OK_KTO_REPLACED;
-            case    66666: strcpy(kto,"1299807801"); return OK_KTO_REPLACED;
-            case   102030: strcpy(kto,"1837501600"); return OK_KTO_REPLACED;
-            case   121212: strcpy(kto,"1249461502"); return OK_KTO_REPLACED;
-            case   130500: strcpy(kto,"1413482100"); return OK_KTO_REPLACED;
-            case   202020: strcpy(kto,"1213431002"); return OK_KTO_REPLACED;
-            case   414141: strcpy(kto,"1010555101"); return OK_KTO_REPLACED;
-            case   666666: strcpy(kto,"1798758900"); return OK_KTO_REPLACED;
-            case  5000000: strcpy(kto,"1403124100"); return OK_KTO_REPLACED;
-         }
-         else if(k1==5 && k2==500500){
-            strcpy(kto,"1045720000");
-            return OK_KTO_REPLACED;
-         }
-         RETURN_OK;
+         RETURN_OK;  /* sollte nicht vorkommen, nur Lumpensammler */
 
 
          /* Lumpensammler für Regeln */
@@ -21703,7 +21704,7 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
         return "09.12.2013";
 #endif
       case 6:
-        return "4. November 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "9. November 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -24785,7 +24786,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22623 "konto_check.lxx"
+#line 22624 "konto_check.lxx"
 /* Funktion lut_suche_bic() +§§§2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
