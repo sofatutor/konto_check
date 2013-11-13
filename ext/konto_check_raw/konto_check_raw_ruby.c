@@ -3086,6 +3086,8 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-140) Die IBAN-Prüfsumme stimmt, für die Bank gibt es allerdings eine (andere) Nachfolge-BLZ */
+   rb_define_const(KontoCheck,"IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED",INT2FIX(IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED));
       /* (-139) es konnten nicht alle Datenblocks die für die IBAN-Berechnung notwendig sind geladen werden */
    rb_define_const(KontoCheck,"LUT2_NOT_ALL_IBAN_BLOCKS_LOADED",INT2FIX(LUT2_NOT_ALL_IBAN_BLOCKS_LOADED));
       /* (-138) Der Datensatz ist noch nicht gültig, außerdem konnten nicht alle Blocks geladen werden */
