@@ -1,3 +1,11 @@
+important changes in version 5.2:
+   - new check method E1 implemented
+   - new IBAN rules 55 and 56 implemented
+   - changes for some IBAN rules (5, 10, 15, 20, 43 und 45, valid from 2013-12-09) implemented
+   - new function lut_blocks(), lut_suche_regel(), kto_check_regel(), kto_check_regel_dbg() implemented
+   - new functions KontoCheck:: bank_suche_* (no longer only in the KontoCheckRaw:: library)
+   - some minor changes (see file 0_history.txt)
+
 important changes in version 5.1:
    - new function ci_check() for testing a Credit Identifier (Gläubiger-Identifikationsnummer)
    - new version of IBAN rule 20 (Deutsche Bank)

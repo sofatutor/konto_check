@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.2 (beta)"
+#define VERSION "5.2 (final)"
 #endif
-#define VERSION_DATE "2013-11-09"
+#define VERSION_DATE "2013-11-11"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -101,10 +101,8 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die Änderungen zum 9.9.2013 zu aktivieren */
-#if 0
+   /* Flag, um die Änderungen zum 9.12.2013 zu aktivieren */
 static int pz_aenderungen_aktivieren;
-#endif
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
     * Funktionen mittels perror() zusätzliche Debuginfos ausgegeben. Die
@@ -9098,8 +9096,8 @@ static void init_atoi_table(void)
    int i,ziffer;
    unsigned long l;
 
-#if 0
-      /* Änderungen zum 9.9.2013 aktivieren */
+#if 1
+      /* Änderungen zum 9.12.2013 aktivieren */
    if(time(NULL)>1386543600)pz_aenderungen_aktivieren=1;
 #endif
 
@@ -17500,9 +17498,9 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # Variante 1:                                                        #
  * # Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7, 8, 9, 3 (modifiziert)     #
  * #                                                                    #
- * # Die Berechnung und mögliche Ergebnisse entsprechen der Methode     #
- * # 20. Führt die Berechnung nach Variante 1 zu einem                  #
- * # Prüfzifferfehler, so ist nach Variante 2 zu prüfen.                #
+ * # Die Berechnung und mögliche Ergebnisse entsprechen der Methode 20. #
+ * # Führt die Berechnung nach Variante 1 zu einem Prüfzifferfehler,    #
+ * # so ist nach Variante 2 zu prüfen.                                  #
  * #                                                                    #
  * # Variante 2: Modulus 10, iterierte Transformation.                  #
  * # Die Berechnung und mögliche Ergebnisse entsprechen der Methode 29. #
@@ -20609,6 +20607,7 @@ DLL_EXPORT const char *kto_check_retval2txt(int retval)
 DLL_EXPORT const char *kto_check_retval2iso(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Prüfsumme stimmt, für die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die für die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht gültig, außerdem konnten nicht alle Blocks geladen werden";
       case LUT2_NO_LONGER_VALID_PARTIAL_OK: return "Der Datensatz ist nicht mehr gültig, außerdem konnten nicht alle Blocks geladen werdeng";
@@ -20791,6 +20790,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
 DLL_EXPORT const char *kto_check_retval2dos(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Prfsumme stimmt, fr die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die fr die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht gltig, auáerdem konnten nicht alle Blocks geladen werden";
       case LUT2_NO_LONGER_VALID_PARTIAL_OK: return "Der Datensatz ist nicht mehr gltig, auáerdem konnten nicht alle Blocks geladen werdeng";
@@ -20973,6 +20973,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
 DLL_EXPORT const char *kto_check_retval2html(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr&uuml;fsumme stimmt, f&uuml;r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die f&uuml;r die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht g&uuml;ltig, au&szlig;erdem konnten nicht alle Blocks geladen werden";
       case LUT2_NO_LONGER_VALID_PARTIAL_OK: return "Der Datensatz ist nicht mehr g&uuml;ltig, au&szlig;erdem konnten nicht alle Blocks geladen werdeng";
@@ -21155,6 +21156,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
 DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-PrÃ¼fsumme stimmt, fÃ¼r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die fÃ¼r die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht gÃ¼ltig, auÃŸerdem konnten nicht alle Blocks geladen werden";
       case LUT2_NO_LONGER_VALID_PARTIAL_OK: return "Der Datensatz ist nicht mehr gÃ¼ltig, auÃŸerdem konnten nicht alle Blocks geladen werdeng";
@@ -21337,6 +21339,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "LUT2_NOT_ALL_IBAN_BLOCKS_LOADED";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "LUT2_NOT_YET_VALID_PARTIAL_OK";
       case LUT2_NO_LONGER_VALID_PARTIAL_OK: return "LUT2_NO_LONGER_VALID_PARTIAL_OK";
@@ -21699,14 +21702,17 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
 #endif
       case 5:
 #if DB_NEUE_VERSION>0
-        return "09.12.2013 (Regel 20 / Deutsche Bank: Version 1.6 aus der Bundesbank-Mail vom 30.8.2013)";  /* Datum der IBAN-Regeln */
+         if(pz_aenderungen_aktivieren)
+            return "09.12.2013";  /* Datum der IBAN-Regeln */
+         else
+            return "09.12.2013 (Regel 20 / Deutsche Bank: Version 1.6 aus der Bundesbank-Mail vom 30.8.2013)";  /* Datum der IBAN-Regeln */
 #else
         return "09.12.2013";
 #endif
       case 6:
-        return "9. November 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "11. November 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -22601,7 +22607,7 @@ DLL_EXPORT int ci_check(char *ci)
 DLL_EXPORT int iban_check(char *iban,int *retval)
 {
    char c,check[128],*papier2,iban1[64],iban2[24],*blz2,*kto2,*ptr,*dptr;
-   int j,test,ret,iban_len,regel,uk;
+   int j,test,ret,iban_len,regel,uk,nachfolge;
    UINT4 zahl,rest;
 
    if(!iban || !*iban){
@@ -22775,11 +22781,13 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
          if(j>0){
             if((ret=iban_init())<OK)return ret;  /* alle notwendigen Blocks kontrollieren, evl. nachladen */
             uk=uk_pz_methoden[pz_methoden[j]];
+            nachfolge=nachfolge_blz[startidx[j]];
+
             if(iban_regel)
                regel=iban_regel[startidx[j]];
             else
                regel=0;
-            if(uk || regel){
+            if(uk || nachfolge || regel){
                papier2=iban_bic_gen(blz2,kto2,NULL,NULL,NULL,&ret);
                if(ret==NO_IBAN_CALCULATION)return IBAN_CHKSUM_OK_NO_IBAN_CALCULATION;
                if(ret==OK_IBAN_WITHOUT_KC_TEST || ret==OK_KTO_REPLACED_NO_PZ)test=4; /* kein Test der Bankverbindung */
@@ -22790,6 +22798,8 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
                   if(strcmp(iban,iban2)){
                      if(regel>0)
                         return IBAN_CHKSUM_OK_RULE_IGNORED;
+                     else if(nachfolge)
+                        return IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED;
                      else  /*  bei Regel==0 kann nur ein Unterkonto fehlen */
                         return IBAN_CHKSUM_OK_UNTERKTO_MISSING;
                   }
@@ -24786,7 +24796,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22624 "konto_check.lxx"
+#line 22629 "konto_check.lxx"
 /* Funktion lut_suche_bic() +§§§2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
