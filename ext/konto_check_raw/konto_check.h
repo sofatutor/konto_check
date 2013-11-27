@@ -1,5 +1,6 @@
 /* vim: ft=c:set si:set fileencoding=iso-8859-1
  */
+#line 9 "konto_check_h.lx"
 
 /*
  * ##########################################################################
@@ -370,6 +371,7 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define IBAN_CHKSUM_OK_BLZ_INVALID            -141
 #define IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED  -140
 #define LUT2_NOT_ALL_IBAN_BLOCKS_LOADED       -139
 #define LUT2_NOT_YET_VALID_PARTIAL_OK         -138
@@ -536,6 +538,7 @@ extern const char *lut2_feld_namen[256];
 #define OK_HYPO_REQUIRES_KTO                    23
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
+#line 321 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
