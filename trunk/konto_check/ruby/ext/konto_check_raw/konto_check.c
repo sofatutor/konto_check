@@ -13,7 +13,7 @@
  * #  wurden aus der aktuellen BLZ-Datei der Deutschen Bundesbank           #
  * #  ¸bernommen.                                                           #
  * #                                                                        #
- * #  Copyright (C) 2002-2011 Michael Plugge <m.plugge@hs-mannheim.de>      #
+ * #  Copyright (C) 2002-2013 Michael Plugge <m.plugge@hs-mannheim.de>      #
  * #                                                                        #
  * #  Dieses Programm ist freie Software; Sie d¸rfen es unter den           #
  * #  Bedingungen der GNU Lesser General Public License, wie von der Free   #
@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.2 (final)"
+#define VERSION "5.3 (development)"
 #endif
-#define VERSION_DATE "2013-11-11"
+#define VERSION_DATE "2013-11-25"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -20607,6 +20607,7 @@ DLL_EXPORT const char *kto_check_retval2txt(int retval)
 DLL_EXPORT const char *kto_check_retval2iso(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr¸fsumme stimmt, die BLZ ist allerdings ung¸ltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr¸fsumme stimmt, f¸r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die f¸r die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht g¸ltig, auﬂerdem konnten nicht alle Blocks geladen werden";
@@ -20790,6 +20791,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
 DLL_EXPORT const char *kto_check_retval2dos(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-PrÅfsumme stimmt, die BLZ ist allerdings ungÅltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-PrÅfsumme stimmt, fÅr die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die fÅr die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht gÅltig, au·erdem konnten nicht alle Blocks geladen werden";
@@ -20973,6 +20975,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
 DLL_EXPORT const char *kto_check_retval2html(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr&uuml;fsumme stimmt, die BLZ ist allerdings ung&uuml;ltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr&uuml;fsumme stimmt, f&uuml;r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die f&uuml;r die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht g&uuml;ltig, au&szlig;erdem konnten nicht alle Blocks geladen werden";
@@ -21156,6 +21159,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
 DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr√ºfsumme stimmt, die BLZ ist allerdings ung√ºltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr√ºfsumme stimmt, f√ºr die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "es konnten nicht alle Datenblocks die f√ºr die IBAN-Berechnung notwendig sind geladen werden";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "Der Datensatz ist noch nicht g√ºltig, au√üerdem konnten nicht alle Blocks geladen werden";
@@ -21339,6 +21343,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
 {
    switch(retval){
+      case IBAN_CHKSUM_OK_BLZ_INVALID: return "IBAN_CHKSUM_OK_BLZ_INVALID";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED";
       case LUT2_NOT_ALL_IBAN_BLOCKS_LOADED: return "LUT2_NOT_ALL_IBAN_BLOCKS_LOADED";
       case LUT2_NOT_YET_VALID_PARTIAL_OK: return "LUT2_NOT_YET_VALID_PARTIAL_OK";
@@ -21710,9 +21715,9 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
         return "09.12.2013";
 #endif
       case 6:
-        return "11. November 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "25. November 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -22067,12 +22072,6 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
    *dptr=0;
    iban=iban1;
 
-   if((ret=iban_check(iban,NULL))<=0){
-      if(retval)*retval=ret;
-      if(blz)*blz=0;
-      if(kto)*kto=0;
-      return "";
-   }
    if(tolower(*iban)!='d' || tolower(*(iban+1))!='e'){
       if(retval)*retval=IBAN2BIC_ONLY_GERMAN;
       if(blz)*blz=0;
@@ -22104,16 +22103,16 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
       }
       *dptr=0;
    }
-            /* Nachsehen, ob der BIC evl. durch eine Regel ge‰ndert wird
-             * (‰hnlich wie bei iban_check()).
-             *
-             * Pr¸fziffermethode und IBAN-Regel auf dem kleinen Dienstweg holen
-             * (es m¸ssen nicht alle Tests doppelt und dreifach gemacht werden ;-)
-             * Dann testen, ob eine selbst generierte IBAN (mit Regeln und
-             * Unterkonto-Ersetzung) mit der ¸bergebenen Variante ¸bereinstimmt,
-             * falls nicht, Fehlermeldung/Warnung. Falls eine Regel benutzt wird,
-             * wird der BIC aus iban_bic_gen() genommen, ansonsten der aus lut_bic().
-             */
+      /* Nachsehen, ob der BIC evl. durch eine Regel ge‰ndert wird
+       * (‰hnlich wie bei iban_check()).
+       *
+       * Pr¸fziffermethode und IBAN-Regel auf dem kleinen Dienstweg holen (es
+       * m¸ssen nicht alle Tests doppelt und dreifach gemacht werden ;-) Dann
+       * testen, ob eine selbst generierte IBAN (mit Regeln und Unterkonto-
+       * Ersetzung) mit der ¸bergebenen Variante ¸bereinstimmt, falls nicht,
+       * Fehlermeldung/Warnung. Falls eine Regel benutzt wird, wird der BIC aus
+       * iban_bic_gen() genommen, ansonsten der aus lut_bic().
+       */
    if(retval)*retval=OK;
    j=lut_index(blz2);
    if(j>0){
@@ -22125,18 +22124,19 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
       if(uk || regel){
          papier=iban_bic_gen(blz2,kto2,&bic,NULL,NULL,&ret);
          if(retval)*retval=ret;
-         if(ret==NO_IBAN_CALCULATION)return bic;
+         if(ret==NO_IBAN_CALCULATION){
+            if(retval)*retval=OK;
+            return bic;   /* kein IBAN berechnet, gleich zur¸ck */
+         }
          if(papier){
             for(ptr=papier,dptr=iban2;*ptr;ptr++)if(*ptr!=' ')*dptr++=*ptr;
             *dptr=0;
             FREE(papier);
-            if(strcmp(iban,iban2)){
-               if(regel>0){
-                  if(retval)*retval=IBAN_CHKSUM_OK_RULE_IGNORED;
-               }
-               else{  /*  bei Regel==0 kann nur ein Unterkonto fehlen */
-                  if(retval)*retval=IBAN_CHKSUM_OK_UNTERKTO_MISSING;
-               }
+            if(strcmp(iban,iban2) && retval){
+               if(regel>0)
+                  *retval=IBAN_CHKSUM_OK_RULE_IGNORED;
+               else  /*  bei Regel==0 kann nur ein Unterkonto fehlen */
+                  *retval=IBAN_CHKSUM_OK_UNTERKTO_MISSING;
             }
          }
          return bic;
@@ -22306,11 +22306,6 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
    kto=kto_n;
    blz=blz_n;
 
-      /* IBAN-Regeln */
-   if((ret=iban_init())<OK){  /* alle notwendigen Blocks kontrollieren, evl. nachladen */
-      if(retval)*retval=ret;
-      return NULL;
-   }
    regel=lut_iban_regel_i(blz_i,0,&ret);
    if(ret<=0 && ret!=LUT2_IBAN_REGEL_NOT_INITIALIZED){
       if(retval)*retval=ret;
@@ -22607,7 +22602,7 @@ DLL_EXPORT int ci_check(char *ci)
 DLL_EXPORT int iban_check(char *iban,int *retval)
 {
    char c,check[128],*papier2,iban1[64],iban2[24],*blz2,*kto2,*ptr,*dptr;
-   int j,test,ret,iban_len,regel,uk,nachfolge;
+   int j,test,ret,ret_kc,iban_len,regel,uk,nachfolge;
    UINT4 zahl,rest;
 
    if(!iban || !*iban){
@@ -22638,67 +22633,86 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
 
    if(retval)*retval=LUT2_KTO_NOT_CHECKED;
    switch(test){  /* L‰nge der IBAN testen, u.U. Fehler zur¸ckgeben */
-      case  104: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* AD -> Andorra */
-      case  105: if(iban_len!=23)return INVALID_IBAN_LENGTH; break; /* AE -> Vereinigte Arabische Emirate */
       case  112: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* AL -> Albanien */
-      case  120: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* AT -> ÷sterreich */
+      case  104: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* AD -> Andorra */
       case  126: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* AZ -> Aserbaidschan */
-      case  201: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* BA -> Bosnien und Herzegowina */
-      case  205: if(iban_len!=16)return INVALID_IBAN_LENGTH; break; /* BE -> Belgien */
-      case  207: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* BG -> Bulgarien */
       case  208: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* BH -> Bahrain */
-      case  308: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* CH -> Schweiz */
+      case  218: if(iban_len!=29)return INVALID_IBAN_LENGTH; break; /* BR -> Brasilien */
+      case  205: if(iban_len!=16)return INVALID_IBAN_LENGTH; break; /* BE -> Belgien */
+      case  201: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* BA -> Bosnien und Herzegowina */
+      case  207: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* BG -> Bulgarien */
       case  318: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* CR -> Costa Rica */
-      case  325: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* CY -> Zypern */
-      case  326: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* CZ -> Tschechien */
-      case  405: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* DE -> Deutschland */
       case  411: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* DK -> D‰nemark */
+      case  405: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* DE -> Deutschland */
       case  415: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* DO -> Dominikanische Republik */
       case  505: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* EE -> Estland */
-      case  519: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* ES -> Spanien */
-      case  609: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* FI -> Finnland */
       case  615: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* FO -> F‰rˆer */
+      case  609: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* FI -> Finnland */
       case  618: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* FR -> Frankreich */
-      case  702: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* GB -> Vereinigtes Kˆnigreich */
+      case  706: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* GF -> Franzˆsisch-Guayana */
+      case 1606: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* PF -> Franzˆsisch-Polynesien */
+      case 2006: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* TF -> Franzˆsische S¸d- und Antarktisgebiete */
       case  705: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* GE -> Georgien */
       case  709: if(iban_len!=23)return INVALID_IBAN_LENGTH; break; /* GI -> Gibraltar */
-      case  712: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* GL -> Grˆnland */
       case  718: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* GR -> Griechenland */
-      case  818: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* HR -> Kroatien */
-      case  821: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* HU -> Ungarn */
+      case  712: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* GL -> Grˆnland */
+      case  716: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* GP -> Guadeloupe */
+      case  720: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* GT -> Guatemala */
+      case  811: if(iban_len!=16)return INVALID_IBAN_LENGTH; break; /* HK -> Hongkong */
       case  905: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* IE -> Irland */
-      case  912: if(iban_len!=23)return INVALID_IBAN_LENGTH; break; /* IL -> Israel */
       case  919: if(iban_len!=26)return INVALID_IBAN_LENGTH; break; /* IS -> Island */
+      case  912: if(iban_len!=23)return INVALID_IBAN_LENGTH; break; /* IL -> Israel */
       case  920: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* IT -> Italien */
-      case 1123: if(iban_len!=30)return INVALID_IBAN_LENGTH; break; /* KW -> Kuwait */
+      case 2207: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* VG -> Jungferninseln */
       case 1126: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* KZ -> Kasachstan */
+      case 1701: if(iban_len!=29)return INVALID_IBAN_LENGTH; break; /* QA -> Katar */
+      case  818: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* HR -> Kroatien */
+      case 1123: if(iban_len!=30)return INVALID_IBAN_LENGTH; break; /* KW -> Kuwait */
+      case 1222: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* LV -> Lettland */
       case 1202: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* LB -> Libanon */
       case 1209: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* LI -> Liechtenstein */
       case 1220: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* LT -> Litauen */
       case 1221: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* LU -> Luxemburg */
-      case 1222: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* LV -> Lettland */
-      case 1303: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MC -> Monaco */
-      case 1304: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* MD -> Moldawien */
-      case 1305: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* ME -> Montenegro */
-      case 1311: if(iban_len!=19)return INVALID_IBAN_LENGTH; break; /* MK -> Mazedonien */
-      case 1318: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MR -> Mauretanien */
       case 1320: if(iban_len!=31)return INVALID_IBAN_LENGTH; break; /* MT -> Malta */
+      case 1301: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* MA -> Marokko */
+      case 1317: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MQ -> Martinique */
+      case 1318: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MR -> Mauretanien */
       case 1321: if(iban_len!=30)return INVALID_IBAN_LENGTH; break; /* MU -> Mauritius */
+      case 2520: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* YT -> Mayotte */
+      case 1311: if(iban_len!=19)return INVALID_IBAN_LENGTH; break; /* MK -> Mazedonien */
+      case 1304: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* MD -> Moldawien */
+      case 1303: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MC -> Monaco */
+      case 1305: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* ME -> Montenegro */
+      case 1403: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* NC -> Neukaledonien */
       case 1412: if(iban_len!=18)return INVALID_IBAN_LENGTH; break; /* NL -> Niederlande */
       case 1415: if(iban_len!=15)return INVALID_IBAN_LENGTH; break; /* NO -> Norwegen */
+      case  120: if(iban_len!=20)return INVALID_IBAN_LENGTH; break; /* AT -> ÷sterreich */
+      case 1611: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* PK -> Pakistan */
+      case 1619: if(iban_len!=29)return INVALID_IBAN_LENGTH; break; /* PS -> Pal‰stinensische Autonomiegebiete */
       case 1612: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* PL -> Polen */
       case 1620: if(iban_len!=25)return INVALID_IBAN_LENGTH; break; /* PT -> Portugal */
+      case 1805: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* RE -> RÈunion */
       case 1815: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* RO -> Rum‰nien */
-      case 1819: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* RS -> Serbien */
+      case  212: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* BL -> Saint-BarthÈlemy */
+      case 1306: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* MF -> Saint-Martin */
+      case 1913: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* SM -> San Marino */
       case 1901: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* SA -> Saudi-Arabien */
       case 1905: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* SE -> Schweden */
-      case 1909: if(iban_len!=19)return INVALID_IBAN_LENGTH; break; /* SI -> Slowenien */
+      case  308: if(iban_len!=21)return INVALID_IBAN_LENGTH; break; /* CH -> Schweiz */
+      case 1819: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* RS -> Serbien */
       case 1911: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* SK -> Slowakei */
-      case 1913: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* SM -> San Marino */
+      case 1909: if(iban_len!=19)return INVALID_IBAN_LENGTH; break; /* SI -> Slowenien */
+      case  519: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* ES -> Spanien */
+      case 1613: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* PM -> St. Pierre und Miquelon */
+      case  326: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* CZ -> Tschechien */
       case 2014: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* TN -> Tunesien */
       case 2018: if(iban_len!=26)return INVALID_IBAN_LENGTH; break; /* TR -> T¸rkei */
-      case 2207: if(iban_len!=24)return INVALID_IBAN_LENGTH; break; /* VG -> Jungferninseln */
-      default: break;
+      case  821: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* HU -> Ungarn */
+      case  105: if(iban_len!=23)return INVALID_IBAN_LENGTH; break; /* AE -> Vereinigte Arabische Emirate */
+      case  702: if(iban_len!=22)return INVALID_IBAN_LENGTH; break; /* GB -> Vereinigtes Kˆnigreich */
+      case 2306: if(iban_len!=27)return INVALID_IBAN_LENGTH; break; /* WF -> Wallis und Futuna */
+      case  325: if(iban_len!=28)return INVALID_IBAN_LENGTH; break; /* CY -> Zypern */
+      default: break;   /* unbekannt, stehen lassen */
    }
 
       /* BBAN (Basic Bank Account Number) kopieren (alphanumerisch) */
@@ -22765,7 +22779,7 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
          j++;
       }
       *dptr=0;
-      if((ret=kto_check_blz(blz2,kto2))>0)test|=2;
+      if((ret=ret_kc=kto_check_blz(blz2,kto2))>0)test|=2;
       if(retval)*retval=ret;
 
       if(test&1){
@@ -22813,7 +22827,7 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
       if(retval)*retval=NO_GERMAN_BIC;
    }
    switch(test){
-      case 1: return IBAN_OK_KTO_NOT;
+      case 1: if(ret_kc==INVALID_BLZ)return IBAN_CHKSUM_OK_BLZ_INVALID; else return IBAN_OK_KTO_NOT;
       case 2: return KTO_OK_IBAN_NOT;
       case 3: return OK;
       case 4: if(retval)*retval=OK_NO_CHK; return OK_IBAN_WITHOUT_KC_TEST;
@@ -24796,7 +24810,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22629 "konto_check.lxx"
+#line 22638 "konto_check.lxx"
 /* Funktion lut_suche_bic() +ßßß2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
