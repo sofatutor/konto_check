@@ -114,6 +114,8 @@
     
     <li><a href="#method-c-bank_valid-3F">::bank_valid?</a>
     
+    <li><a href="#method-c-bic_check">::bic_check</a>
+    
     <li><a href="#method-c-ci_check">::ci_check</a>
     
     <li><a href="#method-c-current_init_level">::current_init_level</a>
@@ -845,7 +847,7 @@ Bankleitzahlen, die auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_bic-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1100</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1116</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_bic</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_bic</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -884,7 +886,7 @@ Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_blz-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1149</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1165</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_blz</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_blz</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -918,7 +920,7 @@ href="KontoCheck.html#method-c-bank_suche_multiple">::bank_suche_multiple</a>(su
 
           
           <div class="method-source-code" id="bank_suche_multiple-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1224</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1240</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_multiple</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_multiple</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -956,7 +958,7 @@ die auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_namen-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1112</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1128</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_namen</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_namen</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -994,7 +996,7 @@ die auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_namen_kurz-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1124</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1140</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_namen_kurz</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_namen_kurz</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1032,7 +1034,7 @@ die auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_ort-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1136</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1152</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_ort</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_ort</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1071,7 +1073,7 @@ Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_plz-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1162</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1178</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_plz</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_plz</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1110,7 +1112,7 @@ auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_pz-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1175</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1191</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_pz</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_pl</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1149,7 +1151,7 @@ die auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_regel-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1188</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1204</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_regel</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_regel</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1192,7 +1194,7 @@ auf das Suchmuster passen.</p>
 
           
           <div class="method-source-code" id="bank_suche_volltext-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1204</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1220</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bank_suche_volltext</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bank_suche_volltext</span>(*<span class="ruby-identifier">args</span>)[<span class="ruby-value">1</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -1290,6 +1292,47 @@ Der Rückgabewert ist nur true oder false.</p>
 
         
       </div><!-- bank_valid-3F-method -->
+
+    
+      <div id="method-c-bic_check" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bic_check</span><span
+            class="method-args">(*args)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-bic_check-label-KontoCheck%3A%3Abic_check%28+bic%29"><a href="KontoCheck.html#method-c-bic_check">::bic_check</a>( bic)</h3>
+
+<h5 id="method-c-bic_check-label-KontoCheckRaw%3A%3Abic_check%28+bic%29"><a href="KontoCheckRaw.html#method-c-bic_check">KontoCheckRaw.bic_check</a>( bic)</h5>
+
+<p>Diese Funktion testet einen BIC (nur für deutsche Bankverbindungen).</p>
+
+<p>Mögliche Rückgabewerte sind:</p>
+
+<pre>-145  (BIC_ONLY_GERMAN)            &quot;Es werden nur deutsche BICs unterstützt&quot;
+-144  (INVALID_BIC_LENGTH)         &quot;Die Länge des BIC muß genau 8 oder 11 Zeichen sein&quot;
+   0  (FALSE)                      &quot;falsch&quot;
+   1  (OK)                         &quot;ok&quot;</pre>
+          
+
+          
+          <div class="method-source-code" id="bic_check-source">
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 939</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bic_check</span>(*<span class="ruby-identifier">args</span>)
+  <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">bic_check</span>(*<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span></pre>
+          </div><!-- bic_check-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- bic_check-method -->
 
     
       <div id="method-c-ci_check" class="method-detail ">
@@ -1821,7 +1864,7 @@ Banken ist er in der BLZ-Datei enthalten. Nähere Infos gibt es z.B. unter
           
           <h3 id="method-c-iban_check-label-KontoCheck%3A%3Aiban_check%28+iban%29"><a href="KontoCheck.html#method-c-iban_check">::iban_check</a>( iban)</h3>
 
-<h5 id="method-c-iban_check-label-KontoCheckRaw%3A%3Aiban_check%28iban%29"><a href="KontoCheckRaw.html#method-c-iban_check">KontoCheckRaw.iban_check</a></h5>
+<h5 id="method-c-iban_check-label-KontoCheckRaw%3A%3Aiban_check%28+iban%29"><a href="KontoCheckRaw.html#method-c-iban_check">KontoCheckRaw.iban_check</a>( iban)</h5>
 
 <p>Diese Funktion testet einen IBAN. Dabei wird sowohl die Prüfziffer des IBAN
 getestet als auch (bei deutschen Konten) die Prüfziffer der Bankverbindung
@@ -1840,7 +1883,7 @@ kann man zusätzlich noch den Status der Kontenprüfung abfragen.</p>
 
           
           <div class="method-source-code" id="iban_check-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 943</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 959</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">iban_check</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">iban_check</span>(*<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1902,7 +1945,7 @@ ermitteln.</p>
 
           
           <div class="method-source-code" id="iban_gen-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 975</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 991</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">iban_gen</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">iban_gen</span>(*<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -2049,7 +2092,7 @@ Initialisierung nicht alle Blocks in der LUT-Datei enthalten.</p>
 
           
           <div class="method-source-code" id="ipi_check-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1000</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1016</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ipi_check</span>(<span class="ruby-identifier">zweck</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">ipi_check</span>(<span class="ruby-identifier">zweck</span>)<span class="ruby-operator">&gt;</span><span class="ruby-value">0</span><span class="ruby-operator">?</span><span class="ruby-keyword">true</span><span class="ruby-operator">:</span><span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>
@@ -2091,7 +2134,7 @@ einen Statuscode zurück, der etwas nähere Infos im Fehlerfall enthält.</p>
 
           
           <div class="method-source-code" id="ipi_gen-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 990</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1006</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ipi_gen</span>(<span class="ruby-identifier">zweck</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">ipi_gen</span>(<span class="ruby-identifier">zweck</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
@@ -3042,7 +3085,7 @@ lut_suche_multiple() implementiert.</p>
 
           
           <div class="method-source-code" id="suche-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1069</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1085</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">suche</span>(<span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">search_cmd</span>=<span class="ruby-identifier">value</span>=<span class="ruby-identifier">key</span>=<span class="ruby-string">&quot;&quot;</span>
   <span class="ruby-identifier">sort</span>=<span class="ruby-identifier">uniq</span>=<span class="ruby-value">1</span>
@@ -3267,7 +3310,7 @@ href="KontoCheck.html#method-c-konto_check_pz-3F">::konto_check_pz?</a></p>
 
           
           <div class="method-source-code" id="version-source">
-            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1244</span>
+            <pre><span class="ruby-comment"># File lib/konto_check.rb, line 1260</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">version</span>(*<span class="ruby-identifier">args</span>)
   <span class="ruby-constant">KontoCheckRaw</span><span class="ruby-operator">::</span><span class="ruby-identifier">version</span>(*<span class="ruby-identifier">args</span>)
 <span class="ruby-keyword">end</span></pre>

@@ -81,7 +81,8 @@
  * # Update zur Flessa-Bank (abgerufen 28.10.13): Die obigen Bankleitzahlen #
  * # haben in der aktuellen BLZ-Datei das Löschflag gesetzt und als         #
  * # Nachfolge-BLZ die 79330111 eingetragen. Damit erübrigt sich die        #
- * # Korrektur für die Flessa-Bank.                                         #
+ * # Korrektur für die Flessa-Bank. Der entsprechende Code wird dann auch   #
+ * # bald komplett verschwinden...                                          #
  * ##########################################################################
  */
 
@@ -91,17 +92,28 @@
 #define USE_IBAN_RULES 1
 
    /* Änderungen der Prüfziffermethoden zum 9. September 2013 erzwingen
-    * (bei 0 werden sie abhängig vom Datum aktiviert).
+    * (bei 0 werden sie abhängig vom Datum aktiviert; aktuell nicht benutzt).
    */ 
 #define FORCE_AENDERUNGEN_2013_09 0
 
-   /* die neue Version der Regel 20 wird zum 9. Dezember in den offiziellen IBAN-Regeln veröffentlicht;
-    * die Bundesbank hat jedoch schon die Regelversion am 28. August veröffentlicht, mit der Bitte, sie
-    * möglichst schon zum 9. September einzusetzen. Durch die neue Regelversion werden die Fälle mit dem
-    * Rückgabewert IBAN_AMBIGUOUS_KTO komplett eliminiert.
+   /* Falls EXTRA_BLZ_REGEL auf 1 gesetzt wird, wird beim IBAN-Test
+    * unterschieden ob eine Regel ignoriert wurde, die nur eine BLZ ersetzt,
+    * oder eine andere Regel. Die Variante wenn nur eine BLZ ersetzt wird, wird
+    * von cKonto als richtig angesehen.
+    *
+    * Bei einer Nachfrage bei den 17 in Frage kommenden Banken bekam ich 10
+    * Antworten; von diesen sagte nur einer, daß (aktuell) die "alten" IBANs
+    * noch akzeptiert würden. Die neun anderen sehen eine solche IBAN jedoch
+    * als fehlerhaft an. In konto_check wird daher defaultmäßig das alte
+    * Verhalten beibehalten, solche IBANs auch weiter einfach unter
+    * "Regelverstoß" laufen zu lassen, statt die Rückgabewerte zu
+    * differenzieren.
+    *
+    * Mit dem folgenden Makro ist es möglich, die Rückgabewerte zu differenzieren;
+    * aber aufgrund der Umfrageergebnisse denke ich, es ist nicht notwendig.
     */
 
-#define DB_NEUE_VERSION 1  /* bei 1: neue Version der DB-Regel benutzen */
+#define EXTRA_BLZ_REGEL 0
 
 /* Debug-Version für iban_gen in Perl aktivieren (zur Ausgabe der benutzten
  * Prüfziffermethode in iban_gen()). Dies ist nur möglich, falls das Makro
@@ -371,6 +383,10 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define BIC_ONLY_GERMAN                       -145
+#define INVALID_BIC_LENGTH                    -144
+#define IBAN_CHKSUM_OK_RULE_IGNORED_BLZ       -143
+#define IBAN_CHKSUM_OK_KC_NOT_INITIALIZED     -142
 #define IBAN_CHKSUM_OK_BLZ_INVALID            -141
 #define IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED  -140
 #define LUT2_NOT_ALL_IBAN_BLOCKS_LOADED       -139
@@ -538,7 +554,7 @@ extern const char *lut2_feld_namen[256];
 #define OK_HYPO_REQUIRES_KTO                    23
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
-#line 321 "konto_check_h.lx"
+#line 333 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
@@ -1018,6 +1034,7 @@ DLL_EXPORT int lut_cleanup(void);
 
    /* IBAN-Sachen */
 DLL_EXPORT int ci_check(char *ci);
+DLL_EXPORT int bic_check(char *search_bic,int *cnt);
 DLL_EXPORT int iban_check(char *iban,int *retval);
 DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto);
 DLL_EXPORT char *iban_gen(char *kto,char *blz,int *retval);

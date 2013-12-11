@@ -112,6 +112,8 @@
     
     <li><a href="#method-c-bank_valid">::bank_valid</a>
     
+    <li><a href="#method-c-bic_check">::bic_check</a>
+    
     <li><a href="#method-c-ci_check">::ci_check</a>
     
     <li><a href="#method-c-current_lutfile_name">::current_lutfile_name</a>
@@ -290,6 +292,11 @@ als 13a interpretiert).</p>
         <dd class="description"><p>(-77) BAV denkt, das Konto ist falsch (<a
 href="KontoCheckRaw.html#method-c-konto_check">::konto_check</a> hält es
 für richtig)</p>
+        
+      
+        <dt id="BIC_ONLY_GERMAN">BIC_ONLY_GERMAN
+        
+        <dd class="description"><p>(-145) Es werden nur deutsche BICs unterstützt</p>
         
       
         <dt id="BLZ_BLACKLISTED">BLZ_BLACKLISTED
@@ -499,6 +506,18 @@ von der des A-Satzes</p>
         <dd class="description"><p>(-127) Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)</p>
         
       
+        <dt id="IBAN_CHKSUM_OK_BLZ_INVALID">IBAN_CHKSUM_OK_BLZ_INVALID
+        
+        <dd class="description"><p>(-141) Die IBAN-Prüfsumme stimmt, die BLZ ist allerdings ungültig</p>
+        
+      
+        <dt id="IBAN_CHKSUM_OK_KC_NOT_INITIALIZED">IBAN_CHKSUM_OK_KC_NOT_INITIALIZED
+        
+        <dd class="description"><p>(-142) Die IBAN-Prüfsumme stimmt, <a
+href="KontoCheckRaw.html#method-c-konto_check">::konto_check</a> wurde
+jedoch noch nicht initialisiert (Kontoprüfung nicht möglich)</p>
+        
+      
         <dt id="IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED">IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED
         
         <dd class="description"><p>(-140) Die IBAN-Prüfsumme stimmt, für die Bank gibt es allerdings eine
@@ -515,6 +534,12 @@ erlaubt (wahrscheinlich falsch)</p>
         
         <dd class="description"><p>(-130) Die IBAN-Prüfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht
 beachtet (wahrscheinlich falsch)</p>
+        
+      
+        <dt id="IBAN_CHKSUM_OK_RULE_IGNORED_BLZ">IBAN_CHKSUM_OK_RULE_IGNORED_BLZ
+        
+        <dd class="description"><p>(-143) Die IBAN-Prüfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht
+beachtet (BLZ nicht ersetzt, wahrscheinlich falsch)</p>
         
       
         <dt id="IBAN_CHKSUM_OK_SOMETHING_WRONG">IBAN_CHKSUM_OK_SOMETHING_WRONG
@@ -564,6 +589,11 @@ LUT-Datei</p>
         <dt id="INIT_FATAL_ERROR">INIT_FATAL_ERROR
         
         <dd class="description"><p>(-64) Initialisierung fehlgeschlagen (init_wait geblockt)</p>
+        
+      
+        <dt id="INVALID_BIC_LENGTH">INVALID_BIC_LENGTH
+        
+        <dd class="description"><p>(-144) Die Länge des BIC muß genau 8 oder 11 Zeichen sein</p>
         
       
         <dt id="INVALID_BLZ">INVALID_BLZ
@@ -1183,13 +1213,28 @@ steht ein String mit dem Änderungsflag, im zweiten ein Statuscode. Im
 Fehlerfall wird für das Flag nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--43  (LUT2_AENDERUNG_NOT_INITIALIZED) &quot;Das Feld Änderung wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-43  (<a
+href="KontoCheckRaw.html#LUT2_AENDERUNG_NOT_INITIALIZED">LUT2_AENDERUNG_NOT_INITIALIZED</a>)
+"Das Feld Änderung wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1233,30 +1278,54 @@ Fehlerfall wird für das Flag nil zurückgegeben.</p>
 <p>Dies ist eine Mammutfunktion, die alle vorhandenen Informationen über eine
 Bank zurückliefert. Das Ergebnis ist ein Array mit den folgenden
 Komponenten:</p>
-
-<pre>0:  Statuscode
-1:  Anzahl Filialen
-2:  Name
-3:  Kurzname
-4:  PLZ
-5:  Ort
-6:  PAN
-7:  BIC
-8:  Prüfziffer
-9:  Laufende Nr.
-10: Änderungs-Flag
-11: Löeschung-Flag
-12: Nachfolge-BLZ</pre>
+<ul><li>
+<p>0:  Statuscode</p>
+</li><li>
+<p>1:  Anzahl Filialen</p>
+</li><li>
+<p>2:  Name</p>
+</li><li>
+<p>3:  Kurzname</p>
+</li><li>
+<p>4:  PLZ</p>
+</li><li>
+<p>5:  Ort</p>
+</li><li>
+<p>6:  PAN</p>
+</li><li>
+<p>7:  BIC</p>
+</li><li>
+<p>8:  Prüfziffer</p>
+</li><li>
+<p>9:  Laufende Nr.</p>
+</li><li>
+<p>10: Änderungs-Flag</p>
+</li><li>
+<p>11: Löeschung-Flag</p>
+</li><li>
+<p>12: Nachfolge-BLZ</p>
+</li></ul>
 
 <p>Der Statuscode (Element 0) kann folgende Werte annehmen:</p>
+<ul><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-38  (<a href="KontoCheckRaw.html#LUT2_PARTIAL_OK">LUT2_PARTIAL_OK</a>)    
+"es wurden nicht alle Blocks geladen"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
 
-<pre>-40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
--38  (LUT2_PARTIAL_OK)            &quot;es wurden nicht alle Blocks geladen&quot;
- -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
-
-<p>Anmerkung: Falls der Statuscode <a
+<p>* Anmerkung: Falls der Statuscode <a
 href="KontoCheckRaw.html#LUT2_PARTIAL_OK">LUT2_PARTIAL_OK</a> ist, wurden
 bei der Initialisierung nicht alle Blocks geladen (oder es sind nicht alle
 verfügbar); die entsprechenden Elemente haben dann den Wert nil.</p>
@@ -1333,13 +1402,28 @@ mit dem BIC, im zweiten ein Statuscode. Im Fehlerfall wird für den BIC nil
 zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--46  (LUT2_BIC_NOT_INITIALIZED)      &quot;Das Feld BIC wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-46  (<a
+href="KontoCheckRaw.html#LUT2_BIC_NOT_INITIALIZED">LUT2_BIC_NOT_INITIALIZED</a>)
+"Das Feld BIC wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1376,24 +1460,38 @@ zurückgegeben.</p>
 
         <div class="method-description">
           
-          <h3 id="method-c-bank_filialen-label-KontoCheckRaw%3A%3Abank_filialen%28+blz%29"><a href="KontoCheckRaw.html#method-c-bank_filialen">::bank_filialen</a>( blz)</h3>
+          <p>static VALUE <a
+href="KontoCheckRaw.html#method-c-bank_valid">::bank_valid</a>(int
+argc,VALUE* argv,VALUE self) {</p>
 
-<h5 id="method-c-bank_filialen-label-KontoCheck%3A%3Abank_filialen%28+blz%29"><a href="KontoCheck.html#method-c-bank_filialen">KontoCheck.bank_filialen</a>( blz)</h5>
+<pre>char blz[16],error_msg[512];
+int filiale,retval;
 
-<p>Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive
-Hauptstelle). Die LUT-Datei muß dazu natürlich mit den Filialdaten
-generiert sein, sonst wird für alle Banken nur 1 zurückgegeben. Der
-Rückgabewert ist ein Array mit der Anzahl Filialen im ersten Parameter, und
-einem Statuscode im zwweiten.</p>
+get_params(argc,argv,blz,NULL,NULL,&amp;filiale,1);
+retval=lut_blz(blz,filiale);
+if(retval==LUT2_BLZ_NOT_INITIALIZED)RUNTIME_ERROR(retval);
+return INT2FIX(retval);</pre>
 
-<p>Mögliche Statuswerte sind:</p>
+<p>}</p>
 
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--52  (LUT2_FILIALEN_NOT_INITIALIZED) &quot;Das Feld Filialen wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<p>/**</p>
+
+<pre>===KontoCheckRaw::bank_filialen( blz)
+=====KontoCheck::bank_filialen( blz)
+
+Diese Funktion liefert die Anzahl Filialen einer Bank (inklusive Hauptstelle).
+Die LUT-Datei muß dazu natürlich mit den Filialdaten generiert sein, sonst
+wird für alle Banken nur 1 zurückgegeben. Der Rückgabewert ist ein Array mit
+der Anzahl Filialen im ersten Parameter, und einem Statuscode im zwweiten.
+
+Mögliche Statuswerte sind:
+
+*  -55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
+*  -53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
+*  -52  (LUT2_FILIALEN_NOT_INITIALIZED) &quot;Das Feld Filialen wurde nicht initialisiert&quot;
+*   -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
+*   -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
+*    1  (OK)                            &quot;ok&quot;</pre>
           
 
           
@@ -1439,13 +1537,28 @@ Elementen: im ersten steht das Flag, im zweiten ein Statuscode. Im
 Fehlerfall wird für das Flag nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--42  (LUT2_LOESCHUNG_NOT_INITIALIZED) &quot;Das Feld Löschung wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-42  (<a
+href="KontoCheckRaw.html#LUT2_LOESCHUNG_NOT_INITIALIZED">LUT2_LOESCHUNG_NOT_INITIALIZED</a>)
+"Das Feld Löschung wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1491,13 +1604,28 @@ mit zwei Elementen: im ersten steht die Nachfolge-BLZ, im zweiten ein
 Statuscode. Im Fehlerfall wird für die Nachfolge-BLZ nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--41  (LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED) &quot;Das Feld Nachfolge-BLZ wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-41  (<a
+href="KontoCheckRaw.html#LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED">LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED</a>)
+"Das Feld Nachfolge-BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1542,13 +1670,28 @@ mit zwei Elementen: im ersten steht ein String mit dem Namen, im zweiten
 ein Statuscode. Im Fehlerfall wird für den Namen nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--51  (LUT2_NAME_NOT_INITIALIZED)     &quot;Das Feld Bankname wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-51  (<a
+href="KontoCheckRaw.html#LUT2_NAME_NOT_INITIALIZED">LUT2_NAME_NOT_INITIALIZED</a>)
+"Das Feld Bankname wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1594,13 +1737,28 @@ Array mit zwei Elementen: im ersten steht ein String mit dem Namen, im
 zweiten ein Statuscode. Im Fehlerfall wird für den Namen nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--48  (LUT2_NAME_KURZ_NOT_INITIALIZED) &quot;Das Feld Kurzname wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-48  (<a
+href="KontoCheckRaw.html#LUT2_NAME_KURZ_NOT_INITIALIZED">LUT2_NAME_KURZ_NOT_INITIALIZED</a>)
+"Das Feld Kurzname wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1650,13 +1808,28 @@ Fehlerfall wird für die Nummer nil zurückgegeben.</p>
 <p>Mögliche Statuscodes:</p>
 
 <p>Possible return values (and short description):</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--44  (LUT2_NR_NOT_INITIALIZED)       &quot;Das Feld NR wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-44  (<a
+href="KontoCheckRaw.html#LUT2_NR_NOT_INITIALIZED">LUT2_NR_NOT_INITIALIZED</a>)
+"Das Feld NR wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1703,13 +1876,28 @@ mit dem Namen, im zweiten ein Statuscode. Im Fehlerfall wird für den Ort
 nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--49  (LUT2_ORT_NOT_INITIALIZED)   &quot;Das Feld Ort wurde nicht initialisiert&quot;
--55  (LUT2_INDEX_OUT_OF_RANGE)    &quot;Der Index für die Filiale ist ungültig&quot;
- -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-49  (<a
+href="KontoCheckRaw.html#LUT2_ORT_NOT_INITIALIZED">LUT2_ORT_NOT_INITIALIZED</a>)
+"Das Feld Ort wurde nicht initialisiert"</p>
+</li><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -1755,13 +1943,28 @@ Rückgabewert ist ein Array mit zwei Elementen: im ersten steht der PAN, im
 zweiten ein Statuscode. Im Fehlerfall wird für den PAN nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--47  (LUT2_PAN_NOT_INITIALIZED)      &quot;Das Feld PAN wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-47  (<a
+href="KontoCheckRaw.html#LUT2_PAN_NOT_INITIALIZED">LUT2_PAN_NOT_INITIALIZED</a>)
+"Das Feld PAN wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1807,13 +2010,28 @@ Rückgabewert ist ein Array mit zwei Elementen: im ersten steht die PLZ, im
 zweiten ein Statuscode. Im Fehlerfall wird für die PLZ nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--50  (LUT2_PLZ_NOT_INITIALIZED)      &quot;Das Feld PLZ wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-50  (<a
+href="KontoCheckRaw.html#LUT2_PLZ_NOT_INITIALIZED">LUT2_PLZ_NOT_INITIALIZED</a>)
+"Das Feld PLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1860,13 +2078,28 @@ im ersten steht die Prüfziffer, im zweiten ein Statuscode. Im Fehlerfall
 wird für den Prüfziffer nil zurückgegeben.</p>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)       &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)      &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--45  (LUT2_PZ_NOT_INITIALIZED)       &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)            &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                   &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                            &quot;ok&quot;</pre>
+<ul><li>
+<p>-55  (<a
+href="KontoCheckRaw.html#LUT2_INDEX_OUT_OF_RANGE">LUT2_INDEX_OUT_OF_RANGE</a>)
+"Der Index für die Filiale ist ungültig"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-45  (<a
+href="KontoCheckRaw.html#LUT2_PZ_NOT_INITIALIZED">LUT2_PZ_NOT_INITIALIZED</a>)
+"Das Feld Prüfziffer wurde nicht initialisiert"</p>
+</li><li>
+<p>-5  (<a
+href="KontoCheckRaw.html#INVALID_BLZ_LENGTH">INVALID_BLZ_LENGTH</a>)       
+"die Bankleitzahl ist nicht achtstellig"</p>
+</li><li>
+<p>-4  (<a href="KontoCheckRaw.html#INVALID_BLZ">INVALID_BLZ</a>)             
+"die Bankleitzahl ist ungültig"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                            "ok"</p>
+</li></ul>
           
 
           
@@ -1923,13 +2156,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--46  (LUT2_BIC_NOT_INITIALIZED)   &quot;Das Feld BIC wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-46  (<a
+href="KontoCheckRaw.html#LUT2_BIC_NOT_INITIALIZED">LUT2_BIC_NOT_INITIALIZED</a>)
+"Das Feld BIC wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -1981,13 +2227,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-53  (<a
+href="KontoCheckRaw.html#LUT2_BLZ_NOT_INITIALIZED">LUT2_BLZ_NOT_INITIALIZED</a>)
+"Das Feld BLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2217,13 +2476,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--51  (LUT2_NAME_NOT_INITIALIZED)  &quot;Das Feld Bankname wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-51  (<a
+href="KontoCheckRaw.html#LUT2_NAME_NOT_INITIALIZED">LUT2_NAME_NOT_INITIALIZED</a>)
+"Das Feld Bankname wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2274,13 +2546,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--48  (LUT2_NAME_KURZ_NOT_INITIALIZED) &quot;Das Feld Kurzname wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-48  (<a
+href="KontoCheckRaw.html#LUT2_NAME_KURZ_NOT_INITIALIZED">LUT2_NAME_KURZ_NOT_INITIALIZED</a>)
+"Das Feld Kurzname wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2331,13 +2616,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--49  (LUT2_ORT_NOT_INITIALIZED)   &quot;Das Feld Ort wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-49  (<a
+href="KontoCheckRaw.html#LUT2_ORT_NOT_INITIALIZED">LUT2_ORT_NOT_INITIALIZED</a>)
+"Das Feld Ort wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2389,13 +2687,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--50  (LUT2_PLZ_NOT_INITIALIZED)   &quot;Das Feld PLZ wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-50  (<a
+href="KontoCheckRaw.html#LUT2_PLZ_NOT_INITIALIZED">LUT2_PLZ_NOT_INITIALIZED</a>)
+"Das Feld PLZ wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2447,13 +2758,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--45  (LUT2_PZ_NOT_INITIALIZED)    &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-45  (<a
+href="KontoCheckRaw.html#LUT2_PZ_NOT_INITIALIZED">LUT2_PZ_NOT_INITIALIZED</a>)
+"Das Feld Prüfziffer wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2505,13 +2829,26 @@ gefundenen Bankleitzahlen</p>
 </li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
--70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
--45  (LUT2_PZ_NOT_INITIALIZED)    &quot;Das Feld Prüfziffer wurde nicht initialisiert&quot;
--40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
- -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-45  (<a
+href="KontoCheckRaw.html#LUT2_PZ_NOT_INITIALIZED">LUT2_PZ_NOT_INITIALIZED</a>)
+"Das Feld Prüfziffer wurde nicht initialisiert"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2551,22 +2888,47 @@ einziges Wort gesucht; falls mehrere Worte angegeben werden, wird der
 Fehlerwert <a
 href="KontoCheckRaw.html#LUT2_VOLLTEXT_SINGLE_WORD_ONLY">LUT2_VOLLTEXT_SINGLE_WORD_ONLY</a>
 zurückgegeben. Die Rückgabe ist ein Array mit fünf Elementen:</p>
-
-<pre>0. Das erste Element ist ein Array mit den gefundenen Suchworten
-1. Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das Suchmuster passen
-2. Das dritte Element ist ein Array mit den Zweigstellen-Indizes der gefundenen Bankleitzahlen
-3. das vierte Element ist der Statuscode (s.u.)
-4. das fünfte Element gibt die Anzahl der gefundenen Banken zurück.</pre>
+<ul><li>
+<p>Das erste Element ist ein Array mit den gefundenen Suchworten</p>
+</li><li>
+<p>Das zweite Element ist ein Array mit den Bankleitzahlen, die auf das
+Suchmuster passen</p>
+</li><li>
+<p>Das dritte Element ist ein Array mit den Zweigstellen-Indizes der
+gefundenen Bankleitzahlen</p>
+</li><li>
+<p>das vierte Element ist der Statuscode (s.u.)</p>
+</li><li>
+<p>das fünfte Element gibt die Anzahl der gefundenen Banken zurück.</p>
+</li></ul>
 
 <p>Mögliche Statuscodes:</p>
-
-<pre>-118  (LUT2_VOLLTEXT_SINGLE_WORD_ONLY) &quot;Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen Sie bank_suche_multiple() zur Suche nach mehreren Worten&quot;
--114  (LUT2_VOLLTEXT_NOT_INITIALIZED)  &quot;Das Feld Volltext wurde nicht initialisiert&quot;
- -78  (KEY_NOT_FOUND)              &quot;Die Suche lieferte kein Ergebnis&quot;
- -70  (LUT1_FILE_USED)             &quot;Es wurde eine LUT-Datei im Format 1.0/1.1 geladen&quot;
- -40  (LUT2_NOT_INITIALIZED)       &quot;die Programmbibliothek wurde noch nicht initialisiert&quot;
-  -9  (ERROR_MALLOC)               &quot;kann keinen Speicher allokieren&quot;
-   1  (OK)                         &quot;ok&quot;</pre>
+<ul><li>
+<p>-118  (<a
+href="KontoCheckRaw.html#LUT2_VOLLTEXT_SINGLE_WORD_ONLY">LUT2_VOLLTEXT_SINGLE_WORD_ONLY</a>)
+"Die Volltextsuche sucht jeweils nur ein einzelnes Wort; benutzen Sie <a
+href="KontoCheckRaw.html#method-c-bank_suche_multiple">::bank_suche_multiple</a>()
+zur Suche nach mehreren Worten"</p>
+</li><li>
+<p>-114  (<a
+href="KontoCheckRaw.html#LUT2_VOLLTEXT_NOT_INITIALIZED">LUT2_VOLLTEXT_NOT_INITIALIZED</a>)
+"Das Feld Volltext wurde nicht initialisiert"</p>
+</li><li>
+<p>-78  (<a href="KontoCheckRaw.html#KEY_NOT_FOUND">KEY_NOT_FOUND</a>)        
+"Die Suche lieferte kein Ergebnis"</p>
+</li><li>
+<p>-70  (<a href="KontoCheckRaw.html#LUT1_FILE_USED">LUT1_FILE_USED</a>)      
+"Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"</p>
+</li><li>
+<p>-40  (<a
+href="KontoCheckRaw.html#LUT2_NOT_INITIALIZED">LUT2_NOT_INITIALIZED</a>)   
+"die Programmbibliothek wurde noch nicht initialisiert"</p>
+</li><li>
+<p>-9  (<a href="KontoCheckRaw.html#ERROR_MALLOC">ERROR_MALLOC</a>)           
+"kann keinen Speicher allokieren"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                         "ok"</p>
+</li></ul>
           
 
           
@@ -2638,24 +3000,7 @@ zurückgegeben. Die Rückgabe ist ein Array mit fünf Elementen:</p>
 
         <div class="method-description">
           
-          <h4 id="method-c-bank_valid-label-KontoCheckRaw%3A%3Abank_valid%28+blz+%5B%2Cfiliale%5D%29"><a href="KontoCheckRaw.html#method-c-bank_valid">::bank_valid</a>( blz [,filiale])</h4>
-
-<h6 id="method-c-bank_valid-label-KontoCheck%3A%3Abank_valid%28+blz+%5B%2Cfiliale%5D%29"><a href="KontoCheck.html#method-c-bank_valid">KontoCheck.bank_valid</a>( blz [,filiale])</h6>
-
-<h6 id="method-c-bank_valid-label-KontoCheck%3A%3Abank_valid%3F%28+blz+%5B%2Cfiliale%5D%29"><a href="KontoCheck.html#method-c-bank_valid-3F">KontoCheck.bank_valid?</a>( blz [,filiale])</h6>
-
-<p>Diese Funktion testet, ob eine gegebene BLZ gültig ist. Der Rückgabewert
-ist ein Statuscode mit den unten angegebenen Werten. Falls das Argument
-filiale auch angegeben ist, wird zusätzlich noch getestet, ob eine Filiale
-mit dem gegebenen Index existiert.</p>
-
-<p>Mögliche Rückgabewerte sind:</p>
-
-<pre>-55  (LUT2_INDEX_OUT_OF_RANGE)    &quot;Der Index für die Filiale ist ungültig&quot;
--53  (LUT2_BLZ_NOT_INITIALIZED)   &quot;Das Feld BLZ wurde nicht initialisiert&quot;
- -5  (INVALID_BLZ_LENGTH)         &quot;die Bankleitzahl ist nicht achtstellig&quot;
- -4  (INVALID_BLZ)                &quot;die Bankleitzahl ist ungültig&quot;
-  1  (OK)                         &quot;ok&quot;</pre>
+          
           
 
           
@@ -2678,6 +3023,81 @@ mit dem gegebenen Index existiert.</p>
 
         
       </div><!-- bank_valid-method -->
+
+    
+      <div id="method-c-bic_check" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bic_check</span><span
+            class="method-args">(p1)</span>
+          <span class="method-click-advice">click to toggle source</span>
+        </div>
+        
+
+        <div class="method-description">
+          
+          <h3 id="method-c-bic_check-label-KontoCheckRaw%3A%3Abic_check%28+bic%29"><a href="KontoCheckRaw.html#method-c-bic_check">::bic_check</a>( bic)</h3>
+
+<h5 id="method-c-bic_check-label-KontoCheck%3A%3Abic_check%28+bic%29"><a href="KontoCheck.html#method-c-bic_check">KontoCheck.bic_check</a>( bic)</h5>
+
+<p>Diese Funktion testet einen BIC (nur für deutsche Bankverbindungen). Die
+Rückgabe ist ein Array mit zwei Elementen: im ersten (retval) wird das
+Testergebnis für die zurückgegeben, im zweiten die Änzahl Banken, die
+diesen BIC benutzen (interessant bei 8stelligen BICs)</p>
+
+<h4 id="method-c-bic_check-label-Aufruf%3A">Aufruf:</h4>
+
+<p>ret=<a href="KontoCheckRaw.html#method-c-bic_check">::bic_check</a>( bic)</p>
+
+<h4 id="method-c-bic_check-label-Parameter%3A">Parameter:</h4>
+<ul><li>
+<p>bic: der bic, der getestet werden soll</p>
+</li></ul>
+
+<h4 id="method-c-bic_check-label-R%C3%BCckgabe%3A">Rückgabe:</h4>
+
+<p>Rückgabe ist ein Array mit zwei Elementen:</p>
+<ul><li>
+<p>das erste Element enthält den Statuscode</p>
+</li><li>
+<p>das zweite Element enthält die Anzahl Banken, die diesen BIC benutzen</p>
+</li></ul>
+
+<h4 id="method-c-bic_check-label-M%C3%B6gliche+R%C3%BCckgabewerte%3A">Mögliche Rückgabewerte:</h4>
+<ul><li>
+<p>-145  (<a href="KontoCheckRaw.html#BIC_ONLY_GERMAN">BIC_ONLY_GERMAN</a>)   
+"Es werden nur deutsche BICs unterstützt";</p>
+</li><li>
+<p>-144  (<a
+href="KontoCheckRaw.html#INVALID_BIC_LENGTH">INVALID_BIC_LENGTH</a>)     
+"Die Länge des BIC muß genau 8 oder 11 Zeichen sein"</p>
+</li><li>
+<p>0  (<a href="KontoCheckRaw.html#FALSE">FALSE</a>)                  
+"falsch"</p>
+</li><li>
+<p>1  (<a href="KontoCheckRaw.html#OK">OK</a>)                      "ok"</p>
+</li></ul>
+          
+
+          
+          <div class="method-source-code" id="bic_check-source">
+            <pre>static VALUE bic_check_rb(int argc,VALUE* argv,VALUE self)
+{
+   char bic[12];
+   int retval,cnt;
+
+   get_params(argc,argv,bic,NULL,NULL,NULL,8);
+   retval=bic_check(bic,&amp;cnt);
+   return rb_ary_new3(2,INT2FIX(retval),INT2FIX(cnt));
+}</pre>
+          </div><!-- bic_check-source -->
+          
+        </div>
+
+        
+
+        
+      </div><!-- bic_check-method -->
 
     
       <div id="method-c-ci_check" class="method-detail ">
