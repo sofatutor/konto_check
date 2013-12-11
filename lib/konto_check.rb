@@ -924,8 +924,24 @@ module KontoCheck
       KontoCheckRaw::ci_check(*args)
     end
 
+#===KontoCheck::bic_check( bic)
+#=====KontoCheckRaw::bic_check( bic)
+#
+#Diese Funktion testet einen BIC (nur für deutsche Bankverbindungen).
+#
+#Mögliche Rückgabewerte sind:
+#
+#   -145  (BIC_ONLY_GERMAN)            "Es werden nur deutsche BICs unterstützt"
+#   -144  (INVALID_BIC_LENGTH)         "Die Länge des BIC muß genau 8 oder 11 Zeichen sein"
+#      0  (FALSE)                      "falsch"
+#      1  (OK)                         "ok"
+
+    def bic_check(*args)
+      KontoCheckRaw::bic_check(*args).first
+    end
+
 #===KontoCheck::iban_check( iban)
-#=====KontoCheckRaw::iban_check(iban)
+#=====KontoCheckRaw::iban_check( iban)
 #
 #Diese Funktion testet einen IBAN. Dabei wird sowohl die Prüfziffer des IBAN
 #getestet als auch (bei deutschen Konten) die Prüfziffer der Bankverbindung
