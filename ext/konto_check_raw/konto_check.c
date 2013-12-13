@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.3 (development)"
 #endif
-#define VERSION_DATE "2013-12-06"
+#define VERSION_DATE "2013-12-13"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -8463,11 +8463,10 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
             default:
                break;
          }
+         RETURN_OK;
 
-         RETURN_OK;  /* sollte nicht vorkommen, nur Lumpensammler */
 
-
-         /* Lumpensammler f¸r Regeln */
+         /* Lumpensammler f¸r unbekannte Regeln */
       default: 
          return IBAN_RULE_UNKNOWN;
    }
@@ -20505,7 +20504,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
    switch(retval){
       case BIC_ONLY_GERMAN: return "Es werden nur deutsche BICs unterst¸tzt";
       case INVALID_BIC_LENGTH: return "Die L‰nge des BIC muﬂ genau 8 oder 11 Zeichen sein";
-      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr¸fsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (BLZ nicht ersetzt, wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr¸fsumme stimmt, die BLZ sollte aber durch eine zentrale BLZ ersetzt werden. Die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_KC_NOT_INITIALIZED: return "Die IBAN-Pr¸fsumme stimmt, konto_check wurde jedoch noch nicht initialisiert (Kontopr¸fung nicht mˆglich)";
       case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr¸fsumme stimmt, die BLZ ist allerdings ung¸ltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr¸fsumme stimmt, f¸r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
@@ -20517,7 +20516,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste f¸r IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gelˆscht markiert und somit ung¸ltig";
       case IBAN_CHKSUM_OK_SOMETHING_WRONG: return "Die IBAN-Pr¸fsumme stimmt, es gibt allerdings einen Fehler in der eigenen IBAN-Bestimmung (wahrscheinlich falsch)";
-      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr¸fsumme stimmt, eine IBAN-Berechnung ist allerdings nicht erlaubt (wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr¸fsumme stimmt. Die Bank gibt IBANs nach nicht verˆffentlichten Regeln heraus, die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_RULE_IGNORED: return "Die IBAN-Pr¸fsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)";
       case IBAN_CHKSUM_OK_UNTERKTO_MISSING: return "Die IBAN-Pr¸fsumme stimmt, es fehlt aber ein Unterkonto (wahrscheinlich falsch)";
       case IBAN_INVALID_RULE: return "Die BLZ passt nicht zur angegebenen IBAN-Regel";
@@ -20693,7 +20692,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
    switch(retval){
       case BIC_ONLY_GERMAN: return "Es werden nur deutsche BICs unterstÅtzt";
       case INVALID_BIC_LENGTH: return "Die LÑ nge des BIC mu· genau 8 oder 11 Zeichen sein";
-      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-PrÅfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (BLZ nicht ersetzt, wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-PrÅfsumme stimmt, die BLZ sollte aber durch eine zentrale BLZ ersetzt werden. Die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_KC_NOT_INITIALIZED: return "Die IBAN-PrÅfsumme stimmt, konto_check wurde jedoch noch nicht initialisiert (KontoprÅfung nicht mîglich)";
       case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-PrÅfsumme stimmt, die BLZ ist allerdings ungÅltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-PrÅfsumme stimmt, fÅr die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
@@ -20705,7 +20704,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste fÅr IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gelîscht markiert und somit ungÅltig";
       case IBAN_CHKSUM_OK_SOMETHING_WRONG: return "Die IBAN-PrÅfsumme stimmt, es gibt allerdings einen Fehler in der eigenen IBAN-Bestimmung (wahrscheinlich falsch)";
-      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-PrÅfsumme stimmt, eine IBAN-Berechnung ist allerdings nicht erlaubt (wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-PrÅfsumme stimmt. Die Bank gibt IBANs nach nicht verîffentlichten Regeln heraus, die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_RULE_IGNORED: return "Die IBAN-PrÅfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)";
       case IBAN_CHKSUM_OK_UNTERKTO_MISSING: return "Die IBAN-PrÅfsumme stimmt, es fehlt aber ein Unterkonto (wahrscheinlich falsch)";
       case IBAN_INVALID_RULE: return "Die BLZ passt nicht zur angegebenen IBAN-Regel";
@@ -20881,7 +20880,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
    switch(retval){
       case BIC_ONLY_GERMAN: return "Es werden nur deutsche BICs unterst&uuml;tzt";
       case INVALID_BIC_LENGTH: return "Die L&auml;nge des BIC mu&szlig; genau 8 oder 11 Zeichen sein";
-      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr&uuml;fsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (BLZ nicht ersetzt, wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr&uuml;fsumme stimmt, die BLZ sollte aber durch eine zentrale BLZ ersetzt werden. Die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_KC_NOT_INITIALIZED: return "Die IBAN-Pr&uuml;fsumme stimmt, konto_check wurde jedoch noch nicht initialisiert (Kontopr&uuml;fung nicht m&ouml;glich)";
       case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr&uuml;fsumme stimmt, die BLZ ist allerdings ung&uuml;ltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr&uuml;fsumme stimmt, f&uuml;r die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
@@ -20893,7 +20892,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste f&uuml;r IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gel&ouml;scht markiert und somit ung&uuml;ltig";
       case IBAN_CHKSUM_OK_SOMETHING_WRONG: return "Die IBAN-Pr&uuml;fsumme stimmt, es gibt allerdings einen Fehler in der eigenen IBAN-Bestimmung (wahrscheinlich falsch)";
-      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr&uuml;fsumme stimmt, eine IBAN-Berechnung ist allerdings nicht erlaubt (wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr&uuml;fsumme stimmt. Die Bank gibt IBANs nach nicht ver&ouml;ffentlichten Regeln heraus, die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_RULE_IGNORED: return "Die IBAN-Pr&uuml;fsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)";
       case IBAN_CHKSUM_OK_UNTERKTO_MISSING: return "Die IBAN-Pr&uuml;fsumme stimmt, es fehlt aber ein Unterkonto (wahrscheinlich falsch)";
       case IBAN_INVALID_RULE: return "Die BLZ passt nicht zur angegebenen IBAN-Regel";
@@ -21069,7 +21068,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
    switch(retval){
       case BIC_ONLY_GERMAN: return "Es werden nur deutsche BICs unterst√ºtzt";
       case INVALID_BIC_LENGTH: return "Die L√§nge des BIC mu√ü genau 8 oder 11 Zeichen sein";
-      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr√ºfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (BLZ nicht ersetzt, wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_RULE_IGNORED_BLZ: return "Die IBAN-Pr√ºfsumme stimmt, die BLZ sollte aber durch eine zentrale BLZ ersetzt werden. Die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_KC_NOT_INITIALIZED: return "Die IBAN-Pr√ºfsumme stimmt, konto_check wurde jedoch noch nicht initialisiert (Kontopr√ºfung nicht m√∂glich)";
       case IBAN_CHKSUM_OK_BLZ_INVALID: return "Die IBAN-Pr√ºfsumme stimmt, die BLZ ist allerdings ung√ºltig";
       case IBAN_CHKSUM_OK_NACHFOLGE_BLZ_DEFINED: return "Die IBAN-Pr√ºfsumme stimmt, f√ºr die Bank gibt es allerdings eine (andere) Nachfolge-BLZ";
@@ -21081,7 +21080,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case BLZ_BLACKLISTED: return "Die BLZ findet sich in der Ausschlussliste f√ºr IBAN-Berechnungen";
       case BLZ_MARKED_AS_DELETED: return "Die BLZ ist in der Bundesbank-Datei als gel√∂scht markiert und somit ung√ºltig";
       case IBAN_CHKSUM_OK_SOMETHING_WRONG: return "Die IBAN-Pr√ºfsumme stimmt, es gibt allerdings einen Fehler in der eigenen IBAN-Bestimmung (wahrscheinlich falsch)";
-      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr√ºfsumme stimmt, eine IBAN-Berechnung ist allerdings nicht erlaubt (wahrscheinlich falsch)";
+      case IBAN_CHKSUM_OK_NO_IBAN_CALCULATION: return "Die IBAN-Pr√ºfsumme stimmt. Die Bank gibt IBANs nach nicht ver√∂ffentlichten Regeln heraus, die Richtigkeit der IBAN kann nur mit einer Anfrage bei der Bank ermittelt werden";
       case IBAN_CHKSUM_OK_RULE_IGNORED: return "Die IBAN-Pr√ºfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)";
       case IBAN_CHKSUM_OK_UNTERKTO_MISSING: return "Die IBAN-Pr√ºfsumme stimmt, es fehlt aber ein Unterkonto (wahrscheinlich falsch)";
       case IBAN_INVALID_RULE: return "Die BLZ passt nicht zur angegebenen IBAN-Regel";
@@ -21624,7 +21623,7 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 5:
         return "09.12.2013";
       case 6:
-        return "6. Dezember 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "13. Dezember 2013";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -22184,32 +22183,6 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
 
       /* BLZ numerisch darstellen */
    blz_i=b8[I blz[0]]+b7[I blz[1]]+b6[I blz[2]]+b5[I blz[3]]+b4[I blz[4]]+b3[I blz[5]]+b2[I blz[6]]+b1[I blz[7]];
-
-   /* Alle BLZs der Flessa-Bank werden f¸r die IBAN-Generierung auf 79330111
-    * umgesetzt (siehe dazu http://www.flessabank.de/aktuell.php?akt=149). In
-    * konto_check.h findet sich ein Auszug von dieser Seite.
-    *
-    * In CONFIG.INI sind die BLZs der der Flessa-Bank auskommentiert (d.h.
-    * sie sind f¸r die Selbstgenerierung zugelassen); dabei steht allerdings
-    * noch die Anmerkung "Flessa Sonderfall  implementiert ab 19.4.2012" (das
-    * bezieht sich wohl auch auf das Umsetzen der BLZ). Wenn die neue
-    * CONFIG.INI mit einer alten konto_check-Version ohne diese Korrektur
-    * eingesetzt wird, werden f¸r die BLZs der Flessa-Bank (auﬂer 79330111)
-    * syntaktisch richtige, aber ansonsten falsche IBANs erzeugt.
-    *
-    * Die Kontonummern der Flessa-Bank bleiben trotz der Umstellung erhalten.
-    * (siehe dazu die angegebene Webseite).
-    *
-    * Ab dem 9. September 2013 sind die Daten als gelˆscht markiert, und die BLZ
-    * 79330111 ist als Nachfolge-BLZ eingetragen. Damit ist diese Korrektur hinf‰llig
-    * und das Makro kann auf 0 gesetzt werden (bzw. bald verschwinden).
-    */
-#if FLESSA_KORREKTUR
-   if(blz_i==70030111 || blz_i==76330111 || blz_i==77030111 || blz_i==78330111 || blz_i==84030111){
-      blz=(char*)"79330111";
-      blz_i=79330111;
-   }
-#endif
 
       /* BLZ und Kontonummer in eigenen Speicherbereich kopieren, Konto links mit Nullen f¸llen */
 #if USE_IBAN_RULES
@@ -24738,7 +24711,7 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22546 "konto_check.lxx"
+#line 22519 "konto_check.lxx"
 /* Funktion lut_suche_bic() +ßßß2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)
