@@ -1,12 +1,13 @@
 h1. KontoCheck
 
 Check whether a certain bic/account-no-combination can possibly be valid for a German bank,
-retrieve certain infos from the blz file and search for banks matching different criteria.
+retrieve certain infos from the blz file and search for banks matching different criteria,
+convert bic/account into IBAN and BIC, test IBAN or BIC...
 
-It uses the C library konto_check (see http://sourceforge.net/projects/kontocheck/) by
+It uses the C library konto_check available at <a href="http://sourceforge.net/projects/kontocheck" target="_blank">sourceforge</a> by
 Michael Plugge.
 
-h2. Example
+h2. A few Examples
 
 An example tends to tell more than a 1000 words:
 
@@ -14,619 +15,73 @@ An example tends to tell more than a 1000 words:
 >> require "konto_check"
 true
 
->> KontoCheck::init()
+# initialize the library
+>> KontoCheck::init
+1
+
+# use UTF-8 encoding
+>> KontoCheck::encoding 'u'
+2
+
+# check a bic/account combination
+>> KontoCheck::konto_check("52250030","52001")
 true
 
-# konto_check?(blz, ktno) => true/false (valid/invalid)
->> KontoCheck::konto_check?("52250030", "52001")
-true
-
->> KontoCheck::konto_check?("52250030", "52002")
-false
-
-# ISO-8859-1 encoded name of bank
+# retrieve a bank name
 >> KontoCheck::bank_name("10010010")
 "Postbank"
 
-# there is much more, RTFS or wait for/help creating more examples...
+# search banks with "eifel"
+>> eifel=KontoCheckRaw::bank_suche_volltext 'eifel'
+[["Eifel"],
+ [37069303, 37069342, 37069642, 37069720, 39050000, 39550110, 57069067, 57069144, 57650010, 57751310, 57761591, 58650030, 58651240, 58660101, 58661901, 58668818, 58691500, 58751230, 58760954],
+ [2, 0, 1, 0, 6, 14, 2, 2, 1, 13, 18, 6, 2, 2, 1, 0, 0, 0, 1],
+ 1, 19]
+# show some resuts
+>> b=eifel[1]; f=eifel[2]; maxidx=eifel[4]-1
+>> (10..maxidx).each{|i|  printf("%s (Fil.%2d) %s, %s\n",b[i],f[i],KontoCheck::bank_name(b[i],f[i]),KontoCheck::bank_ort(b[i],f[i])) }
+57761591 (Fil.18) Volksbank RheinAhrEifel, Uersfeld, Eifel
+58650030 (Fil. 6) Kreissparkasse Bitburg-Prüm, Bettingen, Eifel
+58651240 (Fil. 2) Kreissparkasse Vulkaneifel, Hillesheim, Eifel
+58660101 (Fil. 2) Volksbank Bitburg, Bettingen, Eifel
+58661901 (Fil. 1) Raiffeisenbank Westeifel, Burbach, Eifel
+58668818 (Fil. 0) Raiffeisenbank Neuerburg-Land -alt-, Neuerburg, Eifel
+58691500 (Fil. 0) Volksbank Eifel Mitte, Prüm
+58751230 (Fil. 0) Sparkasse Mittelmosel-Eifel Mosel Hunsrück, Bernkastel-Kues
+58760954 (Fil. 1) Vereinigte Volksbank Raiffeisenbank, Landscheid, Eifel
+
+# test an IBAN
+>> KontoCheck::iban_check "DE03683515573047232594"
+1
+
+# check of an invalid IBAN with correct IBAN checksum
+>> KontoCheck::retval2txt KontoCheck::iban_check 'DE80200500000000101105'
+"Die IBAN-Prüfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)"
+# extract bic and account from IBAN
+>> KontoCheckRaw::iban2bic  'DE80200500000000101105'
+["HSHNDEHHXXX", -130, "20050000", "0000101105"]
+# generate the IBAN again using IBAN rules
+>> KontoCheckRaw::iban_gen  "20050000", "0000101105"
+["DE32210500000101105000", "DE32 2105 0000 0101 1050 00", 20, "HSHNDEHHXXX", "21050000", "0101105000", 36]
+
+# generate an IBAN using the low-level interface KontoCheckRaw::
+>> KontoCheckRaw::iban_gen('68351976','1116232594')
+["DE03683515573047232594", "DE03 6835 1557 3047 2325 94", 20, "SOLADES1SFH", "68351557", "3047232594", 9]
+# once again using the high-level interface KontoCheck::
+>> KontoCheck::iban_gen('68351976','1116232594')
+"DE03683515573047232594"
 </pre>
 
-h2. Short 'Documentation'
-
-h3. <tt>KontoCheck::konto_check?(&lt;blz&gt;, &lt;kto&gt;)</tt>
-
-check whether the given account number <tt>kto</tt> can possibly be
-a valid number of the bank with the bic <tt>blz</tt>.
-
-h3. <tt>KontoCheck::init(&lt;lut_file&gt;)</tt>
-
-initialize the underlying C library konto_check with bank
-information from the LUT file <tt>lut_file</tt>.
-The LUT file can be created from the plain text file
-found at: http://www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php
-This file is updated every three months, so be sure to
-replace (and regenerate) it regularly.
-
-There will be a rake task to update the LUT file soon.
-
-h3. <tt>KontoCheck::bank_name(&lt;blz&gt;)</tt>
-
-returns the name of the bank as a (ISO-8859-1 encoded)
-string or raises a runtime error with a short error message
-if an error occurred (invalid blz, blz too short, etc.).
-This may be changed in the future to simply return nil (should be discussed).
-
-
-h3. <tt>KontoCheck::konto_check_pz(&lt;pz&gt;, &lt;kto&gt;)</tt>
-
-Check whether the given account number kto kann possibly be
-a valid number of a bank with the given check method pz.
-
-Possible return values (and short description):
-
-    -69  (MISSING_PARAMETER)       "bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
-    -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
-
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
-    -29  (UNDEFINED_SUBMETHOD)     "die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
-     -3  (INVALID_KTO)             "das Konto ist ungueltig"
-     -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
-     -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
-      0  (FALSE)                   "falsch"
-      1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Pruefung"
-
-
-h3. <tt>KontoCheck::konto_check(&lt;blz&gt;, &lt;kto&gt;)</tt>
-
-Check whether the given account number kto kann possibly be
-a valid number of the bank with the bic blz.
-
-Possible return values (and short description):
-
-    -69  (MISSING_PARAMETER)       "Bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
-    -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
-
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
-    -29  (UNDEFINED_SUBMETHOD)     "Die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
-     -5  (INVALID_BLZ_LENGTH)      "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)             "die Bankleitzahl ist ungueltig"
-     -3  (INVALID_KTO)             "das Konto ist ungueltig"
-     -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
-     -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
-      0  (FALSE)                   "falsch"
-      1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Pruefung"
-
-
-h3. <tt>KontoCheck::init(&lt;level&gt;[,&lt;lutfile&gt;[,&lt;set&gt;]]])</tt>
-
-ATTENTION - the order of the parameters changed:                            ***
-first comes now the initialization level, then the filename and             ***
-last the set. This change was introduced because the filename can be found  ***
-usually in the default values.                                              ***
-
-
-initialize the underlying C library konto_check with the bank
-information from lutfile.
-
-Possible return values (and short description):
-
-   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
-    -64  (INIT_FATAL_ERROR)        "Initialisierung fehlgeschlagen (init_wait geblockt)"
-    -63  (INCREMENTAL_INIT_NEEDS_INFO)            "Ein inkrementelles Initialisieren benoetigt einen Info-Block in der LUT-Datei"
-    -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht moeglich"
-    -36  (LUT2_Z_MEM_ERROR)        "Memory error in den ZLIB-Routinen"
-    -35  (LUT2_Z_DATA_ERROR)       "Datenfehler im komprimierten LUT-Block"
-    -34  (LUT2_BLOCK_NOT_IN_FILE)  "Der Block ist nicht in der LUT-Datei enthalten"
-    -33  (LUT2_DECOMPRESS_ERROR)   "Fehler beim Dekomprimieren eines LUT-Blocks"
-    -31  (LUT2_FILE_CORRUPTED)     "Die LUT-Datei ist korrumpiert"
-    -20  (LUT_CRC_ERROR)           "Pruefsummenfehler in der blz.lut Datei"
-    -10  (FILE_READ_ERROR)         "kann Datei nicht lesen"
-     -9  (ERROR_MALLOC)            "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)        "die blz.lut Datei ist inkosistent/ungueltig"
-     -6  (NO_LUT_FILE)             "die blz.lut Datei wurde nicht gefunden"
-
-      6  (LUT1_SET_LOADED)         "Die Datei ist im alten LUT-Format (1.0/1.1)"
-      1  (OK)                      "ok"
-
-
-h3. <tt>KontoCheck::free()</tt>
-
-Release allocated memory of the underlying C library konto_check
-return value is always true
-
-
-h3. <tt>KontoCheck::generate_lutfile(&lt;inputfile&gt;, &lt;outputfile&gt;[, &lt;user_info&gt;[, &lt;gueltigkeit&gt;[,</tt>
-
-<felder>[, <filialen>[, <set>]]]]])
-
-generate a new lutfile
-
-Possible return values (and short description):
-   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
-    -57  (LUT2_GUELTIGKEIT_SWAPPED)   "Im Gueltigkeitsdatum sind Anfangs- und Enddatum vertauscht"
-    -56  (LUT2_INVALID_GUELTIGKEIT)   "Das angegebene Gueltigkeitsdatum ist ungueltig (Soll: JJJJMMTT-JJJJMMTT)"
-    -32  (LUT2_COMPRESS_ERROR)        "Fehler beim Komprimieren eines LUT-Blocks"
-    -31  (LUT2_FILE_CORRUPTED)        "Die LUT-Datei ist korrumpiert"
-    -30  (LUT2_NO_SLOT_FREE)          "Im Inhaltsverzeichnis der LUT-Datei ist kein Slot mehr frei"
-    -15  (INVALID_BLZ_FILE)           "Fehler in der blz.txt Datei (falsche Zeilenlaenge)"
-    -11  (FILE_WRITE_ERROR)           "kann Datei nicht schreiben"
-    -10  (FILE_READ_ERROR)            "kann Datei nicht lesen"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)           "die blz.lut Datei ist inkosistent/ungueltig"
-
-      1  (OK)                         "ok"
-      7  (LUT1_FILE_GENERATED)        "ok; es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert"
-
-
-
-h3. <tt>KontoCheck::retval2txt(&lt;retval&gt;)</tt>
-
-Convert a numeric retval to an ISO8859-1 encoded string.
-
-
-h3. <tt>KontoCheck::retval2txt_short(&lt;retval&gt;)</tt>
-
-Convert a numeric retval to a short string (macro name).
-
-
-h3. <tt>KontoCheck::retval2utf(&lt;retval&gt;)</tt>
-
-Convert a numeric retval to an UTF-8 encoded string.
-
-
-h3. <tt>KontoCheck::retval2html(&lt;retval&gt;)</tt>
-
-Convert a numeric retval to a string with HTML entities for german Umlaute.
-
-
-h3. <tt>KontoCheck::dump_lutfile(&lt;lutfile&gt;)</tt>
-
-Get all infos about the contents of a lutfile
-
-
-
-h3. <tt>KontoCheck::lut_info([lutfile])</tt>
-
-Get infos about the contents of a lutfile or about the loaded blocks (if called without filename).
-
-The return value is an array of 5 elements:
-
-retval:  overall return status
-valid1:  validity of first block
-valid2:  validity of second block
-info1:   first infoblock
-info2:   second infoblock
-
-Possible return value for info1 and info2 with short description:
-
-   -105  (LUT2_NO_LONGER_VALID_BETTER)   "Beide Datensaetze sind nicht mehr gueltig; dieser ist  aber juenger als der andere"
-    -59  (LUT2_NOT_YET_VALID)            "Der Datenblock ist noch nicht gueltig"
-    -58  (LUT2_NO_LONGER_VALID)          "Der Datenblock ist nicht mehr gueltig"
-    -34  (LUT2_BLOCK_NOT_IN_FILE)        "Die LUT-Datei enthaelt den Infoblock nicht"
-      4  (LUT2_VALID)                    "Der Datenblock ist aktuell gueltig"
-      5  (LUT2_NO_VALID_DATE)            "Der Datenblock enthaelt kein Gueltigkeitsdatum"
-
-Possible return value for retval (and short description):
-
-   -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
-    -70  (LUT1_FILE_USED)         "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -40  (LUT2_NOT_INITIALIZED)   "die Programmbibliothek wurde noch nicht initialisiert"
-    -37  (LUT2_Z_BUF_ERROR)       "Buffer error in den ZLIB Routinen"
-    -36  (LUT2_Z_MEM_ERROR)       "Memory error in den ZLIB-Routinen"
-    -35  (LUT2_Z_DATA_ERROR)      "Datenfehler im komprimierten LUT-Block"
-    -34  (LUT2_BLOCK_NOT_IN_FILE) "Der Block ist nicht in der LUT-Datei enthalten"
-    -31  (LUT2_FILE_CORRUPTED)    "Die LUT-Datei ist korrumpiert"
-    -20  (LUT_CRC_ERROR)          "Pruefsummenfehler in der blz.lut Datei"
-    -10  (FILE_READ_ERROR)        "kann Datei nicht lesen"
-     -9  (ERROR_MALLOC)           "kann keinen Speicher allokieren"
-     -7  (INVALID_LUT_FILE)       "die blz.lut Datei ist inkosistent/ungueltig"
-      1  (OK)                     "ok"
-
-
-
-h3. <tt>KontoCheck::load_bank_data(&lt;datafile&gt;)</tt>
-
-This function was the old initialization function for konto_check; it is now
-replaced by init() for initialization and generate_lutfile() for generating
-a data file with all bank informations from blz_yyyymmdd.txt from
-http://www.bundesbank.de/zahlungsverkehr/zahlungsverkehr_bankleitzahlen_download.php
-
-This function serves now only as a schibbolet to check if someone uses the
-old interface :-).
-
-WARNING - this function will be removed in near future. Use KontoCheck::init()
-for initialization from a lutfile, KontoCheck::generate_lutfile() to generate a
-new lutfile. The init() function is much faster (about 7..20 times) and has
-some more advantages (two sets of data, flexible level of initialization,
-compact format).
-
-
-h3. <tt>KontoCheck::iban_2bic(&lt;blz&gt;)</tt>
-
-Determine the BIC for a given (german) IBAN
-
-Possible return values for retval (and short description):
-
-    -68  (IBAN2BIC_ONLY_GERMAN)       "Die Funktion iban2bic() arbeitet nur mit deutschen Bankleitzahlen"
-    -46  (LUT2_BIC_NOT_INITIALIZED)   "Das Feld BIC wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
-      1  (OK)                         "ok"
-
-
-h3. <tt>KontoCheck::iban_check(&lt;blz&gt;)</tt>
-
-Test an IBAN
-
-Possible return values for retval (and short description):
-
-    -74  (NO_GERMAN_BIC)              "Ein Konto kann kann nur fuer deutsche Banken geprueft werden"
-    -67  (IBAN_OK_KTO_NOT)            "Die Pruefziffer der IBAN stimmt, die der Kontonummer nicht"
-    -66  (KTO_OK_IBAN_NOT)            "Die Pruefziffer der Kontonummer stimmt, die der IBAN nicht"
-      0  (FALSE)                      "falsch"
-      1  (OK)                         "ok"
-
-Possible return values for retval_kc:
-    -77  (BAV_FALSE)               "BAV denkt, das Konto ist falsch (konto_check haelt es fuer richtig)"
-    -69  (MISSING_PARAMETER)       "Bei der Kontopruefung fehlt ein notwendiger Parameter (BLZ oder Konto)"
-    -40  (LUT2_NOT_INITIALIZED)    "die Programmbibliothek wurde noch nicht initialisiert"
-    -29  (UNDEFINED_SUBMETHOD)     "Die (Unter)Methode ist nicht definiert"
-    -12  (INVALID_KTO_LENGTH)      "ein Konto muss zwischen 1 und 10 Stellen haben"
-     -5  (INVALID_BLZ_LENGTH)      "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)             "Die (Unter)Methode ist nicht definiert"
-     -3  (INVALID_KTO)             "das Konto ist ungueltig"
-     -2  (NOT_IMPLEMENTED)         "die Methode wurde noch nicht implementiert"
-     -1  (NOT_DEFINED)             "die Methode ist nicht definiert"
-      0  (FALSE)                   "falsch"
-      1  (OK)                      "ok"
-      2  (OK_NO_CHK)               "ok, ohne Pruefung"
-
-
-
-h3. <tt>KontoCheck::ipi_gen(&lt;zweck&gt;)</tt>
-
-Determine the BIC for a given (german) IBAN
-
-Possible return values for retval (and short description):
-
-    -72  (IPI_INVALID_CHARACTER)      "Im strukturierten Verwendungszweck duerfen nur alphanumerische Zeichen vorkommen"
-    -71  (IPI_INVALID_LENGTH)         "Die Laenge des IPI-Verwendungszwecks darf maximal 18 Byte sein"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::ipi_check(&lt;zweck&gt;)</tt>
-
-Determine the BIC for a given (german) IBAN
-
-Possible return values for retval (and short description):
-
-    -73  (IPI_CHECK_INVALID_LENGTH)   "Der zu validierende strukturierete Verwendungszweck muss genau 20 Zeichen enthalten"
-      0  (FALSE)                      "falsch"
-      1  (OK)                         "ok"
-
-
-h3. <tt>KontoCheck::bank_valid(&lt;blz&gt; [,filiale])</tt>
-
-Check if a given blz is valid
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)    "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)   "Das Feld BLZ wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
-      1  (OK)                         "ok"
-
-
-h3. <tt>KontoCheck::bank_filialen(&lt;blz&gt;)</tt>
-
-Return the number of branch offices
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -52  (LUT2_FILIALEN_NOT_INITIALIZED) "Das Feld Filialen wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_alles(&lt;blz&gt; [,filiale])</tt>
-
-Return all available information about a bank
-
-Possible return values (and short description):
-
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-    -38  (LUT2_PARTIAL_OK)            "es wurden nicht alle Blocks geladen"
-     -5  (INVALID_BLZ_LENGTH)         "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                "die Bankleitzahl ist ungueltig"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_name(&lt;blz&gt; [,filiale])</tt>
-
-Return the name of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -51  (LUT2_NAME_NOT_INITIALIZED)     "Das Feld Bankname wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-h3. <tt>KontoCheck::bank_name_kurz(&lt;blz&gt; [,filiale])</tt>
-
-Return the short name of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -48  (LUT2_NAME_KURZ_NOT_INITIALIZED) "Das Feld Kurzname wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-h3. <tt>KontoCheck::bank_ort(&lt;blz&gt; [,filiale])</tt>
-
-Return the location of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -49  (LUT2_ORT_NOT_INITIALIZED)      "Das Feld Ort wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_plz(&lt;blz&gt; [,filiale])</tt>
-
-Return the plz of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -50  (LUT2_PLZ_NOT_INITIALIZED)      "Das Feld PLZ wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-h3. <tt>KontoCheck::bank_pz(&lt;blz&gt; [,filiale])</tt>
-
-Return the check method of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -45  (LUT2_PZ_NOT_INITIALIZED)       "Das Feld Pruefziffer wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_bic(&lt;blz&gt; [,filiale])</tt>
-
-Return the BIC (Bank Identifier Code) of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -46  (LUT2_BIC_NOT_INITIALIZED)      "Das Feld BIC wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_aenderung(&lt;blz&gt; [,filiale])</tt>
-
-Return the 'Aenderung' flag of a bank (as string):
-A Addition, M Modified, U Unchanged, D Deletion.
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -43  (LUT2_AENDERUNG_NOT_INITIALIZED) "Das Feld Aenderung wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_loeschung(&lt;blz&gt; [,filiale])</tt>
-
-Return the 'Loeschung' flag of a bank as int: 0 or 1
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -42  (LUT2_LOESCHUNG_NOT_INITIALIZED) "Das Feld Loeschung wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_nachfolge_blz(&lt;blz&gt; [,filiale])</tt>
-
-Return the successor of a bank which will be deleted ('Loeschung' flag set)
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -41  (LUT2_NACHFOLGE_BLZ_NOT_INITIALIZED) "Das Feld Nachfolge-BLZ wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_pan(&lt;blz&gt; [,filiale])</tt>
-
-Return the PAN (Primary Account Number) of a bank
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -47  (LUT2_PAN_NOT_INITIALIZED)      "Das Feld PAN wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_nr(&lt;blz&gt; [,filiale])</tt>
-
-Return the sequence number of a bank (internal field of BLZ file)
-
-Possible return values (and short description):
-
-    -55  (LUT2_INDEX_OUT_OF_RANGE)       "Der Index fuer die Filiale ist ungueltig"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)      "Das Feld BLZ wurde nicht initialisiert"
-    -44  (LUT2_NR_NOT_INITIALIZED)       "Das Feld NR wurde nicht initialisiert"
-     -5  (INVALID_BLZ_LENGTH)            "die Bankleitzahl ist nicht achtstellig"
-     -4  (INVALID_BLZ)                   "die Bankleitzahl ist ungueltig"
-      1  (OK)                            "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_bic(&lt;search_bic&gt;)</tt>
-
-Find all banks with a given bic
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -46  (LUT2_BIC_NOT_INITIALIZED)   "Das Feld BIC wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_namen(&lt;name&gt;)</tt>
-
-Find all banks with a given name
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -51  (LUT2_NAME_NOT_INITIALIZED)  "Das Feld Bankname wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_namen_kurz(&lt;short_name&gt;)</tt>
-
-Find all banks with a given short name
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -48  (LUT2_NAME_KURZ_NOT_INITIALIZED) "Das Feld Kurzname wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_plz(&lt;plz1&gt;[, plz2])</tt>
-
-Find all banks with plz between plz1 and plz2
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)   "Das Feld BLZ wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_pz(&lt;pz1&gt;[, pz2])</tt>
-
-Find all banks with check method between pz1 and pz2
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)   "Das Feld BLZ wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_blz(&lt;blz1&gt;[, blz2])</tt>
-
-Find all banks with bic between blz1 and blz2
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -53  (LUT2_BLZ_NOT_INITIALIZED)   "Das Feld BLZ wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-
-h3. <tt>KontoCheck::bank_suche_ort(&lt;suchort&gt;)</tt>
-
-Find all banks in a given location
-
-Possible return values (and short description):
-
-    -78  (KEY_NOT_FOUND)              "Die Suche lieferte kein Ergebnis"
-    -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
-    -49  (LUT2_ORT_NOT_INITIALIZED)   "Das Feld Ort wurde nicht initialisiert"
-    -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
-     -9  (ERROR_MALLOC)               "kann keinen Speicher allokieren"
-      1  (OK)                         "ok"
-
-
-h3. <tt>KontoCheck::version()</tt>
-
-Get the version string for konto_check
-
-
+h2. Data file
+
+To use the library, you need (of course) the current Bank Data. KontoCheck uses an own compressed format
+to hold the bank data distributed by the Deutsche Bundesbank. You can generate the file yourself using
+the function KontoCheck::generate_lutfile() or use the file from
+<a href="http://sourceforge.net/projects/kontocheck/files/konto_check-de/5.2/blz.lut2f/download" target="_blank">SourceForge.net</a>.
+For further information have look at
+<a href="http://kontocheck.sourceforge.net/?ausgabe=4&sub=5" target="_blank">this page</a>.
 
 h2. License
 
-Since the original http://www.informatik.hs-mannheim.de/konto_check/ is
+Since the <a href="http://sourceforge.net/projects/kontocheck" target="_blank">original</a> is
 licensed under LGPL, so is this module.

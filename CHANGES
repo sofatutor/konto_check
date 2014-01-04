@@ -1,4 +1,10 @@
-important changes in version 5.2:
+important changes in version 5.2.2:
+   - minor documentation changes
+
+important changes in version 5.2.1:
+   - fixed a bug in iban_gen() in ext/konto_check_raw/konto_check_raw_ruby.c
+
+-important changes in version 5.2:
    - new check method E1 implemented
    - new IBAN rules 55 and 56 implemented
    - changes for some IBAN rules (5, 10, 15, 20, 43 und 45, valid from 2013-12-09) implemented
