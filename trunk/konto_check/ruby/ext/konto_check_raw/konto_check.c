@@ -13,7 +13,7 @@
  * #  wurden aus der aktuellen BLZ-Datei der Deutschen Bundesbank           #
  * #  ¸bernommen.                                                           #
  * #                                                                        #
- * #  Copyright (C) 2002-2013 Michael Plugge <m.plugge@hs-mannheim.de>      #
+ * #  Copyright (C) 2002-2014 Michael Plugge <m.plugge@hs-mannheim.de>      #
  * #                                                                        #
  * #  Dieses Programm ist freie Software; Sie d¸rfen es unter den           #
  * #  Bedingungen der GNU Lesser General Public License, wie von der Free   #
@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.3 (development)"
 #endif
-#define VERSION_DATE "2013-12-13"
+#define VERSION_DATE "2014-01-03"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -101,7 +101,7 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die ƒnderungen zum 9.12.2013 zu aktivieren */
+   /* Flag, um die ƒnderungen zum 3.3.2014 zu aktivieren */
 static int pz_aenderungen_aktivieren;
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
@@ -8971,8 +8971,8 @@ static void init_atoi_table(void)
    unsigned long l;
 
 #if 1
-      /* ƒnderungen zum 9.12.2013 aktivieren */
-   if(time(NULL)>1386543600)pz_aenderungen_aktivieren=1;
+      /* ƒnderungen zum 3.3.2014 aktivieren */
+   if(time(NULL)>1393801200)pz_aenderungen_aktivieren=1;
 #endif
 
    /* ung¸ltige Ziffern; Blanks und Tabs werden ebenfalls als ung¸ltig
@@ -12786,7 +12786,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 /*  Berechnung nach der Methode 66 +ßßß4 */
 /*
  * ######################################################################
- * #              Berechnung nach der Methode 66                        #
+ * #          Berechnung nach der Methode 66  (ge‰ndert zum 3.3.2014)   #
  * ######################################################################
  * # Aufbau der 9-stelligen Kontonummer (innerhalb des                  #
  * # zwischenbetrieblich 10-stelligen Feldes)                           #
@@ -12810,13 +12810,27 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # von 0 ist die Pr¸fziffer 1. Bei einem Rest von 1 ist die           #
  * # Pr¸fziffer 0 Verbleibt ein Rest von 2 bis 10, so wird dieser vom   #
  * # Divison (11) subtrahiert. Die Differenz ist dann die Pr¸fziffer.   #
+ * #                                                                    #
+ * # Ausnahme:                                                          #
+ * # Ist die Stelle 2 der Kontonummer der Wert = 9, ist die Kontonummer #
+ * # nicht pr¸fziffergesichert; es gilt die Methode 09 (keine           #
+ * # Pr¸fzifferberechnung)                                              #
  * ######################################################################
  */
       case 66:
 #if DEBUG>0
+      case 2066:
          if(retvals){
-            retvals->methode="66";
-            retvals->pz_methode=66;
+            retvals->methode="66b";
+            retvals->pz_methode=2066;
+         }
+#endif
+         if(pz_aenderungen_aktivieren && kto[1]=='9')return OK_NO_CHK;
+#if DEBUG>0
+      case 1066:
+         if(retvals){
+            retvals->methode="66a";
+            retvals->pz_methode=1066;
          }
 #endif
          if(*kto!='0')return INVALID_KTO;
@@ -20531,8 +20545,8 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ung¸ltiges Zeichen ( ()+-/&.,\' ) f¸r die Volltextsuche gefunden";
       case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ung¸ltig";
-      case LUT_SUCHE_INVALID_CMD: return "Suche: im Verkn¸pfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
-      case LUT_SUCHE_INVALID_CNT: return "Suche: es m¸ssen zwischen 1 und 26 Suchmuster angegeben werden";
+      case LUT_SUCHE_INVALID_CMD: return "bei der Suche sind im Verkn¸pfungsstring nur die Zeichen a-z sowie + und - erlaubt";
+      case LUT_SUCHE_INVALID_CNT: return "bei der Suche m¸ssen zwischen 1 und 26 Suchmuster angegeben werden";
       case LUT2_VOLLTEXT_NOT_INITIALIZED: return "Das Feld Volltext wurde nicht initialisiert";
       case NO_OWN_IBAN_CALCULATION: return "das Institut erlaubt keine eigene IBAN-Berechnung";
       case KTO_CHECK_UNSUPPORTED_COMPRESSION: return "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden";
@@ -20591,7 +20605,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case LUT2_NOT_YET_VALID: return "Der Datensatz ist noch nicht g¸ltig";
       case LUT2_NO_LONGER_VALID: return "Der Datensatz ist nicht mehr g¸ltig";
       case LUT2_GUELTIGKEIT_SWAPPED: return "Im G¸ltigkeitsdatum sind Anfangs- und Enddatum vertauscht";
-      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G¸ltigkeitsdatum ist ung¸ltig (Soll: JJJJMMTT-JJJJMMTT)";
+      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G¸ltigkeitsdatum ist ung¸ltig (Sollformat ist JJJJMMTT-JJJJMMTT)";
       case LUT2_INDEX_OUT_OF_RANGE: return "Der Index f¸r die Filiale ist ung¸ltig";
       case LUT2_INIT_IN_PROGRESS: return "Die Bibliothek wird gerade neu initialisiert";
       case LUT2_BLZ_NOT_INITIALIZED: return "Das Feld BLZ wurde nicht initialisiert";
@@ -20719,8 +20733,8 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case LUT2_VOLLTEXT_INVALID_CHAR: return "UngÅltiges Zeichen ( ()+-/&.,\' ) fÅr die Volltextsuche gefunden";
       case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ungÅltig";
-      case LUT_SUCHE_INVALID_CMD: return "Suche: im VerknÅpfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
-      case LUT_SUCHE_INVALID_CNT: return "Suche: es mÅssen zwischen 1 und 26 Suchmuster angegeben werden";
+      case LUT_SUCHE_INVALID_CMD: return "bei der Suche sind im VerknÅpfungsstring nur die Zeichen a-z sowie + und - erlaubt";
+      case LUT_SUCHE_INVALID_CNT: return "bei der Suche mÅssen zwischen 1 und 26 Suchmuster angegeben werden";
       case LUT2_VOLLTEXT_NOT_INITIALIZED: return "Das Feld Volltext wurde nicht initialisiert";
       case NO_OWN_IBAN_CALCULATION: return "das Institut erlaubt keine eigene IBAN-Berechnung";
       case KTO_CHECK_UNSUPPORTED_COMPRESSION: return "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden";
@@ -20779,7 +20793,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case LUT2_NOT_YET_VALID: return "Der Datensatz ist noch nicht gÅltig";
       case LUT2_NO_LONGER_VALID: return "Der Datensatz ist nicht mehr gÅltig";
       case LUT2_GUELTIGKEIT_SWAPPED: return "Im GÅltigkeitsdatum sind Anfangs- und Enddatum vertauscht";
-      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene GÅltigkeitsdatum ist ungÅltig (Soll: JJJJMMTT-JJJJMMTT)";
+      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene GÅltigkeitsdatum ist ungÅltig (Sollformat ist JJJJMMTT-JJJJMMTT)";
       case LUT2_INDEX_OUT_OF_RANGE: return "Der Index fÅr die Filiale ist ungÅltig";
       case LUT2_INIT_IN_PROGRESS: return "Die Bibliothek wird gerade neu initialisiert";
       case LUT2_BLZ_NOT_INITIALIZED: return "Das Feld BLZ wurde nicht initialisiert";
@@ -20907,8 +20921,8 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ung&uuml;ltiges Zeichen ( ()+-/&.,\' ) f&uuml;r die Volltextsuche gefunden";
       case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ung&uuml;ltig";
-      case LUT_SUCHE_INVALID_CMD: return "Suche: im Verkn&uuml;pfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
-      case LUT_SUCHE_INVALID_CNT: return "Suche: es m&uuml;ssen zwischen 1 und 26 Suchmuster angegeben werden";
+      case LUT_SUCHE_INVALID_CMD: return "bei der Suche sind im Verkn&uuml;pfungsstring nur die Zeichen a-z sowie + und - erlaubt";
+      case LUT_SUCHE_INVALID_CNT: return "bei der Suche m&uuml;ssen zwischen 1 und 26 Suchmuster angegeben werden";
       case LUT2_VOLLTEXT_NOT_INITIALIZED: return "Das Feld Volltext wurde nicht initialisiert";
       case NO_OWN_IBAN_CALCULATION: return "das Institut erlaubt keine eigene IBAN-Berechnung";
       case KTO_CHECK_UNSUPPORTED_COMPRESSION: return "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden";
@@ -20967,7 +20981,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case LUT2_NOT_YET_VALID: return "Der Datensatz ist noch nicht g&uuml;ltig";
       case LUT2_NO_LONGER_VALID: return "Der Datensatz ist nicht mehr g&uuml;ltig";
       case LUT2_GUELTIGKEIT_SWAPPED: return "Im G&uuml;ltigkeitsdatum sind Anfangs- und Enddatum vertauscht";
-      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G&uuml;ltigkeitsdatum ist ung&uuml;ltig (Soll: JJJJMMTT-JJJJMMTT)";
+      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G&uuml;ltigkeitsdatum ist ung&uuml;ltig (Sollformat ist JJJJMMTT-JJJJMMTT)";
       case LUT2_INDEX_OUT_OF_RANGE: return "Der Index f&uuml;r die Filiale ist ung&uuml;ltig";
       case LUT2_INIT_IN_PROGRESS: return "Die Bibliothek wird gerade neu initialisiert";
       case LUT2_BLZ_NOT_INITIALIZED: return "Das Feld BLZ wurde nicht initialisiert";
@@ -21095,8 +21109,8 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case LUT2_VOLLTEXT_INVALID_CHAR: return "Ung√ºltiges Zeichen ( ()+-/&.,\' ) f√ºr die Volltextsuche gefunden";
       case LUT2_VOLLTEXT_SINGLE_WORD_ONLY: return "Die Volltextsuche sucht jeweils nur ein einzelnes Wort, benutzen Sie lut_suche_multiple() zur Suche nach mehreren Worten";
       case LUT_SUCHE_INVALID_RSC: return "die angegebene Suchresource ist ung√ºltig";
-      case LUT_SUCHE_INVALID_CMD: return "Suche: im Verkn√ºpfungsstring sind nur die Zeichen a-z sowie + und - erlaubt";
-      case LUT_SUCHE_INVALID_CNT: return "Suche: es m√ºssen zwischen 1 und 26 Suchmuster angegeben werden";
+      case LUT_SUCHE_INVALID_CMD: return "bei der Suche sind im Verkn√ºpfungsstring nur die Zeichen a-z sowie + und - erlaubt";
+      case LUT_SUCHE_INVALID_CNT: return "bei der Suche m√ºssen zwischen 1 und 26 Suchmuster angegeben werden";
       case LUT2_VOLLTEXT_NOT_INITIALIZED: return "Das Feld Volltext wurde nicht initialisiert";
       case NO_OWN_IBAN_CALCULATION: return "das Institut erlaubt keine eigene IBAN-Berechnung";
       case KTO_CHECK_UNSUPPORTED_COMPRESSION: return "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden";
@@ -21155,7 +21169,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case LUT2_NOT_YET_VALID: return "Der Datensatz ist noch nicht g√ºltig";
       case LUT2_NO_LONGER_VALID: return "Der Datensatz ist nicht mehr g√ºltig";
       case LUT2_GUELTIGKEIT_SWAPPED: return "Im G√ºltigkeitsdatum sind Anfangs- und Enddatum vertauscht";
-      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G√ºltigkeitsdatum ist ung√ºltig (Soll: JJJJMMTT-JJJJMMTT)";
+      case LUT2_INVALID_GUELTIGKEIT: return "Das angegebene G√ºltigkeitsdatum ist ung√ºltig (Sollformat ist JJJJMMTT-JJJJMMTT)";
       case LUT2_INDEX_OUT_OF_RANGE: return "Der Index f√ºr die Filiale ist ung√ºltig";
       case LUT2_INIT_IN_PROGRESS: return "Die Bibliothek wird gerade neu initialisiert";
       case LUT2_BLZ_NOT_INITIALIZED: return "Das Feld BLZ wurde nicht initialisiert";
@@ -21612,18 +21626,18 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 3:
          return __DATE__ ", " __TIME__;    /* Compilierdatum und -zeit */
       case 4:                              /* Datum der Pr¸fziffermethode */
-#if 0
+#if 1
          if(pz_aenderungen_aktivieren)
-            return "09.12.2013";
+            return "03.03.2014";
          else
-            return "03.06.2013 (Aenderungen vom 09.12.2013 enthalten aber noch nicht aktiviert)";
+            return "09.12.2013 (Aenderungen vom 03.03.2014 enthalten aber noch nicht aktiviert)";
 #else
-         return "09.12.2013";
+         return "03.03.2014";
 #endif
       case 5:
         return "09.12.2013";
       case 6:
-        return "13. Dezember 2013";            /* Klartext-Datum der Bibliotheksversion */
+        return "03. Januar 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -24711,7 +24725,6 @@ DLL_EXPORT int lut_suche_blz(int such1,int such2,int *anzahl,int **start_idx,int
    return suche_int1(such1,such2,anzahl,start_idx,zweigstellen_base,blz_base,&blz_f,&sort_blz,qcmp_blz,cnt,0);
 }
 
-#line 22519 "konto_check.lxx"
 /* Funktion lut_suche_bic() +ßßß2 */
 DLL_EXPORT int lut_suche_bic(char *such_name,int *anzahl,int **start_idx,int **zweigstellen_base,
       char ***base_name,int **blz_base)

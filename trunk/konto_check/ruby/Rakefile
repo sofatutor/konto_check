@@ -1,5 +1,6 @@
 # Copyright (c) 2010 Peter Horn
 # Copyright (c) 2011 Jan Schwenzien, Michael Plugge
+# Copyright (c) 2013 Michael Plugge
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
@@ -24,14 +25,19 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "konto_check"
-    gem.summary = %Q{Checking german BICs/Bank account numbers and IBANs, generate IBANs, retrieve information about german Banks, search for Banks matching certain criteria}
+    gem.summary = %Q{Checking german BICs/Bank account numbers and IBANs, generate IBANs, retrieve information about german Banks, search for Banks matching certain criteria, check IBAN or BIC, convert bic/account to IBAN and BIC}
     gem.description = %Q{Check whether a certain bic/account-no-combination or an IBAN can possibly be valid, generate IBANs, retrieve informations about a bank or search for BICs matching certain criteria. It uses the C library kontocheck (see http://sourceforge.net/projects/kontocheck/) by Michael Plugge.}
-    gem.email = "info@provideal.net"
+    gem.email = "m.plugge@hs-mannheim.de"
     gem.files=Dir.glob('lib/**/*.rb')+Dir.glob('ext/**/*.{c,h,rb}')
     gem.homepage = "http://kontocheck.sourceforge.net"
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     gem.version = "5.3.0"
+    cert = "certs/gem-private_key.michel_plugge.pem"
+    if File.exist?(cert)
+       gem.signing_key = cert
+       gem.cert_chain = ["certs/gem-public_cert.michel_plugge.pem"]
+    end
     gem.extra_rdoc_files = [
       "LICENSE",
       "README.textile",
