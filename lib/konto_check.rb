@@ -917,6 +917,7 @@ module KontoCheck
 #
 #Mögliche Rückgabewerte sind:
 #
+#   -146  (INVALID_PARAMETER_TYPE)     "Falscher Parametertyp für die Funktion"
 #      0  (FALSE)                      "falsch"
 #      1  (OK)                         "ok"
 
@@ -937,6 +938,7 @@ module KontoCheck
 #
 #Mögliche Rückgabewerte sind:
 #
+#   -146  (INVALID_PARAMETER_TYPE)     "Falscher Parametertyp für die Funktion"
 #   -145  (BIC_ONLY_GERMAN)            "Es werden nur deutsche BICs unterstützt"
 #   -144  (INVALID_BIC_LENGTH)         "Die Länge des BIC muß genau 8 oder 11 Zeichen sein"
 #      0  (FALSE)                      "falsch"

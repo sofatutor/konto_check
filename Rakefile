@@ -33,11 +33,6 @@ begin
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
     gem.version = "5.3.0"
-    cert = "certs/gem-private_key.michel_plugge.pem"
-    if File.exist?(cert)
-       gem.signing_key = cert
-       gem.cert_chain = ["certs/gem-public_cert.michel_plugge.pem"]
-    end
     gem.extra_rdoc_files = [
       "LICENSE",
       "README.textile",

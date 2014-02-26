@@ -334,11 +334,6 @@ static void get_params(int argc,VALUE* argv,char *arg1s,char *arg2s,char *arg3s,
          rb_scan_args(argc,argv,"13",&arg1_rb,&arg2_rb,&arg3_rb,&arg4_rb);
          maxlen=128;
          break;
-      case 8:  /* ein notwendiger Parameter (für bic_check) */
-         rb_scan_args(argc,argv,"10",&arg1_rb);
-         maxlen=11;
-         break;
-
 
       default:
          break;
@@ -598,7 +593,7 @@ static VALUE konto_check(int argc,VALUE* argv,VALUE self)
  * *  -127  IBAN_AMBIGUOUS_KTO        "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
  * *  -125  IBAN_RULE_UNKNOWN         "Die IBAN-Regel ist nicht bekannt"
  * *  -124  NO_IBAN_CALCULATION       "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
- * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *   -77  BAV_FALSE                 "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
  * *   -69  MISSING_PARAMETER         "Für die aufgerufene Funktion fehlt ein notwendiger Parameter"
  * *   -64  INIT_FATAL_ERROR          "Initialisierung fehlgeschlagen (init_wait geblockt)"
@@ -681,7 +676,7 @@ static VALUE konto_check_regel(int argc,VALUE* argv,VALUE self)
  * *  -127  IBAN_AMBIGUOUS_KTO        "Die Kontonummer ist nicht eindeutig (es gibt mehrere Möglichkeiten)"
  * *  -125  IBAN_RULE_UNKNOWN         "Die IBAN-Regel ist nicht bekannt"
  * *  -124  NO_IBAN_CALCULATION       "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
- * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *  -112  KTO_CHECK_UNSUPPORTED_COMPRESSION "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *   -77  BAV_FALSE                 "BAV denkt, das Konto ist falsch (konto_check hält es für richtig)"
  * *   -69  MISSING_PARAMETER         "Für die aufgerufene Funktion fehlt ein notwendiger Parameter"
  * *   -64  INIT_FATAL_ERROR          "Initialisierung fehlgeschlagen (init_wait geblockt)"
@@ -880,7 +875,7 @@ static VALUE lut_blocks1_rb(int argc,VALUE* argv,VALUE self)
  * aufgetretene Fehler gibt.
  *
  * ====Mögliche Statuscodes:
- * * -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * * -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *  -64  (INIT_FATAL_ERROR)        "Initialisierung fehlgeschlagen (init_wait geblockt)"
  * *  -63  (INCREMENTAL_INIT_NEEDS_INFO) "Ein inkrementelles Initialisieren benötigt einen Info-Block in der LUT-Datei"
  * *  -62  (INCREMENTAL_INIT_FROM_DIFFERENT_FILE)   "Ein inkrementelles Initialisieren mit einer anderen LUT-Datei ist nicht möglich"
@@ -1005,7 +1000,7 @@ static VALUE free_rb(VALUE self)
  * ====Rückgabe:
  *
  * ====Mögliche Statuscodes:
- * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *   -57  (LUT2_GUELTIGKEIT_SWAPPED)   "Im Gültigkeitsdatum sind Anfangs- und Enddatum vertauscht"
  * *   -56  (LUT2_INVALID_GUELTIGKEIT)   "Das angegebene Gültigkeitsdatum ist ungültig (Soll: JJJJMMTT-JJJJMMTT)"
  * *   -32  (LUT2_COMPRESS_ERROR)        "Fehler beim Komprimieren eines LUT-Blocks"
@@ -1336,7 +1331,7 @@ static VALUE keep_raw_data_rb(VALUE self, VALUE mode_rb)
  */
 static VALUE retval2txt_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2txt(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2txt(FIX2INT(retval)));
 }
 
 /**
@@ -1357,7 +1352,7 @@ static VALUE retval2txt_rb(VALUE self, VALUE retval)
  */
 static VALUE retval2iso_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2iso(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2iso(FIX2INT(retval)));
 }
 
 /**
@@ -1378,7 +1373,7 @@ static VALUE retval2iso_rb(VALUE self, VALUE retval)
  */
 static VALUE retval2txt_short_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2txt_short(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2txt_short(FIX2INT(retval)));
 }
 
 /**
@@ -1399,7 +1394,7 @@ static VALUE retval2txt_short_rb(VALUE self, VALUE retval)
  */
 static VALUE retval2dos_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2dos(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2dos(FIX2INT(retval)));
 }
 
 /**
@@ -1420,7 +1415,7 @@ static VALUE retval2dos_rb(VALUE self, VALUE retval)
  */
 static VALUE retval2html_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2html(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2html(FIX2INT(retval)));
 }
 
 /**
@@ -1441,7 +1436,7 @@ static VALUE retval2html_rb(VALUE self, VALUE retval)
  */
 static VALUE retval2utf8_rb(VALUE self, VALUE retval)
 {
-  return rb_str_new2(kto_check_retval2utf8(FIX2INT(retval)));
+   return rb_str_new2(kto_check_retval2utf8(FIX2INT(retval)));
 }
 
 /**
@@ -1463,7 +1458,7 @@ static VALUE retval2utf8_rb(VALUE self, VALUE retval)
  * Infostring nil zurückgegeben.
  *
  * ====Mögliche Statuscodes:
- * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *   -70  (LUT1_FILE_USED)             "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
  * *   -36  (LUT2_Z_MEM_ERROR)           "Memory error in den ZLIB-Routinen"
  * *   -35  (LUT2_Z_DATA_ERROR)          "Datenfehler im komprimierten LUT-Block"
@@ -1525,7 +1520,7 @@ static VALUE dump_lutfile_rb(int argc,VALUE* argv,VALUE self)
  * *     5  (LUT2_NO_VALID_DATE)            "Der Datenblock enthält kein Gültigkeitsdatum"
  *
  * ====Mögliche Werte für den Statuscode retval:
- * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden"
+ * *  -112  (KTO_CHECK_UNSUPPORTED_COMPRESSION) "die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden"
  * *   -10  (FILE_READ_ERROR)        "kann Datei nicht lesen"
  * *   -70  (LUT1_FILE_USED)         "Es wurde eine LUT-Datei im Format 1.0/1.1 geladen"
  * *   -40  (LUT2_NOT_INITIALIZED)   "die Programmbibliothek wurde noch nicht initialisiert"
@@ -1760,15 +1755,17 @@ static VALUE iban_gen_rb(int argc,VALUE* argv,VALUE self)
  * * ci: der CI, der getestet werden soll
  *
  * ====Mögliche Rückgabewerte für den Test:
+ * *  -146  (INVALID_PARAMETER_TYPE)  "Falscher Parametertyp für die Funktion"
  * *     0  (FALSE)                   "falsch"
  * *     1  (OK)                      "ok"
  *
  */
-static VALUE ci_check_rb(int argc,VALUE* argv,VALUE self)
+static VALUE ci_check_rb(VALUE self,VALUE ci_v)
 {
-   char ci[128];
+   char ci[36];
 
-   get_params(argc,argv,ci,NULL,NULL,NULL,3);
+   if(TYPE(ci_v)!=RUBY_T_STRING)return INT2FIX(INVALID_PARAMETER_TYPE);
+   strncpy(ci,RSTRING_PTR(ci_v),35);
    return INT2FIX(ci_check(ci));
 }
 
@@ -1796,18 +1793,21 @@ static VALUE ci_check_rb(int argc,VALUE* argv,VALUE self)
  * * das zweite Element enthält die Anzahl Banken, die diesen BIC benutzen
  *
  * ====Mögliche Rückgabewerte:
- * *  -145  (BIC_ONLY_GERMAN)         "Es werden nur deutsche BICs unterstützt";
+ * *  -146  (INVALID_PARAMETER_TYPE)  "Falscher Parametertyp für die Funktion"
+ * *  -145  (BIC_ONLY_GERMAN)         "Es werden nur deutsche BICs unterstützt"
  * *  -144  (INVALID_BIC_LENGTH)      "Die Länge des BIC muß genau 8 oder 11 Zeichen sein"
+ * *   -74  (NO_GERMAN_BIC)           "Ein Konto kann kann nur für deutsche Banken geprüft werden"
  * *     0  (FALSE)                   "falsch"
  * *     1  (OK)                      "ok"
  *
  */
-static VALUE bic_check_rb(int argc,VALUE* argv,VALUE self)
+static VALUE bic_check_rb(VALUE self,VALUE bic_v)
 {
    char bic[12];
    int retval,cnt;
 
-   get_params(argc,argv,bic,NULL,NULL,NULL,8);
+   if(TYPE(bic_v)!=RUBY_T_STRING)return INT2FIX(INVALID_PARAMETER_TYPE);
+   strncpy(bic,RSTRING_PTR(bic_v),11);
    retval=bic_check(bic,&cnt);
    return rb_ary_new3(2,INT2FIX(retval),INT2FIX(cnt));
 }
@@ -2992,7 +2992,7 @@ void Init_konto_check_raw()
  * 
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
- * and this version (V. 5.3 from 2013-01-03):
+ * and this version (V. 5.3 from 2014-02-26):
  * 
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
@@ -3133,6 +3133,10 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-147) Es werden nur deutsche IBANs unterstützt */
+   rb_define_const(KontoCheck,"IBAN_ONLY_GERMAN",INT2FIX(IBAN_ONLY_GERMAN));
+      /* (-146) Falscher Parametertyp für die Funktion */
+   rb_define_const(KontoCheck,"INVALID_PARAMETER_TYPE",INT2FIX(INVALID_PARAMETER_TYPE));
       /* (-145) Es werden nur deutsche BICs unterstützt */
    rb_define_const(KontoCheck,"BIC_ONLY_GERMAN",INT2FIX(BIC_ONLY_GERMAN));
       /* (-144) Die Länge des BIC muß genau 8 oder 11 Zeichen sein */
@@ -3199,7 +3203,7 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"LUT2_VOLLTEXT_NOT_INITIALIZED",INT2FIX(LUT2_VOLLTEXT_NOT_INITIALIZED));
       /* (-113) das Institut erlaubt keine eigene IBAN-Berechnung */
    rb_define_const(KontoCheck,"NO_OWN_IBAN_CALCULATION",INT2FIX(NO_OWN_IBAN_CALCULATION));
-      /* (-112) die notwendige Kompressions-Bibliothek wurden beim Kompilieren nicht eingebunden */
+      /* (-112) die notwendige Kompressions-Bibliothek wurde beim Kompilieren nicht eingebunden */
    rb_define_const(KontoCheck,"KTO_CHECK_UNSUPPORTED_COMPRESSION",INT2FIX(KTO_CHECK_UNSUPPORTED_COMPRESSION));
       /* (-111) der angegebene Wert für die Default-Kompression ist ungültig */
    rb_define_const(KontoCheck,"KTO_CHECK_INVALID_COMPRESSION_LIB",INT2FIX(KTO_CHECK_INVALID_COMPRESSION_LIB));
@@ -3463,11 +3467,11 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"OK_KTO_REPLACED",INT2FIX(OK_KTO_REPLACED));
       /* (19) ok, die Bankleitzahl wurde allerdings ersetzt */
    rb_define_const(KontoCheck,"OK_BLZ_REPLACED",INT2FIX(OK_BLZ_REPLACED));
-      /* (20) ok, die Bankleitzahl und Kontonummer wurde allerdings ersetzt */
+      /* (20) ok, die Bankleitzahl und Kontonummer wurden allerdings ersetzt */
    rb_define_const(KontoCheck,"OK_BLZ_KTO_REPLACED",INT2FIX(OK_BLZ_KTO_REPLACED));
       /* (21) ok, die Bankverbindung ist (ohne Test) als richtig anzusehen */
    rb_define_const(KontoCheck,"OK_IBAN_WITHOUT_KC_TEST",INT2FIX(OK_IBAN_WITHOUT_KC_TEST));
-      /* (22) ok, für IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert */
+      /* (22) ok, für die die IBAN ist (durch eine Regel) allerdings ein anderer BIC definiert */
    rb_define_const(KontoCheck,"OK_INVALID_FOR_IBAN",INT2FIX(OK_INVALID_FOR_IBAN));
       /* (23) ok, für die BIC-Bestimmung der ehemaligen Hypo-Bank für IBAN wird i.A. zusätzlich die Kontonummer benötigt */
    rb_define_const(KontoCheck,"OK_HYPO_REQUIRES_KTO",INT2FIX(OK_HYPO_REQUIRES_KTO));
@@ -3475,4 +3479,6 @@ void Init_konto_check_raw()
    rb_define_const(KontoCheck,"OK_KTO_REPLACED_NO_PZ",INT2FIX(OK_KTO_REPLACED_NO_PZ));
       /* (25) ok, es wurde ein (weggelassenes) Unterkonto angefügt */
    rb_define_const(KontoCheck,"OK_UNTERKONTO_ATTACHED",INT2FIX(OK_UNTERKONTO_ATTACHED));
+      /* (26) ok, für den BIC wurde die Zweigstellennummer allerdings durch XXX ersetzt */
+   rb_define_const(KontoCheck,"OK_SHORT_BIC_USED",INT2FIX(OK_SHORT_BIC_USED));
 }
