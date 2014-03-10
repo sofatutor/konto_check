@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.3 (beta)"
+#define VERSION "5.3 (final)"
 #endif
-#define VERSION_DATE "2014-02-26"
+#define VERSION_DATE "2014-03-03"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -673,12 +673,15 @@ static int qcmp_sorti(const void *ap,const void *bp);
 static int iban_init(void);
 static int iban_regel_cvt(char *blz,char *kto,const char **bic,int regel_version);
 static const char *lut_bic_int(char *b,int zweigstelle,int *retval);
-static char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base);
-static char *biq_fkt_s(int idx,int*retval,char **base);
 static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base);
 static int biq_fkt_c(int idx,int*retval,char *base);
+static int iban_fkt_c(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*));
 static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base);
 static int biq_fkt_i(int idx,int*retval,int *base);
+static int iban_fkt_i(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*));
+static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base);
+static const char *biq_fkt_s(int idx,int*retval,char **base);
+static const char *iban_fkt_s(char *iban,int filiale,int *retval,const char*(*fkt)(char*,int,int*));
 #if DEBUG>0
 static int kto_check_int(char *x_blz,int pz_methode,char *kto,int untermethode,RETVAL *retvals);
 #else
@@ -12190,7 +12193,6 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          kto_alt[5]=kto[3];
          for(ptr=kto+4;*ptr=='0' && *ptr;ptr++);
          for(dptr=kto_alt+6;(*dptr= *ptr++);dptr++);
-         kto=kto_alt;
          p1=kto_alt[5];   /* Prüfziffer merken */
          kto_alt[5]='0';
          for(pz=0,ptr=kto_alt+strlen(kto_alt)-1,i=0;ptr>=kto_alt;ptr--,i++)
@@ -12211,7 +12213,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          if(retvals)retvals->pz=pz; 
 #endif
          INVALID_PZ10;
-         if(*(kto+5)-'0'==pz)
+         if(*(kto_alt+5)-'0'==pz)
             return ok;
          else
             return FALSE;
@@ -17526,7 +17528,6 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             kto_alt[5]=kto[3];
             for(ptr=kto+4;*ptr=='0' && *ptr;ptr++);
             for(dptr=kto_alt+6;(*dptr= *ptr++);dptr++);
-            kto=kto_alt;
             p1=kto_alt[5];   /* Prüfziffer merken */
             kto_alt[5]='0';
             for(pz=0,ptr=kto_alt+strlen(kto_alt)-1,i=0;ptr>=kto_alt;ptr--,i++)
@@ -17547,7 +17548,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             if(retvals)retvals->pz=pz; 
 #endif
             INVALID_PZ10;
-            if(*(kto+5)-'0'==pz)
+            if(*(kto_alt+5)-'0'==pz)
                return ok;
             else
                return FALSE;
@@ -21867,6 +21868,9 @@ DLL_EXPORT const char *get_kto_check_version(void)
 
 DLL_EXPORT const char *get_kto_check_version_x(int mode)
 {
+      /* Arrays initialisieren, falls noch nicht gemacht */
+   if(!(init_status&1))init_atoi_table();
+
    switch(mode){
       default:    /* 0 bzw. Default ist wie get_kto_check_version(), die Werte geben einzelne Felder zurück */
       case 0:
@@ -21889,9 +21893,9 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 5:
         return "03.03.2014";
       case 6:
-        return "26. Februar 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "3. März 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -25105,12 +25109,23 @@ DLL_EXPORT int lut_suche_bic_h(char *such_name,int *anzahl,int **start_idx,int *
    /* Funktion bic_info() +§§§2
     * Die Funktion bic_info() sucht Banken mit einem bestimmten BIC und gibt
     * die gefundene Anzahl sowie den Startindex in den internen Arrays zurück.
-    * Sie wird vor allem in Zusammenhang mit den Funktionsgruppen bic_* und
-    * biq_* verwendet.
+    * Sie ist für die Funktionsgruppe biq_* gedacht, falls mehrere Werte aus der
+    * BLZ-Datei bestimmt werden sollen (z.B. verschiedene Felder oder Werte für
+    * mehrere Zweigstellen einer Bank). So erspart man sich die relativ aufwendige
+    * Suche; sie ist nur einmal notwendig.
+    *
     * Parameter:
     *    bic1: BIC zu dem die Banken bestimmt werden sollen (komplett oder teilweise)
-    *    mode: Suchmodus. Bei mode=1 wird der BIC bei allen bekannten BICs (einschließlig
-    *       Zweigstellen) gesucht, bei mode=2 
+    *    mode: Suchmodus; er kann die folgenden Werte annehmen:
+    *          mode=1: Suche in allen BICs der BLZ-Datei (Haupt- und Nebenstellen)
+    *          mode=2: Suche nur in den BICs der Hauptstellen
+    *          mode=0: zunächst Suche bei den Hauptstellen, dann bei Haupt- und Nebenstellen;
+    *                  falls dann noch nichts gefunden wurde, werden die drei letzten Stellen
+    *                  (Filialcode) mit XXX gefüllt und noch einmal eine Suche gemacht.
+    *   anzahl: in diesem Parameter wird die Anahl der gefundenen Banken zurückgegeben
+    *   start_idx: Startindex in den internen Arrays, positiv für das Hauptstellen-Array, 
+    *              negativ für das allgemeine BIC-Array. Dieser Index wird als Parameter für
+    *              die Funktionsgruppe biq_* benutzt.
     */
 DLL_EXPORT int bic_info(char *bic1,int mode,int *anzahl,int *start_idx)
 {
@@ -25153,16 +25168,24 @@ DLL_EXPORT int bic_info(char *bic1,int mode,int *anzahl,int *start_idx)
 
 /* Funktion bic_\bic_*(), biq_* und iban_* +§§§2 */
 /* Diese Funktionen entsprechen weitgehend den Funktionen lut_*; sie können
- * benutzt werden, um Daten zu einem BIC oder einer IBAN zu bestimmen. 
+ * benutzt werden, um Daten zu einem BIC oder einer IBAN zu bestimmen.
  *
- * 
+ * Die Funktionen bic_*() bestimmen die Felder der BLZ-Datei zu einem BIC.
+ * Der Parameter mode bestimmt dabei, wie der BIC gesucht wird (s.o. bei der
+ * Funktion bic_info()). Zu einem BIC werden üblicherweise mehrere Banken gefunden;
+ * diese werden nach BIC sortiert ausgegeben.
+ *
+ * Da der BIC nur ein sehr grobes Merkmal ist (bei der Postbank ist z.B. der Filialteil bei
+ * allen Filialen auf XXX gesetzt, so daß alle Postbanken sich einen BIC teilen), wurden
+ * zusätzlich noch die Funktion iban_*() implementiert. Diese entsprechen den vorhergehenden
+ * Funktionen, bestimmen allerdings aus der IBAN  die BLZ und werten diese dann aus.
  */
 /* Funktion bic_aenderung(), biq_aenderung und iban_aenderung +§§§3 */
-/* ###########################################################################
- * # *_aenderung(): Änderungsflag zu einem BIC bzw. einer IBAN bestimmen     #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen das Änderungsflag zu einem BIC bzw. einer IBAN   #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_aenderung(char *bic1,int mode,int filiale,int*retval)
@@ -25177,29 +25200,15 @@ DLL_EXPORT int biq_aenderung(int idx,int*retval)
 
 DLL_EXPORT int iban_aenderung(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_aenderung(blz,filiale,retval);
+   return iban_fkt_c(iban,filiale,retval,lut_aenderung);
 }
 
 /* Funktion bic_loeschung(), biq_loeschung und iban_loeschung +§§§3 */
-/* ###########################################################################
- * # *_loeschung(): Löschflag zu einem BIC bzw. einer IBAN bestimmen         #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen das Löschflag zu einem BIC bzw. einer IBAN       #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_loeschung(char *bic1,int mode,int filiale,int*retval)
@@ -25214,29 +25223,15 @@ DLL_EXPORT int biq_loeschung(int idx,int*retval)
 
 DLL_EXPORT int iban_loeschung(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_loeschung(blz,filiale,retval);
+   return iban_fkt_c(iban,filiale,retval,lut_loeschung);
 }
 
 /* Funktion bic_iban_regel(), biq_iban_regel und iban_iban_regel +§§§3 */
-/* ###########################################################################
- * # *_iban_regel(): IBAN-Regel zu einem BIC bzw. einer IBAN bestimmen       #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen die IBAN-Regel zu einem BIC bzw. einer IBAN      #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_iban_regel(char *bic1,int mode,int filiale,int*retval)
@@ -25251,29 +25246,15 @@ DLL_EXPORT int biq_iban_regel(int idx,int*retval)
 
 DLL_EXPORT int iban_iban_regel(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_iban_regel(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_iban_regel);
 }
 
 /* Funktion bic_nachfolge_blz(), biq_nachfolge_blz und iban_nachfolge_blz +§§§3 */
-/* ###########################################################################
- * # *_nachfolge_blz(): Nachfolge-BLZ zu einem BIC bzw. einer IBAN bestimmen #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen die Nachfolge-BLZ zu einem BIC bzw. einer IBAN   #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_nachfolge_blz(char *bic1,int mode,int filiale,int*retval)
@@ -25288,29 +25269,15 @@ DLL_EXPORT int biq_nachfolge_blz(int idx,int*retval)
 
 DLL_EXPORT int iban_nachfolge_blz(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_nachfolge_blz(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_nachfolge_blz);
 }
 
 /* Funktion bic_nr(), biq_nr und iban_nr +§§§3 */
-/* ###########################################################################
- * # *_nr(): Laufende Nr. der Bank zu einem BIC bzw. einer IBAN bestimmen    #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen die Laufende Nr. zu einem BIC bzw. einer IBAN    #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_nr(char *bic1,int mode,int filiale,int*retval)
@@ -25325,29 +25292,15 @@ DLL_EXPORT int biq_nr(int idx,int*retval)
 
 DLL_EXPORT int iban_nr(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_nr(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_nr);
 }
 
 /* Funktion bic_pan(), biq_pan und iban_pan +§§§3 */
-/* ###########################################################################
- * # *_pan(): PAN (Primary Account Number) zu einem BIC bzw. einer IBAN bestimmen#
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den PAN zu einem BIC bzw. einer IBAN             #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_pan(char *bic1,int mode,int filiale,int*retval)
@@ -25362,29 +25315,15 @@ DLL_EXPORT int biq_pan(int idx,int*retval)
 
 DLL_EXPORT int iban_pan(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_pan(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_pan);
 }
 
 /* Funktion bic_plz(), biq_plz und iban_plz +§§§3 */
-/* ###########################################################################
- * # *_plz(): PLZ des Sitzes der Bank zu einem BIC bzw. einer IBAN bestimmen #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen die PLZ der Bank zu einem BIC bzw. einer IBAN    #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_plz(char *bic1,int mode,int filiale,int*retval)
@@ -25399,29 +25338,15 @@ DLL_EXPORT int biq_plz(int idx,int*retval)
 
 DLL_EXPORT int iban_plz(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_plz(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_plz);
 }
 
 /* Funktion bic_pz(), biq_pz und iban_pz +§§§3 */
-/* ###########################################################################
- * # *_pz(): Prüfziffer zu einem BIC bzw. einer IBAN bestimmen               #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen die Prüfziffer zu einem BIC bzw. einer IBAN      #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT int bic_pz(char *bic1,int mode,int filiale,int*retval)
@@ -25436,29 +25361,15 @@ DLL_EXPORT int biq_pz(int idx,int*retval)
 
 DLL_EXPORT int iban_pz(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_pz(blz,filiale,retval);
+   return iban_fkt_i(iban,filiale,retval,lut_pz);
 }
 
 /* Funktion bic_bic(), biq_bic und iban_bic +§§§3 */
-/* ###########################################################################
- * # *_bic(): BIC zu einem BIC bzw. einer IBAN bestimmen                     #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den BIC zu einem BIC bzw. einer IBAN             #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT const char *bic_bic(char *bic1,int mode,int filiale,int*retval)
@@ -25473,29 +25384,15 @@ DLL_EXPORT const char *biq_bic(int idx,int*retval)
 
 DLL_EXPORT const char *iban_bic(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return NULL;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return NULL;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_bic(blz,filiale,retval);
+   return iban_fkt_s(iban,filiale,retval,lut_bic);
 }
 
 /* Funktion bic_bic_h(), biq_bic_h und iban_bic_h +§§§3 */
-/* ###########################################################################
- * # *_bic_h(): BIC der Hauptstelle zu einem BIC bzw. einer IBAN bestimmen   #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den BIC der Hauptstelle zu einem BIC bzw. einer IBAN#
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT const char *bic_bic_h(char *bic1,int mode,int filiale,int*retval)
@@ -25510,29 +25407,15 @@ DLL_EXPORT const char *biq_bic_h(int idx,int*retval)
 
 DLL_EXPORT const char *iban_bic_h(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return NULL;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return NULL;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_bic_h(blz,filiale,retval);
+   return iban_fkt_s(iban,filiale,retval,lut_bic_h);
 }
 
 /* Funktion bic_name(), biq_name und iban_name +§§§3 */
-/* ###########################################################################
- * # *_name(): Name der Bank zu einem BIC bzw. einer IBAN bestimmen          #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den Name der Bank zu einem BIC bzw. einer IBAN   #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT const char *bic_name(char *bic1,int mode,int filiale,int*retval)
@@ -25547,29 +25430,15 @@ DLL_EXPORT const char *biq_name(int idx,int*retval)
 
 DLL_EXPORT const char *iban_name(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return NULL;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return NULL;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_name(blz,filiale,retval);
+   return iban_fkt_s(iban,filiale,retval,lut_name);
 }
 
 /* Funktion bic_name_kurz(), biq_name_kurz und iban_name_kurz +§§§3 */
-/* ###########################################################################
- * # *_name_kurz(): Kurzname der Bank zu einem BIC bzw. einer IBAN bestimmen #
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den Kurzname der Bank zu einem BIC bzw. einer IBAN#
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT const char *bic_name_kurz(char *bic1,int mode,int filiale,int*retval)
@@ -25584,29 +25453,15 @@ DLL_EXPORT const char *biq_name_kurz(int idx,int*retval)
 
 DLL_EXPORT const char *iban_name_kurz(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return NULL;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return NULL;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_name_kurz(blz,filiale,retval);
+   return iban_fkt_s(iban,filiale,retval,lut_name_kurz);
 }
 
 /* Funktion bic_ort(), biq_ort und iban_ort +§§§3 */
-/* ###########################################################################
- * # *_ort(): Ort des Sitzes einer Bank zu einem BIC bzw. einer IBAN bestimmen#
- * #                                                                         #
- * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
+/* ###############################################################################
+ * # Diese Funktionen bestimmen den Ort einer Bank zu einem BIC bzw. einer IBAN  #
+ * #                                                                             #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>                 #
+ * ###############################################################################
  */
 
 DLL_EXPORT const char *bic_ort(char *bic1,int mode,int filiale,int*retval)
@@ -25621,21 +25476,7 @@ DLL_EXPORT const char *biq_ort(int idx,int*retval)
 
 DLL_EXPORT const char *iban_ort(char *iban,int filiale,int*retval)
 {
-   char blz[9];
-
-      /* nur zwei kleine Tests */
-   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
-      if(retval)*retval= IBAN_ONLY_GERMAN;
-      return NULL;
-   }
-   if(strlen(iban)!=22){
-      if(retval)*retval=INVALID_IBAN_LENGTH;
-      return NULL;
-   }
-
-   memcpy(blz,iban+4,8);
-   *(blz+8)=0;
-   return lut_ort(blz,filiale,retval);
+   return iban_fkt_s(iban,filiale,retval,lut_ort);
 }
 
 static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base)
@@ -25681,6 +25522,25 @@ static int biq_fkt_c(int idx,int*retval,char *base)
    }
 }
 
+static int iban_fkt_c(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*))
+{
+   char blz[9];
+
+      /* nur zwei kleine Tests */
+   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
+      if(retval)*retval= IBAN_ONLY_GERMAN;
+      return -1;
+   }
+   if(strlen(iban)!=22){
+      if(retval)*retval=INVALID_IBAN_LENGTH;
+      return -1;
+   }
+
+   memcpy(blz,iban+4,8);
+   *(blz+8)=0;
+   return fkt(iban,filiale,retval);
+}
+
 static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base)
 {
    int cnt,start_idx,rv,ret1,ret2;
@@ -25724,9 +25584,28 @@ static int biq_fkt_i(int idx,int*retval,int *base)
    }
 }
 
-static char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base)
+static int iban_fkt_i(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*))
 {
-   char *rv;
+   char blz[9];
+
+      /* nur zwei kleine Tests */
+   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
+      if(retval)*retval= IBAN_ONLY_GERMAN;
+      return -1;
+   }
+   if(strlen(iban)!=22){
+      if(retval)*retval=INVALID_IBAN_LENGTH;
+      return -1;
+   }
+
+   memcpy(blz,iban+4,8);
+   *(blz+8)=0;
+   return fkt(iban,filiale,retval);
+}
+
+static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base)
+{
+   const char *rv;
    int cnt,start_idx,ret1,ret2;
 
    if((ret1=bic_info(bic1,mode,&cnt,&start_idx))<0){
@@ -25747,7 +25626,7 @@ static char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base)
    return rv;
 }
 
-static char *biq_fkt_s(int idx,int*retval,char **base)
+static const char *biq_fkt_s(int idx,int*retval,char **base)
 {
    if(idx>0){
      if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
@@ -25766,6 +25645,25 @@ static char *biq_fkt_s(int idx,int*retval,char **base)
       if(retval)*retval=OK;
       return base[sort_bic[idx]];
    }
+}
+
+static const char *iban_fkt_s(char *iban,int filiale,int *retval,const char*(*fkt)(char*,int,int*))
+{
+   char blz[9];
+
+      /* nur zwei kleine Tests für die IBAN, dann die BLZ kopieren und die Funktion aufrufen */
+   if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
+      if(retval)*retval= IBAN_ONLY_GERMAN;
+      return NULL;
+   }
+   if(strlen(iban)!=22){
+      if(retval)*retval=INVALID_IBAN_LENGTH;
+      return NULL;
+   }
+
+   memcpy(blz,iban+4,8);
+   *(blz+8)=0;
+   return fkt(blz,filiale,retval);
 }
 
 
