@@ -48,6 +48,7 @@ DLL_EXPORT const char *kto_check_retval2txt(int retval)
 DLL_EXPORT const char *kto_check_retval2iso(int retval)
 {
    switch(retval){
+      case INVALID_BIQ_INDEX: return "Ung¸ltiger Index f¸r die biq_*() Funktionen";
       case ARRAY_INDEX_OUT_OF_RANGE: return "Der Array-Index liegt auﬂerhalb des g¸ltigen Bereichs";
       case IBAN_ONLY_GERMAN: return "Es werden nur deutsche IBANs unterst¸tzt";
       case INVALID_PARAMETER_TYPE: return "Falscher Parametertyp f¸r die Funktion";
@@ -215,6 +216,7 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
 DLL_EXPORT const char *kto_check_retval2dos(int retval)
 {
    switch(retval){
+      case INVALID_BIQ_INDEX: return "UngÅltiger Index fÅr die biq_*() Funktionen";
       case ARRAY_INDEX_OUT_OF_RANGE: return "Der Array-Index liegt au·erhalb des gÅltigen Bereichs";
       case IBAN_ONLY_GERMAN: return "Es werden nur deutsche IBANs unterstÅtzt";
       case INVALID_PARAMETER_TYPE: return "Falscher Parametertyp fÅr die Funktion";
@@ -382,6 +384,7 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
 DLL_EXPORT const char *kto_check_retval2html(int retval)
 {
    switch(retval){
+      case INVALID_BIQ_INDEX: return "Ung&uuml;ltiger Index f&uuml;r die biq_*() Funktionen";
       case ARRAY_INDEX_OUT_OF_RANGE: return "Der Array-Index liegt au&szlig;erhalb des g&uuml;ltigen Bereichs";
       case IBAN_ONLY_GERMAN: return "Es werden nur deutsche IBANs unterst&uuml;tzt";
       case INVALID_PARAMETER_TYPE: return "Falscher Parametertyp f&uuml;r die Funktion";
@@ -549,6 +552,7 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
 DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 {
    switch(retval){
+      case INVALID_BIQ_INDEX: return "Ung√ºltiger Index f√ºr die biq_*() Funktionen";
       case ARRAY_INDEX_OUT_OF_RANGE: return "Der Array-Index liegt au√üerhalb des g√ºltigen Bereichs";
       case IBAN_ONLY_GERMAN: return "Es werden nur deutsche IBANs unterst√ºtzt";
       case INVALID_PARAMETER_TYPE: return "Falscher Parametertyp f√ºr die Funktion";
@@ -716,6 +720,7 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
 DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
 {
    switch(retval){
+      case INVALID_BIQ_INDEX: return "INVALID_BIQ_INDEX";
       case ARRAY_INDEX_OUT_OF_RANGE: return "ARRAY_INDEX_OUT_OF_RANGE";
       case IBAN_ONLY_GERMAN: return "IBAN_ONLY_GERMAN";
       case INVALID_PARAMETER_TYPE: return "INVALID_PARAMETER_TYPE";
