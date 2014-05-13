@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.4 (development)"
+#define VERSION "5.4 (beta)"
 #endif
-#define VERSION_DATE "2014-04-01"
+#define VERSION_DATE "2014-05-13"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -101,7 +101,7 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die Änderungen zum 3.3.2014 zu aktivieren */
+   /* Flag, um die Änderungen zum 9.6.2014 zu aktivieren */
 static int pz_aenderungen_aktivieren;
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
@@ -5078,7 +5078,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
       /* Löschkennzeichen der BLZ überprüfen, u.U. Nachfolge-BLZ einsetzen */
    if(lut_aenderung_i(b,0,NULL)=='D' && !(b=lut_nachfolge_blz_i(b,0,NULL)))return BLZ_MARKED_AS_DELETED;
 
-#define RETURN_OK do{if(b!=b_alt)return OK_BLZ_KTO_REPLACED; else return OK;}while(0) /* Löschkennzeichen und Nachfolge-BLZ beachten für retval */
+#define RETURN_OK do{if(b!=b_alt)return OK_BLZ_REPLACED; else return OK;}while(0) /* Löschkennzeichen und Nachfolge-BLZ beachten für retval */
 #define RETURN_OK_KTO_REPLACED do{if(b!=b_alt)return OK_BLZ_KTO_REPLACED; else return OK_KTO_REPLACED;}while(0) /* Löschkennzeichen und Nachfolge-BLZ beachten für retval */
 
       /* Im Folgenden werden die IBAN-Regeln auf die übergebene BLZ und
@@ -9211,8 +9211,8 @@ static void init_atoi_table(void)
    unsigned long l;
 
 #if 1
-      /* Änderungen zum 3.3.2014 aktivieren */
-   if(time(NULL)>1393801200)pz_aenderungen_aktivieren=1;
+      /* Änderungen zum 9.6.2014 aktivieren */
+   if(time(NULL)>1402264800)pz_aenderungen_aktivieren=1;
 #endif
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
@@ -13077,7 +13077,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             retvals->pz_methode=2066;
          }
 #endif
-         if(pz_aenderungen_aktivieren && kto[1]=='9')return OK_NO_CHK;
+         if(kto[1]=='9')return OK_NO_CHK;
 #if DEBUG>0
       case 1066:
          if(retvals){
@@ -15403,36 +15403,125 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
    Berechnung nach der Methode 90 +§§§4 */
 /*
  * ######################################################################
- * #      Berechnung nach der Methode 90 (geändert zum 6.6.2005)        #
+ * #      Berechnung nach der Methode 90 (geändert zum 9.6.2014)        #
  * ######################################################################
- * # 1. Kundenkonten                                                    #
- * # A. Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7. -> Methode 32          #
- * # B. Modulus 11, Gewichtung 2, 3, 4, 5, 6.    -> Methode 33          #
- * # C. Modulus  7, Gewichtung 2, 3, 4, 5, 6.    -> Methode 33 mod7     #
- * # D. Modulus  9, Gewichtung 2, 3, 4, 5, 6.    -> Methode 33 mod9     #
- * # E. Modulus 10, Gewichtung 2, 1, 2, 1, 2.    -> Methode 33 mod10    #
+ * # Die Kontonummer ist immer 10-stellig, ggf. ist die Kontonummer     #
+ * # durch linksbündige Auffüllung mit Nullen 10-stellig                #
+ * # darzustellen. Die Stelle 10 der Kontonummer ist per Definition     #
+ * # die Prüfziffer. Kontonummern, die nach Durchführung der unten      #
+ * # näher aufgeführten Berechnungsmethoden nicht zu einem richtigen    #
+ * # Ergebnis führen, sind nicht gültig.                                #
  * #                                                                    #
- * # Die Kontonummer ist immer 10-stellig. Die für die Berechnung       #
- * # relevante Kundennummer befindet sich bei der Methode A in den      #
- * # Stellen 4 bis 9 der Kontonummer und bei den Methoden B - E in      #
- * # den Stellen 5 bis 9, die Prüfziffer in Stelle 10.                  #
+ * # Die für die Berechnung relevante Kundennummer (K) befindet sich    #
+ * # bei der Methode A in den Stellen 4 bis 9 der Kontonummer und bei   #
+ * # den Methoden B bis E und G in den Stellen 5 bis 9.                 #
  * #                                                                    #
- * # Ergibt die erste Berechnung der Prüfziffer nach dem Verfahren A    #
- * # einen Prüfziffernfehler, so sind weitere Berechnungen mit den      #
- * # anderen Methoden vorzunehmen.                                      #
- * # Die Methode A enstpricht Verfahren 32. Die Methoden B - E          #
- * # entsprechen Verfahren 33, jedoch mit Divisoren 11, 7, 9 und 10.    #
+ * # Ausnahme:                                                          #
+ * # Ist nach linksbündigem Auffüllen mit Nullen auf 10 Stellen die     #
+ * # 3. Stelle der Kontonummer = 9 (Sachkonten) befindet sich die für   #
+ * # die Berechnung relevante Sachkontonummer (S) in den Stellen 3      #
+ * # bis 9. Diese Kontonummern sind ausschließlich nach Methode F zu    #
+ * # prüfen.                                                            #
  * #                                                                    #
- * # Ausnahme: Ist nach linksbündigem Auffüllen mit Nullen auf 10       #
- * # Stellen die 3. Stelle der Kontonummer = 9 (Sachkonten) befindet    #
- * # sich die für die Berechnung relevante Sachkontonummer (S) in       #
- * # den Stellen 3 bis 9. Diese Kontonummern sind ausschließlich        #
- * # nach Methode F zu prüfen.                                          #
+ * # Kundenkonten                                                       #
+ * # Kundenkonten haben im Gegensatz zu Sachkonten an der Stelle 3      #
+ * # nicht die Ziffer 9 stehen.                                         #
  * #                                                                    #
- * # 2. Sachkonten -> Methode 32 (modifiziert)                          #
- * # F. Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7, 8.                     #
- * # Die 3. Stelle ist 9, die für die Berechnung relevanten  Stellen    #
- * # befinden sich in den Stellen 3 bis 9.                              #
+ * # Ergibt die Berechnung der Prüfziffer nach dem Verfahren A einen    #
+ * # Prüfzifferfehler, so sind weitere Berechnungen mit den Methoden    #
+ * # B bis E und G vorzunehmen. kundenkontonummern, die nach            #
+ * # Durchführung aller Berechnungsmethoden A bis E und G nicht zu      #
+ * # einem richtigen Ergebnis führen, ist nicht gültig.                 #
+ * #                                                                    #
+ * # Methode A:                                                         #
+ * # Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7                            #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.: x x x K K K K K K P                                      #
+ * # Gewichtung: 7 6 5 4 3 2                                            #
+ * #                                                                    #
+ * # Die Berechnung und mögliche Ergebnisse entsprechen dem Verfahren   #
+ * # 06.                                                                #
+ * #                                                                    #
+ * # Methode B                                                          #
+ * # Modulus 11, Gewichtung 2, 3, 4, 5, 6                               #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.: x x x x K K K K K P                                      #
+ * # Gewichtung: 6 5 4 3 2                                              #
+ * #                                                                    #
+ * # Die Berechnung und die möglichen Ergebnisse entsprechen dem        #
+ * # Verfahren 06.                                                      #
+ * #                                                                    #
+ * # Methode C                                                          #
+ * # Modulus 7, Gewichtung 2, 3, 4, 5, 6                                #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.: x x x x K K K K K P                                      #
+ * # Gewichtung: 6 5 4 3 2                                              #
+ * #                                                                    #
+ * # Die einzelnen Stellen der Kontonummer sind von rechts nach links   #
+ * # mit den Gewichten zu multiplizieren. Die jeweiligen Produkte       #
+ * # werden addiert. Die Summe der Produkte ist durch 7 zu              #
+ * # dividieren. Der verbleibende Rest wird vom Divisor (7)             #
+ * # subtrahiert. Das Ergebnis ist die Prüfziffer. Verbleibt kein       #
+ * # Rest, ist die Prüfziffer 0.                                        #
+ * #                                                                    #
+ * # Kontonummern, die in der Stelle 10 die Werte 7, 8 oder 9 haben,    #
+ * # sind nach dieser Methode nicht gültig.                             #
+ * #                                                                    #
+ * # Methode D                                                          #
+ * # Modulus 9, Gewichtung 2, 3, 4, 5, 6                                #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.:   x x x x K K K K K P                                    #
+ * # Gewichtung:         6 5 4 3 2                                      #
+ * #                                                                    #
+ * # Die einzelnen Stellen der Kontonummer sind von rechts nach links   #
+ * # mit den Gewichten zu multiplizieren. Die jeweiligen Produkte       #
+ * # werden addiert. Die Summe der Produkte ist durch 9 zu              #
+ * # dividieren. Der verbleibende Rest wird vom Divisor (9)             #
+ * # subtrahiert. Das Ergebnis ist die Prüfziffer. Verbleibt kein       #
+ * # Rest, ist die Prüfziffer 0.                                        #
+ * #                                                                    #
+ * # Kontonummern, die an der Stelle 10 den Wert 9 haben sind nach      #
+ * # dieser Methode nicht gültig.                                       #
+ * #                                                                    #
+ * # Methode E                                                          #
+ * # Modulus 10, Gewichtung 2, 1, 2, 1, 2                               #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.:   x x x x K K K K K P                                    #
+ * # Gewichtung:         2 1 2 1 2                                      #
+ * #                                                                    #
+ * # Die einzelnen Stellen der Kontonummer sind von rechts nach links   #
+ * # mit den Gewichten zu multiplizieren. Die jeweiligen Produkte       #
+ * # werden addiert. Die Summe der Produkte ist durch 10 zu             #
+ * # dividieren. Der verbleibende Rest wird vom Divisor (10)            #
+ * # subtrahiert. Das Ergebnis ist die Prüfziffer. Verbleibt kein       #
+ * # Rest, ist die Prüfziffer 0.                                        #
+ * #                                                                    #
+ * # Methode G                                                          #
+ * # Modulus 7, Gewichtung 2, 1, 2, 1, 2, 1                             #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.:   x x x K K K K K K P                                    #
+ * # Gewichtung:       1 2 1 2 1 2                                      #
+ * #                                                                    #
+ * # Die einzelnen Stellen der Kontonummer sind von rechts nach links   #
+ * # mit den Gewichten zu multiplizieren. Die jeweiligen Produkte       #
+ * # werden addiert. Die Summe der Produkte ist durch 7 zu              #
+ * # dividieren. Der verbleibende Rest wird vom Divisor (7)             #
+ * # subtrahiert. Das Ergebnis ist die Prüfziffer. Verbleibt kein       #
+ * # Rest, ist die Prüfziffer 0.                                        #
+ * #                                                                    #
+ * # Sachkonten                                                         #
+ * # Sachkonten haben im Gegensatz zu Kundenkonten an der Stelle 3      #
+ * # die Ziffer 9 stehen.                                               #
+ * #                                                                    #
+ * # Methode F                                                          #
+ * # Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7, 8                         #
+ * # Stellennr.: 1 2 3 4 5 6 7 8 9 A (A = 10)                           #
+ * # Kontonr.:   x x S S S S S S S P                                    #
+ * # Gewichtung:     8 7 6 5 4 3 2                                      #
+ * #                                                                    #
+ * # Die Berechnung und die möglichen Ergebnisse entsprechen dem        #
+ * # Verfahren 06. Es ist jedoch die vorgenannte Gewichtung zu          #
+ * # beachten.                                                          #
  * ######################################################################
  */
 
@@ -15558,7 +15647,30 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 
          MOD_10_40;   /* pz%=10 */
          if(pz)pz=10-pz;
-         CHECK_PZ10;
+         CHECK_PZX10;
+
+            /* Methode G */
+#if DEBUG>0
+      case 7090:
+         if(retvals){
+            retvals->methode="90g";
+            retvals->pz_methode=7090;
+         }
+#endif
+         if(pz_aenderungen_aktivieren){
+            pz = (kto[3]-'0')
+               + (kto[4]-'0') * 2
+               + (kto[5]-'0')
+               + (kto[6]-'0') * 2
+               + (kto[7]-'0')
+               + (kto[8]-'0') * 2;
+
+            MOD_7_56;    /* pz%=7 */
+            if(pz)pz=10-pz;
+            CHECK_PZ10;
+         }
+         else
+            return FALSE;
 
 /*  Berechnung nach der Methode 91 +§§§4 */
 /*
@@ -20934,18 +21046,18 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 4:                              /* Datum der Prüfziffermethode */
 #if 1
          if(pz_aenderungen_aktivieren)
-            return "03.03.2014";
+            return "09.06.2014";
          else
-            return "09.12.2013 (Aenderungen vom 03.03.2014 enthalten aber noch nicht aktiviert)";
+            return "09.12.2013 (Aenderungen vom 09.06.2014 enthalten aber noch nicht aktiviert)";
 #else
-         return "03.03.2014";
+         return "09.06.2014";
 #endif
       case 5:
         return "03.03.2014";
       case 6:
-        return "1. April 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "13. Mai 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -24188,10 +24300,10 @@ DLL_EXPORT int bic_info(char *bic1,int mode,int *anzahl,int *start_idx)
       case 0:
       default:
          retval=lut_suche_bic_h(bic1,&cnt,&s_idx,NULL,NULL,NULL);
-         if(start_idx)*start_idx=(s_idx-sort_bic_h);
+         if(start_idx)*start_idx=(s_idx-sort_bic_h)+1;
          if(!cnt){   /* Suche bei allen BICs (inklusive Nebenstellen) */
              retval=lut_suche_bic(bic1,&cnt,&s_idx,NULL,NULL,NULL);
-            if(start_idx)*start_idx=(sort_bic-s_idx);   /* negativer Startindex */
+            if(start_idx)*start_idx=(sort_bic-s_idx)-1;   /* negativer Startindex */
          }
          if(!cnt){   /* noch nichts gefunden, Zweigstellenteil des BIC mit XXX auffüllen (z.B. für Postbank) */
             memcpy(bic2,bic1,8); /* Hauptstellenteil kopieren */
@@ -24201,16 +24313,16 @@ DLL_EXPORT int bic_info(char *bic1,int mode,int *anzahl,int *start_idx)
             *++ptr=0;
             retval=lut_suche_bic(bic2,&cnt,&s_idx,NULL,NULL,NULL);
             if(retval>=OK)retval=OK_SHORT_BIC_USED;
-            if(start_idx)*start_idx=(sort_bic-s_idx);   /* negativer Startindex */
+            if(start_idx)*start_idx=(sort_bic-s_idx)-1;   /* negativer Startindex */
          }
          break;
       case 1:
          retval=lut_suche_bic(bic1,&cnt,&s_idx,NULL,NULL,NULL);
-         if(start_idx)*start_idx=(sort_bic-s_idx);   /* negativer Startindex */
+         if(start_idx)*start_idx=(sort_bic-s_idx)-1;   /* negativer Startindex */
          break;
       case 2:
          retval=lut_suche_bic_h(bic1,&cnt,&s_idx,NULL,NULL,NULL);
-         if(start_idx)*start_idx=(s_idx-sort_bic_h);
+         if(start_idx)*start_idx=(s_idx-sort_bic_h)+1;
          break;
    }
    if(anzahl)*anzahl=cnt;
@@ -24537,15 +24649,15 @@ static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int e
 
    if(!base){
       if(retval)*retval=error;
-      return -1;
+      return 0;
    }
    if((ret1=bic_info(bic1,mode,&cnt,&start_idx))<0){
       if(retval)*retval=ret1;
-      return -1;
+      return 0;
    }
    if(filiale>=cnt){
       if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-      return -1;
+      return 0;
    }
    rv=biq_fkt_c(start_idx+filiale,&ret2,base,error);
    if(retval){
@@ -24559,23 +24671,47 @@ static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int e
 
 static int biq_fkt_c(int idx,int*retval,char *base,int error)
 {
+   int ret;
+
    if(!base){
       if(retval)*retval=error;
-      return -1;
+      return 0;
    }
+   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+      if(retval)*retval=INVALID_BIQ_INDEX;
+      return 0;
+   }
+   else if(idx>0)
+      idx--;
+   else
+      idx++;
    if(idx>0){
-     if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
-        if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-        return -1;
-     }
-     if(retval)*retval=OK;
-     return (int)base[sort_bic_h[idx]];
+      if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
+         if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
+         return 0;
+      }
+      if(!sort_bic_h){
+         ret=lut_suche_bic_h("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic_h initialisieren */
+         if(ret<0){
+            if(retval)*retval=ret;
+            return 0;
+         }
+      }
+      if(retval)*retval=OK;
+      return (int)base[sort_bic_h[idx]];
    }
    else{
       idx=-idx;
       if(idx>lut2_cnt){
          if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-         return -1;
+         return 0;
+      }
+      if(!sort_bic){
+         ret=lut_suche_bic("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic initialisieren */
+         if(ret<0){
+            if(retval)*retval=ret;
+            return 0;
+         }
       }
       if(retval)*retval=OK;
       return (int)base[sort_bic[idx]];
@@ -24589,11 +24725,11 @@ static int iban_fkt_c(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int
       /* nur zwei kleine Tests */
    if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
       if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
+      return 0;
    }
    if(strlen(iban)!=22){
       if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
+      return 0;
    }
 
    memcpy(blz,iban+4,8);
@@ -24607,15 +24743,15 @@ static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base,int er
 
    if(!base){
       if(retval)*retval=error;
-      return -1;
+      return 0;
    }
    if((ret1=bic_info(bic1,mode,&cnt,&start_idx))<0){
       if(retval)*retval=ret1;
-      return -1;
+      return 0;
    }
    if(filiale>=cnt){
       if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-      return -1;
+      return 0;
    }
    rv=biq_fkt_i(start_idx+filiale,&ret2,base,error);
    if(retval){
@@ -24629,14 +24765,31 @@ static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base,int er
 
 static int biq_fkt_i(int idx,int*retval,int *base,int error)
 {
+   int ret;
+
    if(!base){
       if(retval)*retval=error;
-      return -1;
+      return 0;
    }
+   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+      if(retval)*retval=INVALID_BIQ_INDEX;
+      return 0;
+   }
+   else if(idx>0)
+      idx--;
+   else
+      idx++;
    if(idx>0){
      if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
         if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-        return -1;
+        return 0;
+     }
+     if(!sort_bic_h){
+        ret=lut_suche_bic_h("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic_h initialisieren */
+        if(ret<0){
+           if(retval)*retval=ret;
+           return 0;
+        }
      }
      if(retval)*retval=OK;
      if(base==pz_methoden)
@@ -24648,7 +24801,14 @@ static int biq_fkt_i(int idx,int*retval,int *base,int error)
       idx=-idx;
       if(idx>lut2_cnt){
          if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-         return -1;
+         return 0;
+      }
+      if(!sort_bic){
+         ret=lut_suche_bic("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic initialisieren */
+         if(ret<0){
+            if(retval)*retval=ret;
+            return 0;
+         }
       }
       if(retval)*retval=OK;
       return base[sort_bic[idx]];
@@ -24662,11 +24822,11 @@ static int iban_fkt_i(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int
       /* nur zwei kleine Tests */
    if((*iban!='d' && *iban!='D') || (iban[1]!='e' && iban[1]!='E')){
       if(retval)*retval= IBAN_ONLY_GERMAN;
-      return -1;
+      return 0;
    }
    if(strlen(iban)!=22){
       if(retval)*retval=INVALID_IBAN_LENGTH;
-      return -1;
+      return 0;
    }
 
    memcpy(blz,iban+4,8);
@@ -24703,23 +24863,48 @@ static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **b
 
 static const char *biq_fkt_s(int idx,int*retval,char **base,int error)
 {
+   int ret;
+
    if(!base){
       if(retval)*retval=error;
       return NULL;
    }
+   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+      if(retval)*retval=INVALID_BIQ_INDEX;
+      return NULL;
+   }
+   else if(idx>0)
+      idx--;
+   else
+      idx++;
+
    if(idx>0){
-     if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
-        if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
-        return NULL;
-     }
-     if(retval)*retval=OK;
-     return base[sort_bic_h[idx]];
+      if(idx>lut2_cnt){  /* der Test ist nur sehr grob, aber es gibt an dieser Stelle nicht mehr Infos */
+         if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
+         return NULL;
+      }
+      if(!sort_bic_h){
+         ret=lut_suche_bic_h("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic_h initialisieren */
+         if(ret<0){
+            if(retval)*retval=ret;
+            return NULL;
+         }
+      }
+      if(retval)*retval=OK;
+      return base[sort_bic_h[idx]];
    }
    else{
       idx=-idx;
       if(idx>lut2_cnt){
          if(retval)*retval=LUT2_INDEX_OUT_OF_RANGE;
          return NULL;
+      }
+      if(!sort_bic){
+         ret=lut_suche_bic("MARKDEF1100",NULL,NULL,NULL,NULL,NULL);  /* sort_bic initialisieren */
+         if(ret<0){
+            if(retval)*retval=ret;
+            return NULL;
+         }
       }
       if(retval)*retval=OK;
       return base[sort_bic[idx]];
@@ -25730,6 +25915,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       case 5104: return "A4e";
       case 6051: return "51f";
       case 6090: return "90f";
+      case 7090: return "90g";
       default:   return "???";
    }
 }
