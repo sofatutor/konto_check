@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.4 (beta)"
+#define VERSION "5.4 (final)"
 #endif
-#define VERSION_DATE "2014-05-13"
+#define VERSION_DATE "2014-06-02"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -15666,11 +15666,21 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
                + (kto[8]-'0') * 2;
 
             MOD_7_56;    /* pz%=7 */
-            if(pz)pz=10-pz;
+            if(pz)pz=7-pz;
             CHECK_PZ10;
          }
-         else
+         else{
+#if DEBUG>0
+            if(!pz_aenderungen_aktivieren){  /* switch-code derzeit noch nicht gültig */
+               if(untermethode==7)return UNDEFINED_SUBMETHOD;
+               if(retvals){ /* Methode zurücksetzen, nicht definiert */
+                  retvals->methode="90e";
+                  retvals->pz_methode=5090;
+               }
+            }
+#endif
             return FALSE;
+         }
 
 /*  Berechnung nach der Methode 91 +§§§4 */
 /*
@@ -21055,9 +21065,9 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 5:
         return "03.03.2014";
       case 6:
-        return "13. Mai 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "2. Juni 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "beta";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -21296,6 +21306,8 @@ DLL_EXPORT int dump_lutfile(char *outputname,UINT4 *required)
  * # datei erwartet; bei einem set-Parameter von 0 eine Klartextdatei        #
  * # (Bundesbankdatei).                                                      #
  * #                                                                         #
+ * # Update 2014: die IBAN-Regeln werden jetzt auch ausgegeben.              #
+ * #                                                                         #
  * # Copyright (C) 2007,2009 Michael Plugge <m.plugge@hs-mannheim.de>        #
  * ###########################################################################
  */
@@ -21304,7 +21316,7 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
 {
    char pbuf[256],*b,pan_buf[8],nr_buf[8],tmpfile[16];
    char  **p_name,**p_name_kurz,**p_ort,**p_bic,*p_aenderung,*p_loeschung;
-   int i,j,ret;
+   int i,j,ret,regel;
    int cnt,*p_nachfolge_blz,id,p_pz,*p_nr,*p_plz,*p_pan;
    UINT4 lut_set[30];
    FILE *out;
@@ -21326,24 +21338,26 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
       lut_set[i+3]=0;
       if(i==100000)return FATAL_ERROR; /* keine mögliche Ausgabedatei gefunden */
       ret=generate_lut2(inputname,tmpfile,"Testdatei fuer LUT2",NULL,lut_set,20,3,0);
-      printf("generate_lut2: %s\n",kto_check_retval2txt_short(ret));
-      if(ret!=OK){
+      if(ret<=0){
          unlink(tmpfile);
          RETURN(ret);
       }
       ret=kto_check_init_p(tmpfile,9,0,0);
-      printf("init(): %s\n",kto_check_retval2txt_short(ret));
       unlink(tmpfile);
-      if(ret!=OK)RETURN(ret);
+      if(ret<=0)RETURN(ret);
    }
    else  /* set-Parameter 1 oder 2: LUT-Datei als Eingabedatei */
-      if((ret=kto_check_init_p(inputname,9,set,0))!=OK)RETURN(ret);
+      if(set<0)   /* set darf nur 0, 1 oder 2 sein; 0 wurde schon behandelt */
+         set=1;
+      else if(set>2)
+         set=2;
+      if((ret=kto_check_init_p(inputname,9,set,0))<=0)RETURN(ret);
 
    if(!(out=fopen(outputname,"w"))){
       PRINT_VERBOSE_DEBUG_FILE("fopen");
       return FILE_WRITE_ERROR;
    }
-   for(i=0;i<lut2_cnt_hs;i++){
+   for(i=regel=0;i<lut2_cnt_hs;i++){
       sprintf(b=pbuf,"%d",blz[i]);
       lut_multiple(pbuf,&cnt,NULL,&p_name,&p_name_kurz,&p_plz,&p_ort,&p_pan,&p_bic,
             &p_pz,&p_nr,&p_aenderung,&p_loeschung,&p_nachfolge_blz,&id,NULL,NULL);
@@ -21355,9 +21369,15 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
          sprintf(nr_buf,"%06d",*p_nr);
       else
          *nr_buf=0;
-      fprintf(out,"%8s1%-58s%05d%-35s%-27s%5s%-11s%X%d%6s%c%c%08d\n",
+      fprintf(out,"%8s1%-58s%05d%-35s%-27s%5s%-11s%X%d%6s%c%c%08d",
             pbuf,*p_name,*p_plz,*p_ort,*p_name_kurz,pan_buf,*p_bic,p_pz/10,p_pz%10,
             nr_buf,*p_aenderung,*p_loeschung,*p_nachfolge_blz);
+      if(iban_regel){
+         regel=lut_iban_regel(pbuf,0,NULL);
+         fprintf(out,"%06d\n",regel);
+      }
+      else
+         fputc('\n',out);
       for(j=1;j<cnt;j++){
          if(p_pan[j])
             sprintf(pan_buf,"%05d",p_pan[j]);
@@ -21367,9 +21387,13 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
             sprintf(nr_buf,"%06d",p_nr[j]);
          else
             *nr_buf=0;
-         fprintf(out,"%8s2%-58s%05d%-35s%-27s%5s%-11s%X%d%6s%c%c%08d\n",
+         fprintf(out,"%8s2%-58s%05d%-35s%-27s%5s%-11s%X%d%6s%c%c%08d",
                pbuf,p_name[j],p_plz[j],p_ort[j],p_name_kurz[j],pan_buf,p_bic[j],
                p_pz/10,p_pz%10,nr_buf,p_aenderung[j],p_loeschung[j],p_nachfolge_blz[j]);
+         if(iban_regel)
+            fprintf(out,"%06d\n",regel);
+         else
+            fputc('\n',out);
       }               
    }
    return OK;
@@ -24677,7 +24701,7 @@ static int biq_fkt_c(int idx,int*retval,char *base,int error)
       if(retval)*retval=error;
       return 0;
    }
-   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+   if(!idx){   /* Index 0 ist für Fehlerzustand reserviert */
       if(retval)*retval=INVALID_BIQ_INDEX;
       return 0;
    }
@@ -24771,7 +24795,7 @@ static int biq_fkt_i(int idx,int*retval,int *base,int error)
       if(retval)*retval=error;
       return 0;
    }
-   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+   if(!idx){   /* Index 0 ist für Fehlerzustand reserviert */
       if(retval)*retval=INVALID_BIQ_INDEX;
       return 0;
    }
@@ -24869,7 +24893,7 @@ static const char *biq_fkt_s(int idx,int*retval,char **base,int error)
       if(retval)*retval=error;
       return NULL;
    }
-   if(!idx){   /* Index 0 ist für Feherzustand reserviert */
+   if(!idx){   /* Index 0 ist für Fehlerzustand reserviert */
       if(retval)*retval=INVALID_BIQ_INDEX;
       return NULL;
    }
@@ -26030,6 +26054,29 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
    return retval;
 }
 
+/* Funktion pz_aenderungen_enable() +§§§1 */
+/* ###########################################################################
+ * # Die Funktion pz_aenderungen_enable() dient dazu, den Status des Flags   #
+ * # pz_aenderungen_aktivieren abzufragen bzw. zu setzen. Falls die Variable #
+ * # set 1 ist, werden die Änderungen aktiviert, falls sie 0 ist, werden     #
+ * # die Änderungen deaktiviert. Bei allen anderen Werten wird das aktuelle  #
+ * # Flag nicht verändert, sondern nur der Status zurückgegeben.             #
+ * #                                                                         #
+ * # Parameter:                                                              #
+ * #    set:        0 oder 1: Änderungen deaktivieren/aktivieren             #
+ * #                anderer Wert: nur Abfrage des Status                     #
+ * # Rückgabe:      aktueller Status des Flags                               #                                                               #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT int pz_aenderungen_enable(int set)
+{
+   if(set==0 || set==1)pz_aenderungen_aktivieren=set;
+   return pz_aenderungen_aktivieren;
+}
+
 #if DEBUG>0
 /* Funktion kto_check_test_vars() +§§§1 */
 /* ###########################################################################
@@ -26232,4 +26279,5 @@ XV kc_free(char *ptr)EXCLUDED_V
 DLL_EXPORT void *kc_alloc(int size,int *retval)EXCLUDED_VP
 XI set_default_compression(int mode)EXCLUDED
 XI lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int set)EXCLUDED
+XI pz_aenderungen_enable(int set)EXCLUDED
 #endif

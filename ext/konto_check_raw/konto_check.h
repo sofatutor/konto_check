@@ -1038,6 +1038,9 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval);
    /* Prüfziffer (numerisch) in String umwandeln */
 const DLL_EXPORT char *pz2str(int pz,int *ret);
 
+   /* Flag für neue Prüfziffermethoden setzen bzw. abfragen */
+DLL_EXPORT int pz_aenderungen_enable(int set);
+
 /*
  * ######################################################################
  * #               globale Variablen                                    #
