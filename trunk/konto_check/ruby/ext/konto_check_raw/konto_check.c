@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.4 (final)"
+#define VERSION "5.5 (development)"
 #endif
-#define VERSION_DATE "2014-06-02"
+#define VERSION_DATE "2014-06-13"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -672,7 +672,7 @@ static int qcmp_ort(const void *ap,const void *bp);
 static int qcmp_sortc(const void *ap,const void *bp);
 static int qcmp_sorti(const void *ap,const void *bp);
 static int iban_init(void);
-static int iban_regel_cvt(char *blz,char *kto,const char **bic,int regel_version);
+static int iban_regel_cvt(char *blz,char *kto,const char **bic,int regel_version,RETVAL *retvals);
 static const char *lut_bic_int(char *b,int zweigstelle,int *retval);
 static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int error);
 static int biq_fkt_c(int idx,int*retval,char *base,int error);
@@ -4641,7 +4641,7 @@ DLL_EXPORT const char *lut_bic(char *b,int zweigstelle,int *retval)
       else{
          strcpy(blz2,b);
          strcpy(kto2,"13");   /* nur Dummy für Funktionsaufruf */
-         iban_regel_cvt(blz2,kto2,&bic_neu,regel); /* Rückgabewert egal, nur bic_neu interessiert */
+         iban_regel_cvt(blz2,kto2,&bic_neu,regel,NULL); /* Rückgabewert egal, nur bic_neu interessiert */
          if(bic && bic_neu && strcasecmp(bic,bic_neu))*retval=OK_INVALID_FOR_IBAN;  /* BIC wurde durch eine Regel geändert */
       }
    }
@@ -5001,10 +5001,10 @@ static int iban_init(void)
  */
 
 #if USE_IBAN_RULES
-static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_version)
+static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_version,RETVAL *retvals)
 {
    char tmp_buffer[16];
-   int regel,version,b,b_alt,b_neu,k1,k2,k3,not_ok,i,ret,loesch,idx,pz_methode,uk_cnt;
+   int regel,version,b,b_alt,b_neu,k1,k2,k3,not_ok,i,ret,loesch,idx,pz_methode,uk_cnt,tmp;
 
       /* prüfen, ob bereits initialisiert wurde */
    INITIALIZE_WAIT;
@@ -5878,13 +5878,6 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
           */
       case 20:
 
-   /* die neue Version der Regel 20 wird zum 9. Dezember in den offiziellen IBAN-Regeln veröffentlicht;
-    * die Bundesbank hat jedoch schon die Regelversion am 28. August veröffentlicht, mit der Bitte, sie
-    * möglichst schon zum 9. September einzusetzen. Der Best Guess Ansatz mit dem Fehlercode 51 bzw.
-    * IBAN_AMBIGUOUS_KTO wird entfernt und durch Verfahren zur Ermittlung eindeutiger IBANs ersetzt.
-    * Die alte Version ist jetzt (9.12.13) nicht mehr im Code enthalten, da sie ungültig ist.
-    */
-
             /* BLZ ohne IBAN-Berechnung */
          if(b==10020000)return NO_IBAN_CALCULATION;
 
@@ -5906,6 +5899,11 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
              * die IBAN-Berechnung nicht zugelassen.
              */
          if(pz_methode==127 && kto_check_pz("c7a",kto,NULL)<OK && kto_check_pz("c7c",kto,NULL)<OK){
+            if(retvals){
+                  /* in retvals noch Werte für den Fehlerfall eintragen */
+               retvals->methode="c7b";
+               retvals->pz_methode=2127;
+            }
             if((ret=kto_check_pz("c7b",kto,NULL))==OK)
                return NO_IBAN_CALCULATION;
             else
@@ -5915,7 +5913,11 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
             /* 10-stellige Konten sind ungültig */
          if(*kto!='0')return INVALID_KTO;
 
-         /* Prüfzifferverfahren 63 (Deutsche Bank) */
+            /* jetzt kommt nur noch das Prüfzifferverfahren 63 (Deutsche Bank) */
+         if(retvals){
+            retvals->methode="63";
+            retvals->pz_methode=63;
+         }
 
          if(k1==0){  /* erstmal maximal 7-stellige Konten */
                /* 1-4 stellige Konten sind generell nicht zugelassen */
@@ -5928,13 +5930,32 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
                 * nur Prüfzifferverfahren 63a ist gültig).
                 */
             if(k2<1000000){
+                  /* zunächst einmal testen, ob das Konto mit Methode 63a
+                   * gültig ist, um den Rückgabewert im Fehlerfall bei Methode
+                   * 63b zu setzen. Falls 63a gültig ist, wird dann
+                   * NO_IBAN_CALCULATION zurückgegeben.
+                   *
+                   * Falls hier nicht differenziert wird, würde beim normalen
+                   * Kontentest OK zurückgegeben, beim Kontentest mit
+                   * IBAN-Regeln jedoch FALSE, was etwas verwirrend ist.
+                   */
+               tmp=kto_check_pz("63a",kto,NULL);
                for(i=0;i<8;i++)kto[i]=kto[i+2];
                kto[8]='0';
                kto[9]='0';
                if((ret=kto_check_pz("63a",kto,NULL))==OK)
                   return OK_UNTERKONTO_ATTACHED;
-               else
-                  return ret;
+               else{
+                  if(retvals){
+                        /* in retvals noch Werte für den Fehlerfall eintragen */
+                     retvals->methode="63b";
+                     retvals->pz_methode=2063;
+                  }
+                  if(tmp==OK) /* ursprüngliches Konto war mit 63a gültig */
+                     return NO_IBAN_CALCULATION;
+                  else
+                     return ret;
+               }
             }
 
                /* 7-stellige Konten: zuerst Unterkonto 00 anhängen (Vorschrift
@@ -20235,9 +20256,17 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
    blz=blz_n;
    r=lut_iban_regel(blz,0,&ret);
    if(regel && ret>0)*regel=r;
-   if((ret_regel=iban_regel_cvt(blz,kto,&bicp,r))<OK)return ret_regel;
+   if(retvals){
+         /* in retvals noch Werte für den Fehlerfall eintragen */
+      retvals->pz=-1;
+      retvals->methode="-";
+      retvals->pz_methode=-1;
+      retvals->pz_pos=-1;
+   }
+   ret_regel=iban_regel_cvt(blz,kto,&bicp,r,retvals);
    if(!bicp)bicp=lut_bic(blz,0,NULL);
    if(bic)*bic=bicp;
+   if(ret_regel<OK)return ret_regel;
    ret=kto_check_blz_dbg(blz,kto,retvals);
    if(strcmp(blz,blz_o) || strcmp(kto,kto_o)){  /* BLZ und/oder Kto ersetzt */
       if(ret_regel>3)   /* ret_regel<1 wurde schon oben zurückgegeben */
@@ -20249,7 +20278,8 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
       return ret;
 #else
    if(regel)*regel=0;
-   return kto_check_regel_dbg(blz,kto,retvals);
+   if(retvals)*retvals=NULL;
+   return kto_check_regel(blz,kto);
 #endif
 }
 
@@ -20277,7 +20307,7 @@ DLL_EXPORT int kto_check_regel(char *blz,char *kto)
    kto=kto_n;
    blz=blz_n;
    regel=lut_iban_regel(blz,0,&ret);
-   if((ret_regel=iban_regel_cvt(blz,kto,&bicp,regel))<OK)return ret_regel;
+   if((ret_regel=iban_regel_cvt(blz,kto,&bicp,regel,NULL))<OK)return ret_regel;
    ret=kto_check_blz(blz,kto);
    if(strcmp(blz,blz_o) || strcmp(kto,kto_o)){  /* BLZ und/oder Kto ersetzt */
       if(ret_regel>3)   /* ret_regel<1 wurde schon oben zurückgegeben */
@@ -21058,16 +21088,16 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          if(pz_aenderungen_aktivieren)
             return "09.06.2014";
          else
-            return "09.12.2013 (Aenderungen vom 09.06.2014 enthalten aber noch nicht aktiviert)";
+            return "09.06.2014 (Aenderungen vom 09.06.2014 enthalten aber noch nicht aktiviert)";
 #else
          return "09.06.2014";
 #endif
       case 5:
         return "03.03.2014";
       case 6:
-        return "2. Juni 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "13. Juni 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -21669,7 +21699,7 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
       }
 
          /* IBAN-Regeln anwenden; u.U. wird BLZ und/oder Konto ersetzt */
-      if((ret_regel=iban_regel_cvt(blz,kto,&bic,regel))<OK){
+      if((ret_regel=iban_regel_cvt(blz,kto,&bic,regel,NULL))<OK){
          if(!bic)bic=lut_bic(blz,0,NULL);
          if(!strncmp(bic,"        ",8))bic="";
          if(retval)*retval=ret_regel;
