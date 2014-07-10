@@ -558,7 +558,6 @@ static char uk_pz_methoden[256];
 static char **qs_zeilen,*qs_hauptstelle;
 static int *qs_blz,*qs_plz,*qs_sortidx,*qs_iban_regel;
 
-
 static unsigned char ee[500],*eeh,*eep,eec[]={
    0x78,0xda,0x75,0x8f,0xc1,0x0d,0xc2,0x30,0x0c,0x45,0x39,0x7b,0x0a,
    0x4f,0xc0,0x04,0x55,0x4f,0x08,0xae,0x48,0x4c,0x90,0x36,0x6e,0x12,
@@ -629,6 +628,15 @@ static int h1['9'+1],h2['9'+1],h3['9'+1],h4['9'+1],h5['9'+1],h6['9'+1],h7['9'+1]
 static const int w52[] = { 2, 4, 8, 5,10, 9, 7, 3, 6, 1, 2, 4, 0, 0, 0, 0},
    w24[]={ 1, 2, 3, 1, 2, 3, 1, 2, 3 },
    w93[]= { 2, 3, 4, 5, 6, 7, 2, 3, 4 };
+
+   /* Array mit Pointern für die Windows-DLL. So können Pointer als id
+    * übergeben und später wieder freigegeben werden, und man muß nicht den
+    * (etwas unschönen) Weg über IntPtr wählen.
+    */
+static int h_cnt;
+static char **handle_ptr;
+
+static int kc_ptr2id(char *ptr,int *handle);
 
 /* Prototypen der static Funktionen +§§§2 */
 /*
@@ -2604,6 +2612,21 @@ DLL_EXPORT int lut_dir_dump(char *lutname,char *outputname)
    return OK;
 }
 
+DLL_EXPORT int lut_dir_dump_id(char *lutname,int *rv)
+{
+   char *ptr;
+   int retval,id;
+
+   if((retval=lut_dir_dump_str(lutname,&ptr))<OK){
+      if(ptr)free(ptr);
+      if(rv)*rv=retval;
+      return -1;
+   }
+   if((retval=kc_ptr2id(ptr,&id))<0)free(ptr);
+   if(rv)*rv=retval;
+   return id;
+}
+
 DLL_EXPORT int lut_dir_dump_str(char *lutname,char **dptr)
 {
    char *ptr;
@@ -2731,7 +2754,46 @@ DLL_EXPORT int lut_info_b(char *lut_name,char **info1,char **info2,int *valid1,i
    }
    else
       **info2=0;
-   RETURN(retval);
+   return retval;
+}
+
+
+/* Funktion lut_info_id() +§§§1 */
+/* ###########################################################################
+ * # Die Funktion lut_info_id() ist ähnlich wie lut_info_b(). Für die        #
+ * # Parameter info1 und info2 wird jedoch ein Handle zurückgegeben, das     #
+ * # mittels der Funktion kc_id2ptr() in einen String umgewandelt, sowie mit #
+ * # der Funktion kc_id_free() wieder freigegeben werden kann.               #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT int lut_info_id(char *lut_name,int *info1,int *info2,int *valid1,int *valid2)
+{
+   char *i1,*i2;
+   int retval,rv;
+
+   retval=lut_info(lut_name,&i1,&i2,valid1,valid2);
+   if(i1){
+      if((rv=kc_ptr2id(i1,info1))<0){
+         FREE(i1);
+         FREE(i2);
+         return rv;
+      }
+   }
+   else
+      *info1=-1;
+   if(i2){
+      if((rv=kc_ptr2id(i2,info2))<0){
+         FREE(i1);
+         FREE(i2);
+         return rv;
+      }
+   }
+   else
+      *info2=-1;
+   return retval;
 }
 
 
@@ -4212,6 +4274,45 @@ DLL_EXPORT int lut_blocks(int mode,char **lut_filename,char **lut_blocks_ok,char
       return LUT2_BLOCKS_MISSING;
    else
       return OK;
+}
+
+
+/* Funktion lut_blocks_id() +§§§1 */
+/* ############################################################################
+ * # Die Funktion lut_blocks_id() entspricht der Funktion lut_blocks(); die   #
+ * # Rückgabe erfolgt jedoch per Handle. Die Funktion ist vor allem für die   #
+ * # Windows-DLL gedacht, da der angeforderte Speicher wieder freigegeben     #
+ * # werden muß. Rückgabewerte und Parameter s.o. Die Parameter lut_blocks_ok #
+ * # und lut_blocks_fehler können mit der Funktion kc_id2ptr() in einen       #
+ * # String umgewandelt werden; mittels kc_id_free() kann der allokierte      #
+ * # Speicher wieder freigegeben werden.                                      #
+ * #                                                                          #
+ * # Diese Funktion unterstützt keine optionalen Parameter, d.h. die drei     #
+ * # Variablen lut_filename, lut_blocks_ok und lut_blocks_fehler müssen immer #
+ * # angegeben werden; eine Übergabe von NULL führt zu einer access violation.#
+ * #                                                                          #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>              #
+ * ############################################################################
+ */
+DLL_EXPORT int lut_blocks_id(int mode,int *lut_filename,int *lut_blocks_ok,int *lut_blocks_fehler)
+{
+   char *lut_filename_p,*lut_blocks_ok_p,*lut_blocks_fehler_p;
+   int retval,rv;
+
+   retval=lut_blocks(mode,&lut_filename_p,&lut_blocks_ok_p,&lut_blocks_fehler_p);
+
+      /* alle drei retvals in einem if() in Handles umwandeln; es kÃ¶nnen nur
+       * malloc Fehler vorkommen, dann ist doch alles zu spÃ¤t... daher keine
+       * weitere Unterscheidung hier.
+       */
+   if((rv=kc_ptr2id(lut_filename_p,lut_filename)<0) || (rv=kc_ptr2id(lut_blocks_ok_p,lut_blocks_ok)<0)
+         || (rv=kc_ptr2id(lut_blocks_fehler_p,lut_blocks_fehler)<0)){
+      FREE(lut_filename_p);
+      FREE(lut_blocks_ok_p);
+      FREE(lut_blocks_fehler_p);
+      return rv;
+   }
+   return retval;
 }
 
 /* Funktion current_lutfile_name() +§§§1 */
@@ -9049,6 +9150,10 @@ DLL_EXPORT int lut_cleanup(void)
    for(i=0;i<last_lut_suche_idx;i++)lut_suche_free(i);
    FREE(lut_suche_arr);
    last_lut_suche_idx=0;
+   if(handle_ptr){
+      for(i=0;i<h_cnt;i++)if(handle_ptr[i])FREE(handle_ptr[i]);
+      free(handle_ptr);
+   }
 
    if(init_status&8){
 
@@ -15434,8 +15539,8 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # Ergebnis führen, sind nicht gültig.                                #
  * #                                                                    #
  * # Die für die Berechnung relevante Kundennummer (K) befindet sich    #
- * # bei der Methode A in den Stellen 4 bis 9 der Kontonummer und bei   #
- * # den Methoden B bis E und G in den Stellen 5 bis 9.                 #
+ * # bei der Methode A und G in den Stellen 4 bis 9 der Kontonummer     #
+ * # und bei den Methoden B bis E in den Stellen 5 bis 9.               #
  * #                                                                    #
  * # Ausnahme:                                                          #
  * # Ist nach linksbündigem Auffüllen mit Nullen auf 10 Stellen die     #
@@ -21027,7 +21132,8 @@ DLL_EXPORT void kc_free(char *ptr)
 DLL_EXPORT void *kc_alloc(int size,int *retval)
 {
    void *ptr;
-   if(!(ptr=calloc(size,1)))
+
+   if(!(ptr=(void*)calloc(size,1)))
       *retval=ERROR_MALLOC;
    else
       *retval=OK;
@@ -21548,6 +21654,27 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
    return bic;
 }
 
+/* Funktion iban2bic_id() +§§§1 */
+/* ###########################################################################
+ * # Die Funktion iban2bic_id() entspricht der Funktion iban2bic(); für      #
+ * # die Parameter blz und kto wird allerdings Speicher allokiert und per    #
+ * # Handle wieder zurückgegeben.                                            #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT const char *iban2bic_id(char *iban,int *retval,int *blz,int *kto)
+{
+   char *b,*k;
+
+   if(!(b=(char*)malloc(12)) || !(k=(char*)malloc(12)) || kc_ptr2id(b,blz)<0 || kc_ptr2id(k,kto)<0){
+      if(retval)*retval=ERROR_MALLOC;
+      return "";
+   }
+   return iban2bic(iban,retval,b,k);
+}
+
 /* Funktion iban_gen(), iban_bic_gen() und iban_bic_gen1 +§§§1 */
 /* ###########################################################################
  * # Die Funktion iban_gen generiert aus Bankleitzahl und Kontonummer eine   #
@@ -21628,12 +21755,54 @@ DLL_EXPORT char *iban_gen(char *blz,char *kto,int *retval)
    return iban_bic_gen(blz,kto,NULL,NULL,NULL,retval);
 }
 
+DLL_EXPORT int iban_gen_id(char *blz,char *kto,int *retval)
+{
+   char *ptr;
+   int rv,id;
+
+   if(!(ptr=iban_bic_gen(blz,kto,NULL,NULL,NULL,retval)))return -1;  /* retval wurde in iban_bic_gen gesetzt, daher gleich return */
+   if((rv=kc_ptr2id(ptr,&id))<0){
+      *retval=rv;
+      return -1;
+   }
+   return id;
+}
+
+DLL_EXPORT int iban_bic_gen_id(char *blz,char *kto,int *bic2,int *blz2,int *kto2,int *retval)
+{
+   char *ptr,*bp2,*b2,*k2;
+   const char *bp;
+   int rv,id;
+
+   bp2=b2=k2=NULL;
+   if(!(bp2=(char*)malloc(16)) || !(b2=(char*)malloc(16)) || !(k2=(char*)malloc(16))){
+      FREE(bp2);
+      FREE(b2);
+      FREE(k2);
+      return ERROR_MALLOC;
+   }
+   ptr=iban_bic_gen(blz,kto,&bp,b2,k2,retval);
+   strcpy(bp2,(char*)bp);
+   if((rv=kc_ptr2id(bp2,bic2))<0 || (rv=kc_ptr2id(b2,blz2))<0 || (rv=kc_ptr2id(k2,kto2))<0){
+      FREE(bp2);
+      FREE(b2);
+      FREE(k2);
+      *retval=rv;
+      return -1;
+   }
+
+   if(!ptr)return -1;   /* Fehler bei der Generierung */
+   if((rv=kc_ptr2id(ptr,&id))<0){
+      *retval=rv;
+      return -1;
+   }
+   return id;
+}
+
 DLL_EXPORT char *iban_bic_gen1(char *blz,char *kto,const char **bicp,int *retval)
 {
    return iban_bic_gen(blz,kto,bicp,NULL,NULL,retval);
 }
-
-
 
 DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,char *kto2,int *retval)
 {
@@ -22299,6 +22468,33 @@ DLL_EXPORT int ipi_gen(char *zweck,char *dst,char *papier)
    if(dst)for(ptr=buffer,dptr=dst;(*dptr++=*ptr++););
    if(papier)for(ptr=buffer,dptr=papier,i=1;(*dptr++=*ptr++);)if(i<20 && !(i++%4))*dptr++=' ';
    return OK;
+}
+
+/* Funktion ipi_gen_id() +§§§1 */
+/* ###########################################################################
+ * # Die Funktion ipi_gen_id entspricht der Funktion ipi_gen(); allerdings   #
+ * # wird für die beiden Parameter dst und papier Speicher allokiert und     #
+ * # über jeweils ein Handle wieder zurückgegeben. Mit der Funktion          #
+ * # kc_id2ptr() kann das Handle in einen String umgewandelt werden, sowie   #
+ * # mittels der Funktion kc_id_free() wieder freigegeben werden.            #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT int ipi_gen_id(char *zweck,int *dst,int *papier)
+{
+   char *d,*p;
+   int retval,rv;
+
+   if(!(d=(char*)malloc(24)))return ERROR_MALLOC;
+   if(!(p=(char*)malloc(32))){
+      free(d);
+      return ERROR_MALLOC;
+   }
+   retval=ipi_gen(zweck,d,p);
+   if((rv=kc_ptr2id(d,dst)<0) || (rv=kc_ptr2id(p,papier)<0))return rv;
+   return retval;
 }
 
 /* Funktion ipi_check() +§§§1 */
@@ -26135,6 +26331,95 @@ DLL_EXPORT char *kto_check_test_vars(char *txt,UINT4 i)
 
 #endif
 
+
+/* Funktionen kc_ptr2id(), kc_id2ptr() und kc_id_free() +§§§1 */
+/* ###########################################################################
+ * # Die folgenden Funktionen dienen dazu, ein Array von (char-)Pointern     #
+ * # aufzubauen, in dem die Adressen von allokierten Strings gespeichert     #
+ * # werden. Die Routinen, die Speicher für Strings allokieren, können dann  #
+ * # in der DLL die String-Routinen direkt verwenden und müssen nicht mehr   #
+ * # den etwas eigenwilligen (Schleich-)Weg über IntPtr nehmen, damit der    #
+ * # Speicher wieder freigegeben werden kann...                              #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+/* Funktion kc_ptr2id() +§§§2 */
+/* ###########################################################################
+ * # Die Funktion kc_ptr2id() sucht für einen Pointer einen freien Slot  #
+ * # in dem Array handle_ptr[]; falls kein Platz mehr in dem Array ist oder  #
+ * # es noch nicht initialisiert wurde, wird es erweitert.                   #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+#define HANDLE_CNT_INCREMENT 100
+
+static int kc_ptr2id(char *ptr,int *handle)
+{
+   int i;
+
+   *handle=-1; /* für evl. malloc-Fehler vorbelegen */
+   if(!h_cnt){
+      if(!(handle_ptr=(char **)calloc(sizeof(char*),HANDLE_CNT_INCREMENT)))return ERROR_MALLOC;
+      h_cnt=HANDLE_CNT_INCREMENT;
+   }
+   for(i=0;i<h_cnt;i++)if(!handle_ptr[i]){
+      *handle=i;
+      handle_ptr[i]=ptr;
+      return OK;
+   }
+   if(!(handle_ptr=(char **)realloc(handle_ptr,sizeof(char*)*(h_cnt+HANDLE_CNT_INCREMENT))))return ERROR_MALLOC;
+   h_cnt+=HANDLE_CNT_INCREMENT;
+   *handle=i;
+   handle_ptr[i++]=ptr;
+   while(i<h_cnt)handle_ptr[i++]=NULL;
+   return OK;
+}
+
+/* Funktion kc_id2ptr() +§§§2 */
+/* ###########################################################################
+ * # Diese Funktion gibt den Pointer zu einem Handle zurück. Dieser Wert     #
+ * # kann dann als String-Pointer in den DLL-Routinen verwendet werden.      #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT char *kc_id2ptr(int handle,int *retval)
+{
+   if(handle>=0 && handle<h_cnt && handle_ptr[handle]){
+      if(retval)*retval=OK;
+      return handle_ptr[handle];
+   }
+   else{
+      if(retval)*retval=INVALID_HANDLE;
+      return "";
+   }
+}
+
+/* Funktion kc_id_free() +§§§2 */
+/* ###########################################################################
+ * # Diese Funktion gibt den Speicher, der zu einem Handle gehört, wieder    #
+ * # frei und setzt den entsprechenden Slot-Eintrag auf NULL.                #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+
+DLL_EXPORT int kc_id_free(int handle)
+{
+   if(handle>=0 && handle<h_cnt && handle_ptr[handle]){
+      free(handle_ptr[handle]);
+      handle_ptr[handle]=NULL;
+      return OK;
+   }
+   return INVALID_HANDLE;
+}
+
+
 #else /* !INCLUDE_KONTO_CHECK_DE */
 /* Leerdefinitionen für !INCLUDE_KONTO_CHECK_DE +§§§1 */
 #include "konto_check.h"
@@ -26182,6 +26467,8 @@ XI lut_init(char *lut_name,int required,int set)EXCLUDED
 XI kto_check_init(char *lut_name,int *required,int **status,int set,int incremental)EXCLUDED
 XI kto_check_init_p(char *lut_name,int required,int set,int incremental)EXCLUDED
 XI lut_info(char *lut_name,char **info1,char **info2,int *valid1,int *valid2)EXCLUDED
+XI lut_info_b(char *lut_name,char **info1,char **info2,int *valid1,int *valid2)EXCLUDED
+XI lut_info_id(char *lut_name,int *info1,int *info2,int *valid1,int *valid2)EXCLUDED
 XI lut_valid(void)EXCLUDED
 XI lut_multiple(char *b,int *cnt,int **p_blz,char  ***p_name,char ***p_name_kurz,int **p_plz,char ***p_ort,
       int **p_pan,char ***p_bic,int *p_pz,int **p_nr,char **p_aenderung,char **p_loeschung,int **p_nachfolge_blz,
@@ -26268,10 +26555,14 @@ XI ci_check(char *ci)EXCLUDED
 XI bic_check(char *search_bic,int *cnt)EXCLUDED
 XI iban_check(char *iban,int *retval)EXCLUDED
 XCC iban2bic(char *iban,int *retval,char *blz,char *kto)EXCLUDED_S
+XCC iban2bic_id(char *iban,int *retval,int *blz,int *kto)EXCLUDED_S
 XC iban_gen(char *kto,char *blz,int *retval)EXCLUDED_S
+XI iban_gen_id(char *kto,char *blz,int *retval)EXCLUDED
 XC char *iban_bic_gen(char *blz,char *kto,const char **bic,char *blz2,char *kto2,int *retval)EXCLUDED_S
 XC char *iban_bic_gen1(char *blz,char *kto,const char **bic,int *retval)EXCLUDED_S
 XI ipi_gen(char *zweck,char *dst,char *papier)EXCLUDED
+XI ipi_gen_id(char *zweck,int *dst,int *papier)EXCLUDED
+XI iban_bic_gen_id(char *blz,char *kto,int *bic2,int *blz2,int *kto2,int *retval)EXCLUDED
 XI ipi_check(char *zweck)EXCLUDED
 XI kto_check_blz_dbg(char *blz,char *kto,RETVAL *retvals)EXCLUDED
 XI kto_check_pz_dbg(char *pz,char *kto,char *blz,RETVAL *retvals)EXCLUDED
@@ -26299,6 +26590,7 @@ XI lut_suche_multiple(char *such_str,int uniq,char *such_cmd,UINT4 *anzahl,UINT4
 XI lut_suche_sort1(int anzahl,int *blz_base,int *zweigstellen_base,int *idx,int *anzahl_o,int **idx_op,int **cnt_op,int uniq)EXCLUDED
 XI lut_suche_sort2(int anzahl,int *blz,int *zweigstellen,int *anzahl_o,int **blz_op,int **zweigstellen_op,int **cnt_o,int uniq)EXCLUDED
 XI lut_blocks(int mode,char **lut_filename,char **lut_blocks_ok,char **lut_blocks_fehler)EXCLUDED
+XI lut_blocks_id(int mode,int *lut_filename,int *lut_blocks_ok,int *lut_blocks_fehler)EXCLUDED
 XI kto_check_init_default(char *lut_name,int block_id)EXCLUDED
 XI kto_check_default_keys(char ***keys,int *cnt)EXCLUDED
 XI kto_check_set_default(char *key,char *val)EXCLUDED
@@ -26310,4 +26602,6 @@ DLL_EXPORT void *kc_alloc(int size,int *retval)EXCLUDED_VP
 XI set_default_compression(int mode)EXCLUDED
 XI lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int set)EXCLUDED
 XI pz_aenderungen_enable(int set)EXCLUDED
+XC kc_id2ptr(int handle,int *retval)EXCLUDED_S
+XI kc_id_free(int handle)EXCLUDED
 #endif
