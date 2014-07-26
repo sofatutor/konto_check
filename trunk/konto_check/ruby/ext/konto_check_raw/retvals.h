@@ -182,7 +182,6 @@ DLL_EXPORT const char *kto_check_retval2iso(int retval)
       case LUT2_NO_VALID_DATE: return "Der Datensatz enth‰lt kein G¸ltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
       case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
-      case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
       case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
       case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert f¸r den Schl¸ssel wurde ¸berschrieben";
       case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
@@ -351,7 +350,6 @@ DLL_EXPORT const char *kto_check_retval2dos(int retval)
       case LUT2_NO_VALID_DATE: return "Der Datensatz enthÑ lt kein GÅltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
       case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
-      case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
       case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
       case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert fÅr den SchlÅssel wurde Åberschrieben";
       case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
@@ -520,7 +518,6 @@ DLL_EXPORT const char *kto_check_retval2html(int retval)
       case LUT2_NO_VALID_DATE: return "Der Datensatz enth&auml;lt kein G&uuml;ltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
       case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
-      case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
       case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
       case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert f&uuml;r den Schl&uuml;ssel wurde &uuml;berschrieben";
       case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
@@ -689,7 +686,6 @@ DLL_EXPORT const char *kto_check_retval2utf8(int retval)
       case LUT2_NO_VALID_DATE: return "Der Datensatz enth√§lt kein G√ºltigkeitsdatum";
       case LUT1_SET_LOADED: return "Die Datei ist im alten LUT-Format (1.0/1.1)";
       case LUT1_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im alten Format (1.0/1.1) generiert";
-      case DTA_FILE_WITH_WARNINGS: return "In der DTAUS-Datei wurden kleinere Fehler gefunden";
       case LUT_V2_FILE_GENERATED: return "ok, es wurde allerdings eine LUT-Datei im Format 2.0 generiert (Compilerswitch)";
       case KTO_CHECK_VALUE_REPLACED: return "ok, der Wert f√ºr den Schl√ºssel wurde √ºberschrieben";
       case OK_UNTERKONTO_POSSIBLE: return "wahrscheinlich ok, die Kontonummer kann allerdings (nicht angegebene) Unterkonten enthalten";
@@ -858,7 +854,6 @@ DLL_EXPORT const char *kto_check_retval2txt_short(int retval)
       case LUT2_NO_VALID_DATE: return "LUT2_NO_VALID_DATE";
       case LUT1_SET_LOADED: return "LUT1_SET_LOADED";
       case LUT1_FILE_GENERATED: return "LUT1_FILE_GENERATED";
-      case DTA_FILE_WITH_WARNINGS: return "DTA_FILE_WITH_WARNINGS";
       case LUT_V2_FILE_GENERATED: return "LUT_V2_FILE_GENERATED";
       case KTO_CHECK_VALUE_REPLACED: return "KTO_CHECK_VALUE_REPLACED";
       case OK_UNTERKONTO_POSSIBLE: return "OK_UNTERKONTO_POSSIBLE";
