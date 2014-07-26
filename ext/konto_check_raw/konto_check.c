@@ -50,7 +50,7 @@
 #ifndef VERSION
 #define VERSION "5.5 (development)"
 #endif
-#define VERSION_DATE "2014-06-13"
+#define VERSION_DATE "2014-07-25"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -635,8 +635,9 @@ static const int w52[] = { 2, 4, 8, 5,10, 9, 7, 3, 6, 1, 2, 4, 0, 0, 0, 0},
     */
 static int h_cnt;
 static char **handle_ptr;
+static int *handle_free;
 
-static int kc_ptr2id(char *ptr,int *handle);
+static int kc_ptr2id(char *ptr,int *handle,int release_mem);
 
 /* Prototypen der static Funktionen +§§§2 */
 /*
@@ -2622,7 +2623,7 @@ DLL_EXPORT int lut_dir_dump_id(char *lutname,int *rv)
       if(rv)*rv=retval;
       return -1;
    }
-   if((retval=kc_ptr2id(ptr,&id))<0)free(ptr);
+   if((retval=kc_ptr2id(ptr,&id,1))<0)free(ptr);
    if(rv)*rv=retval;
    return id;
 }
@@ -2776,7 +2777,7 @@ DLL_EXPORT int lut_info_id(char *lut_name,int *info1,int *info2,int *valid1,int 
 
    retval=lut_info(lut_name,&i1,&i2,valid1,valid2);
    if(i1){
-      if((rv=kc_ptr2id(i1,info1))<0){
+      if((rv=kc_ptr2id(i1,info1,1))<0){
          FREE(i1);
          FREE(i2);
          return rv;
@@ -2785,7 +2786,7 @@ DLL_EXPORT int lut_info_id(char *lut_name,int *info1,int *info2,int *valid1,int 
    else
       *info1=-1;
    if(i2){
-      if((rv=kc_ptr2id(i2,info2))<0){
+      if((rv=kc_ptr2id(i2,info2,1))<0){
          FREE(i1);
          FREE(i2);
          return rv;
@@ -3193,6 +3194,7 @@ DLL_EXPORT int copy_lutfile(char *old_name,char *new_name,int new_slots)
       FREE(data);
       last_slot=typ;
    }
+   fclose(lut1);
    fclose(lut2);
    return OK;
 }
@@ -4305,8 +4307,8 @@ DLL_EXPORT int lut_blocks_id(int mode,int *lut_filename,int *lut_blocks_ok,int *
        * malloc Fehler vorkommen, dann ist doch alles zu spÃ¤t... daher keine
        * weitere Unterscheidung hier.
        */
-   if((rv=kc_ptr2id(lut_filename_p,lut_filename)<0) || (rv=kc_ptr2id(lut_blocks_ok_p,lut_blocks_ok)<0)
-         || (rv=kc_ptr2id(lut_blocks_fehler_p,lut_blocks_fehler)<0)){
+   if((rv=kc_ptr2id(lut_filename_p,lut_filename,1)<0) || (rv=kc_ptr2id(lut_blocks_ok_p,lut_blocks_ok,1)<0)
+         || (rv=kc_ptr2id(lut_blocks_fehler_p,lut_blocks_fehler,1)<0)){
       FREE(lut_filename_p);
       FREE(lut_blocks_ok_p);
       FREE(lut_blocks_fehler_p);
@@ -9151,7 +9153,7 @@ DLL_EXPORT int lut_cleanup(void)
    FREE(lut_suche_arr);
    last_lut_suche_idx=0;
    if(handle_ptr){
-      for(i=0;i<h_cnt;i++)if(handle_ptr[i])FREE(handle_ptr[i]);
+      for(i=0;i<h_cnt;i++)if(handle_ptr[i] && handle_free[i])FREE(handle_ptr[i]);
       free(handle_ptr);
    }
 
@@ -21199,9 +21201,9 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          return "09.06.2014";
 #endif
       case 5:
-        return "03.03.2014";
+        return "09.06.2014";
       case 6:
-        return "13. Juni 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "25. Juli 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
@@ -21530,8 +21532,9 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
             fprintf(out,"%06d\n",regel);
          else
             fputc('\n',out);
-      }               
+      }
    }
+   fclose(out);
    return OK;
 }
 
@@ -21668,7 +21671,7 @@ DLL_EXPORT const char *iban2bic_id(char *iban,int *retval,int *blz,int *kto)
 {
    char *b,*k;
 
-   if(!(b=(char*)malloc(12)) || !(k=(char*)malloc(12)) || kc_ptr2id(b,blz)<0 || kc_ptr2id(k,kto)<0){
+   if(!(b=(char*)malloc(12)) || !(k=(char*)malloc(12)) || kc_ptr2id(b,blz,1)<0 || kc_ptr2id(k,kto,1)<0){
       if(retval)*retval=ERROR_MALLOC;
       return "";
    }
@@ -21761,7 +21764,7 @@ DLL_EXPORT int iban_gen_id(char *blz,char *kto,int *retval)
    int rv,id;
 
    if(!(ptr=iban_bic_gen(blz,kto,NULL,NULL,NULL,retval)))return -1;  /* retval wurde in iban_bic_gen gesetzt, daher gleich return */
-   if((rv=kc_ptr2id(ptr,&id))<0){
+   if((rv=kc_ptr2id(ptr,&id,1))<0){
       *retval=rv;
       return -1;
    }
@@ -21783,7 +21786,7 @@ DLL_EXPORT int iban_bic_gen_id(char *blz,char *kto,int *bic2,int *blz2,int *kto2
    }
    ptr=iban_bic_gen(blz,kto,&bp,b2,k2,retval);
    strcpy(bp2,(char*)bp);
-   if((rv=kc_ptr2id(bp2,bic2))<0 || (rv=kc_ptr2id(b2,blz2))<0 || (rv=kc_ptr2id(k2,kto2))<0){
+   if((rv=kc_ptr2id(bp2,bic2,1))<0 || (rv=kc_ptr2id(b2,blz2,1))<0 || (rv=kc_ptr2id(k2,kto2,1))<0){
       FREE(bp2);
       FREE(b2);
       FREE(k2);
@@ -21792,7 +21795,7 @@ DLL_EXPORT int iban_bic_gen_id(char *blz,char *kto,int *bic2,int *blz2,int *kto2
    }
 
    if(!ptr)return -1;   /* Fehler bei der Generierung */
-   if((rv=kc_ptr2id(ptr,&id))<0){
+   if((rv=kc_ptr2id(ptr,&id,1))<0){
       *retval=rv;
       return -1;
    }
@@ -22493,7 +22496,7 @@ DLL_EXPORT int ipi_gen_id(char *zweck,int *dst,int *papier)
       return ERROR_MALLOC;
    }
    retval=ipi_gen(zweck,d,p);
-   if((rv=kc_ptr2id(d,dst)<0) || (rv=kc_ptr2id(p,papier)<0))return rv;
+   if((rv=kc_ptr2id(d,dst,1)<0) || (rv=kc_ptr2id(p,papier,1)<0))return rv;
    return retval;
 }
 
@@ -26347,9 +26350,17 @@ DLL_EXPORT char *kto_check_test_vars(char *txt,UINT4 i)
 
 /* Funktion kc_ptr2id() +§§§2 */
 /* ###########################################################################
- * # Die Funktion kc_ptr2id() sucht für einen Pointer einen freien Slot  #
+ * # Die Funktion kc_ptr2id() sucht für einen Pointer einen freien Slot      #
  * # in dem Array handle_ptr[]; falls kein Platz mehr in dem Array ist oder  #
  * # es noch nicht initialisiert wurde, wird es erweitert.                   #
+ * #                                                                         #
+ * # Falls die Variable release_mem 1 ist wird der Speicher bei Aufruf der   #
+ * # Funktion kc_id_free() wieder freigegeben, andernfalls bleibt der Pointer#
+ * # erhalten. Beim Aufruf mit release_mem=0 können somit auch String-       #
+ * # Konstanten einem Handle zugeordnet werden. Falls die entsprechende      #
+ * # Konstante schon ein Handle hat, wird dieses zurückgegeben; beim Aufruf  #
+ * # von kc_id_free() wird es auch nicht gelöscht, der Funktionsaufruf gibt  #
+ * # nur OK zurück, ohne etwas zu tun.                                       #
  * #                                                                         #
  * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
  * ###########################################################################
@@ -26357,25 +26368,36 @@ DLL_EXPORT char *kto_check_test_vars(char *txt,UINT4 i)
 
 #define HANDLE_CNT_INCREMENT 100
 
-static int kc_ptr2id(char *ptr,int *handle)
+static int kc_ptr2id(char *ptr,int *handle,int release_mem)
 {
    int i;
 
    *handle=-1; /* für evl. malloc-Fehler vorbelegen */
    if(!h_cnt){
-      if(!(handle_ptr=(char **)calloc(sizeof(char*),HANDLE_CNT_INCREMENT)))return ERROR_MALLOC;
+      if(!(handle_ptr=(char **)calloc(sizeof(char*),HANDLE_CNT_INCREMENT)) || !(handle_free=(int*)calloc(sizeof(int),HANDLE_CNT_INCREMENT)))return ERROR_MALLOC;
       h_cnt=HANDLE_CNT_INCREMENT;
    }
+   if(!release_mem)  /* Handle für fixen String, suchen ob er schon vergeben wurde */
+      for(i=0;i<h_cnt;i++)if(handle_ptr[i]==ptr && !handle_free[i]){
+         *handle=i;
+         return OK;
+      }
    for(i=0;i<h_cnt;i++)if(!handle_ptr[i]){
       *handle=i;
       handle_ptr[i]=ptr;
+      handle_free[i]=release_mem;
       return OK;
    }
-   if(!(handle_ptr=(char **)realloc(handle_ptr,sizeof(char*)*(h_cnt+HANDLE_CNT_INCREMENT))))return ERROR_MALLOC;
+   if(!(handle_ptr=(char **)realloc(handle_ptr,sizeof(char*)*(h_cnt+HANDLE_CNT_INCREMENT)))
+         || !(handle_free=(int*)realloc(handle_free,sizeof(int)*(h_cnt+HANDLE_CNT_INCREMENT))))return ERROR_MALLOC;
    h_cnt+=HANDLE_CNT_INCREMENT;
    *handle=i;
-   handle_ptr[i++]=ptr;
-   while(i<h_cnt)handle_ptr[i++]=NULL;
+   handle_ptr[i]=ptr;
+   handle_free[i++]=release_mem;
+   for(;i<h_cnt;i++){
+      handle_ptr[i]=NULL;
+      handle_free[i]=0;
+   }
    return OK;
 }
 
@@ -26412,8 +26434,11 @@ DLL_EXPORT char *kc_id2ptr(int handle,int *retval)
 DLL_EXPORT int kc_id_free(int handle)
 {
    if(handle>=0 && handle<h_cnt && handle_ptr[handle]){
-      free(handle_ptr[handle]);
-      handle_ptr[handle]=NULL;
+      if(handle_free[handle]){  /* Freigabe nur bei allokiertem Speicher */
+         free(handle_ptr[handle]);
+         handle_ptr[handle]=NULL;
+         handle_free[handle]=0;
+      }
       return OK;
    }
    return INVALID_HANDLE;

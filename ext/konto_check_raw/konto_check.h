@@ -468,7 +468,6 @@ extern const char *lut2_feld_namen[256];
 #define LUT2_NO_VALID_DATE                       5
 #define LUT1_SET_LOADED                          6
 #define LUT1_FILE_GENERATED                      7
-#define DTA_FILE_WITH_WARNINGS                   8
 #define LUT_V2_FILE_GENERATED                    9
 #define KTO_CHECK_VALUE_REPLACED                10
 #define OK_UNTERKONTO_POSSIBLE                  11
