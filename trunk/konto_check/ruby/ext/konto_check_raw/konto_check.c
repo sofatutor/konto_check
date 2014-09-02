@@ -9340,7 +9340,7 @@ static void init_atoi_table(void)
 
 #if 1
       /* Änderungen zum 9.6.2014 aktivieren */
-   if(time(NULL)>1402264800)pz_aenderungen_aktivieren=1;
+   if(time(NULL)>1410127200)pz_aenderungen_aktivieren=1;
 #endif
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
@@ -21194,14 +21194,14 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 4:                              /* Datum der Prüfziffermethode */
 #if 1
          if(pz_aenderungen_aktivieren)
-            return "09.06.2014";
+            return "08.09.2014";
          else
-            return "09.06.2014 (Aenderungen vom 09.06.2014 enthalten aber noch nicht aktiviert)";
+            return "09.06.2014 (Aenderungen vom 08.09.2014 enthalten aber noch nicht aktiviert)";
 #else
-         return "09.06.2014";
+         return "08.09.2014";
 #endif
       case 5:
-        return "09.06.2014";
+        return "08.09.2014";
       case 6:
         return "1. September 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
