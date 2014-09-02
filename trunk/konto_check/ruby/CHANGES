@@ -1,4 +1,8 @@
 important changes in version 5.4:
+   - bug fix in functions bic_check() and ci_check()
+   - the functions rebuild_blzfile() and pz_aenderungen_enable() are available for ruby
+
+important changes in version 5.4:
    - changes in check method 90 implemented
    - removed some obsolete return values (-80 ... -104)
    - some bug fixes, mainly in the new functions bic_(), biq_*() and iban_*()
