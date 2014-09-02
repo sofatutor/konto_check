@@ -48,9 +48,9 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.5 (development)"
+#define VERSION "5.5 (final)"
 #endif
-#define VERSION_DATE "2014-07-25"
+#define VERSION_DATE "2014-09-01"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -683,14 +683,14 @@ static int qcmp_sorti(const void *ap,const void *bp);
 static int iban_init(void);
 static int iban_regel_cvt(char *blz,char *kto,const char **bic,int regel_version,RETVAL *retvals);
 static const char *lut_bic_int(char *b,int zweigstelle,int *retval);
-static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int error);
-static int biq_fkt_c(int idx,int*retval,char *base,int error);
+static int bic_fkt_c(char *bic1,int mode,int filiale,int *retval,char *base,int error);
+static int biq_fkt_c(int idx,int *retval,char *base,int error);
 static int iban_fkt_c(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*));
-static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base,int error);
-static int biq_fkt_i(int idx,int*retval,int *base,int error);
+static int bic_fkt_i(char *bic1,int mode,int filiale,int *retval,int *base,int error);
+static int biq_fkt_i(int idx,int *retval,int *base,int error);
 static int iban_fkt_i(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int*));
-static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base,int error);
-static const char *biq_fkt_s(int idx,int*retval,char **base,int error);
+static const char *bic_fkt_s(char *bic1,int mode,int filiale,int *retval,char **base,int error);
+static const char *biq_fkt_s(int idx,int *retval,char **base,int error);
 static const char *iban_fkt_s(char *iban,int filiale,int *retval,const char*(*fkt)(char*,int,int*));
 #if DEBUG>0
 static int kto_check_int(char *x_blz,int pz_methode,char *kto,int untermethode,RETVAL *retvals);
@@ -21203,9 +21203,9 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 5:
         return "09.06.2014";
       case 6:
-        return "25. Juli 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "1. September 2014";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "development";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
    }
 }
 
@@ -24896,7 +24896,7 @@ DLL_EXPORT const char *iban_ort(char *iban,int filiale,int*retval)
    return iban_fkt_s(iban,filiale,retval,lut_ort);
 }
 
-static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int error)
+static int bic_fkt_c(char *bic1,int mode,int filiale,int *retval,char *base,int error)
 {
    int cnt,start_idx,rv,ret1,ret2;
 
@@ -24922,7 +24922,7 @@ static int bic_fkt_c(char *bic1,int mode,int filiale,int*retval,char *base,int e
    return rv;
 }
 
-static int biq_fkt_c(int idx,int*retval,char *base,int error)
+static int biq_fkt_c(int idx,int *retval,char *base,int error)
 {
    int ret;
 
@@ -24990,7 +24990,7 @@ static int iban_fkt_c(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int
    return fkt(blz,filiale,retval);
 }
 
-static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base,int error)
+static int bic_fkt_i(char *bic1,int mode,int filiale,int *retval,int *base,int error)
 {
    int cnt,start_idx,rv,ret1,ret2;
 
@@ -25016,7 +25016,7 @@ static int bic_fkt_i(char *bic1,int mode,int filiale,int*retval,int *base,int er
    return rv;
 }
 
-static int biq_fkt_i(int idx,int*retval,int *base,int error)
+static int biq_fkt_i(int idx,int *retval,int *base,int error)
 {
    int ret;
 
@@ -25087,7 +25087,7 @@ static int iban_fkt_i(char *iban,int filiale,int *retval,int(*fkt)(char*,int,int
    return fkt(blz,filiale,retval);
 }
 
-static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **base,int error)
+static const char *bic_fkt_s(char *bic1,int mode,int filiale,int *retval,char **base,int error)
 {
    const char *rv;
    int cnt,start_idx,ret1,ret2;
@@ -25114,7 +25114,7 @@ static const char *bic_fkt_s(char *bic1,int mode,int filiale,int*retval,char **b
    return rv;
 }
 
-static const char *biq_fkt_s(int idx,int*retval,char **base,int error)
+static const char *biq_fkt_s(int idx,int *retval,char **base,int error)
 {
    int ret;
 
@@ -26333,6 +26333,153 @@ DLL_EXPORT char *kto_check_test_vars(char *txt,UINT4 i)
 }
 
 #endif
+
+
+/* Funktionen *_id() +§§§1 */
+/* ###########################################################################
+ * # Die folgenden Funktionen sind die id-Varianten von Funktionen, die      #
+ * # normalerweise einen (konstanten) String zurückgeben; über diese Hilfs-  #
+ * # funktionen wird stattdessen eine ID generiert und zurückgegeben. Bei    #
+ * # Stringkonstanten wird für den entsprechenden id-Slot kein Speicher      #
+ * # allokiert, sondern der Pointer wird direkt auf den String gesetzt. Auch #
+ * # beim Aufruf von kc_id_free() wird für den Speicherblock nicht free()    #
+ * # aufgerufen, sondern einfach nur der Slot freigegeben.                   #
+ * #                                                                         #
+ * # Da der Aufruf für jede Funktionsgruppe gleich ist, wird er per Makro    #
+ * # gemacht.                                                                #
+ * #                                                                         #
+ * # Copyright (C) 2014 Michael Plugge <m.plugge@hs-mannheim.de>             #
+ * ###########################################################################
+ */
+   /* numerische Rückgabewerte in eine id umwandeln */
+#define RV_ID(fkt) \
+DLL_EXPORT int kto_check_retval2 ## fkt ## _id(int retval)\
+{\
+   int handle,rv;\
+\
+   rv=kc_ptr2id((char*)kto_check_retval2 ## fkt(retval),&handle,0);\
+   if(rv<0)\
+      return -1;\
+   else\
+      return handle;\
+}
+
+RV_ID(txt)
+RV_ID(txt_short)
+RV_ID(html)
+RV_ID(utf8)
+RV_ID(dos)
+
+   /* lut_*() und iban_*() Funktionen */
+#define LUT_ID(fkt) \
+DLL_EXPORT int fkt ## _id(char *b,int zweigstelle,int *retval)\
+{\
+   int handle,rv;\
+\
+   rv=kc_ptr2id((char*)fkt(b,zweigstelle,retval),&handle,0);\
+   if(rv<0)\
+      return -1;\
+   else\
+      return handle;\
+}
+
+LUT_ID(lut_name);
+LUT_ID(lut_name_kurz);
+LUT_ID(lut_ort);
+LUT_ID(lut_bic);
+LUT_ID(lut_bic_h);
+LUT_ID(iban_bic);
+LUT_ID(iban_bic_h);
+LUT_ID(iban_name);
+LUT_ID(iban_name_kurz);
+LUT_ID(iban_ort);
+
+#define LUT_I_ID(fkt) \
+DLL_EXPORT int fkt ## _id(int b,int zweigstelle,int *retval)\
+{\
+   int handle,rv;\
+\
+   rv=kc_ptr2id((char*)fkt(b,zweigstelle,retval),&handle,0);\
+   if(rv<0)\
+      return -1;\
+   else\
+      return handle;\
+}
+
+LUT_I_ID(lut_bic_hi);
+LUT_I_ID(lut_name_i);
+LUT_I_ID(lut_name_kurz_i);
+LUT_I_ID(lut_ort_i);
+LUT_I_ID(lut_bic_i);
+
+#define BIC_ID(fkt) \
+DLL_EXPORT int fkt ## _id(char *b,int mode,int zweigstelle,int *retval)\
+{\
+   int handle,rv;\
+\
+   rv=kc_ptr2id((char*)fkt(b,mode,zweigstelle,retval),&handle,0);\
+   if(rv<0)\
+      return -1;\
+   else\
+      return handle;\
+}
+
+BIC_ID(bic_bic);
+BIC_ID(bic_bic_h);
+BIC_ID(bic_name);
+BIC_ID(bic_name_kurz);
+BIC_ID(bic_ort);
+
+#define BIQ_ID(fkt) \
+DLL_EXPORT int fkt ## _id(int idx,int *retval)\
+{\
+   int handle,rv;\
+\
+   rv=kc_ptr2id((char*)fkt(idx,retval),&handle,0);\
+   if(rv<0)\
+      return -1;\
+   else\
+      return handle;\
+}
+
+BIQ_ID(biq_bic);
+BIQ_ID(biq_bic_h);
+BIQ_ID(biq_name);
+BIQ_ID(biq_name_kurz);
+BIQ_ID(biq_ort);
+
+DLL_EXPORT int kto_check_encoding_str_id(int mode)
+{
+   int handle,rv;
+
+   rv=kc_ptr2id((char*)kto_check_encoding_str(mode),&handle,0);
+   if(rv<0)
+      return -1;
+   else
+      return handle;
+}
+
+DLL_EXPORT int get_kto_check_version_id(int mode)
+{
+   int handle,rv;
+
+   rv=kc_ptr2id((char*)get_kto_check_version_x(mode),&handle,0);
+   if(rv<0)
+      return -1;
+   else
+      return handle;
+}
+
+DLL_EXPORT int current_lutfile_name_id(int *set,int *level,int *retval)
+{
+   int handle,rv;
+
+   rv=kc_ptr2id((char*)current_lutfile_name(set,level,retval),&handle,0);
+   if(rv<0)
+      return -1;
+   else
+      return handle;
+}
 
 
 /* Funktionen kc_ptr2id(), kc_id2ptr() und kc_id_free() +§§§1 */
