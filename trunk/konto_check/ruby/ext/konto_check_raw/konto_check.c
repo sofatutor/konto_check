@@ -13,7 +13,7 @@
  * #  wurden aus der aktuellen BLZ-Datei der Deutschen Bundesbank           #
  * #  übernommen.                                                           #
  * #                                                                        #
- * #  Copyright (C) 2002-2014 Michael Plugge <m.plugge@hs-mannheim.de>      #
+ * #  Copyright (C) 2002-2015 Michael Plugge <m.plugge@hs-mannheim.de>      #
  * #                                                                        #
  * #  Dieses Programm ist freie Software; Sie dürfen es unter den           #
  * #  Bedingungen der GNU Lesser General Public License, wie von der Free   #
@@ -48,9 +48,11 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.5 (final)"
+#define VERSION "5.6 (beta)"
+#define VERSION_MAJOR 5
+#define VERSION_MINOR 6
 #endif
-#define VERSION_DATE "2014-09-01"
+#define VERSION_DATE "2015-04-04"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -530,7 +532,6 @@ static char *default_buffer,*default_ptr,*default_key[DEFAULT_CNT],*default_val[
 static int default_cnt,default_bufsize,default_val_size[DEFAULT_CNT];
 
 static int kto_check_clear_default(void);
-static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt);
 
 #if DEBUG>0
    /* "aktuelles" Datum für die Testumgebung (um einen Datumswechsel zu simulieren) */
@@ -4727,7 +4728,6 @@ DLL_EXPORT int lut_pan_i(int b,int zweigstelle,int *retval)
 
 DLL_EXPORT const char *lut_bic(char *b,int zweigstelle,int *retval)
 {
-#if USE_IBAN_RULES
    char blz2[12],kto2[12];
    const char *bic,*bic_neu;
    int ret,regel;
@@ -4752,9 +4752,6 @@ DLL_EXPORT const char *lut_bic(char *b,int zweigstelle,int *retval)
        * Falls der BIC durch die Regel modifiziert wird, wird das nur durch retval angezeigt.
        */
    return bic;
-#else
-   return lut_bic_int(b,zweigstelle,retval);
-#endif
 }
 
 static const char *lut_bic_int(char *b,int zweigstelle,int *retval)
@@ -4815,36 +4812,18 @@ DLL_EXPORT const char *lut_bic_h(char *b,int zweigstelle,int *retval)
     */
 DLL_EXPORT const char *lut_bic_i(int b,int zweigstelle,int *retval)
 {
-#if !USE_IBAN_RULES
-   int idx;
-
-   if(!bic)INVALID_C(LUT2_BIC_NOT_INITIALIZED);
-   if((idx=lut_index_i(b))<0)INVALID_C(idx);
-   CHECK_OFFSET_S;
-   return bic[startidx[idx]+zweigstelle];
-#else
    char b_a[9];
 
    snprintf(b_a,9,"%08d",b);
    return lut_bic(b_a,zweigstelle,retval);
-#endif
 }
 
 DLL_EXPORT const char *lut_bic_hi(int b,int zweigstelle,int *retval)
 {
-#if !USE_IBAN_RULES
-   int idx;
-
-   if(!bic_h)INVALID_C(LUT2_BIC_NOT_INITIALIZED);
-   if((idx=lut_index_i(b))<0)INVALID_C(idx);
-   CHECK_OFFSET_S;
-   return bic_h[startidx[idx]+zweigstelle];
-#else
    char b_a[9];
 
    snprintf(b_a,9,"%08d",b);
    return lut_bic_h(b_a,zweigstelle,retval);
-#endif
 }
 
 /* Funktion lut_nr() +§§§2 */
@@ -5103,11 +5082,10 @@ static int iban_init(void)
  * ###########################################################################
  */
 
-#if USE_IBAN_RULES
 static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_version,RETVAL *retvals)
 {
    char tmp_buffer[16];
-   int regel,version,b,b_alt,b_neu,k1,k2,k3,not_ok,i,ret,loesch,idx,pz_methode,uk_cnt,tmp;
+   int regel,version,b,b_alt,b_neu,k1,k2,k3,not_ok,i,ret,loesch,idx,pz_methode,tmp;
 
       /* prüfen, ob bereits initialisiert wurde */
    INITIALIZE_WAIT;
@@ -5122,56 +5100,6 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
    version=regel_version%100;
    *bicp=NULL;
    ret=OK;
-
-      /* zunächst einige Sonderfälle (weggelassene Unterkonten) für Regel 0 behandeln;
-       * diese sind auch wichtig, falls die IBAN-Regeln nicht in der LUT-Datei enthalten sind.
-       * Die Rückgabe differenziert allerdings nicht mehr nach der Art der Unterkonten; diese
-       * werden nur stillschweigend eingefügt (wie im "SEPA Account Converter").
-       */
-   if(regel==0){  /* in den anderen Regeln wird die Verschiebung bei Bedarf ebenfalls gemacht */
-      if(((ret=kto_check_blz_x(blz,kto,&uk_cnt))<=0))return ret;  /* Fehler bei Regel 0: zurückgeben, keine Berechnung */
-      switch(uk_cnt){
-         case 1:
-            ret=OK_UNTERKONTO_ATTACHED;
-            kto[0]=kto[1];
-            kto[1]=kto[2];
-            kto[2]=kto[3];
-            kto[3]=kto[4];
-            kto[4]=kto[5];
-            kto[5]=kto[6];
-            kto[6]=kto[7];
-            kto[7]=kto[8];
-            kto[8]=kto[9];
-            kto[9]='0';
-            break;
-         case 2:
-            ret=OK_UNTERKONTO_ATTACHED;
-            kto[0]=kto[2];
-            kto[1]=kto[3];
-            kto[2]=kto[4];
-            kto[3]=kto[5];
-            kto[4]=kto[6];
-            kto[5]=kto[7];
-            kto[6]=kto[8];
-            kto[7]=kto[9];
-            kto[8]=kto[9]='0';
-            break;
-         case 3:
-            ret=OK_UNTERKONTO_ATTACHED;
-            kto[0]=kto[3];
-            kto[1]=kto[4];
-            kto[2]=kto[5];
-            kto[3]=kto[6];
-            kto[4]=kto[7];
-            kto[5]=kto[8];
-            kto[6]=kto[9];
-            kto[7]=kto[8]=kto[9]='0';
-            break;
-         default:
-            break;
-      }
-   }
-
 
       /* erstmal Konto und BLZ nach Integer umwandeln */
    k1=b2[I kto[0]]+b1[I kto[1]];
@@ -8829,7 +8757,6 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
          return IBAN_RULE_UNKNOWN;
    }
 }
-#endif
 
 /* Funktion lut_multiple() +§§§2 */
 /* ###########################################################################
@@ -9340,7 +9267,7 @@ static void init_atoi_table(void)
 
 #if 1
       /* Änderungen zum 9.6.2014 aktivieren */
-   if(time(NULL)>1410127200)pz_aenderungen_aktivieren=1;
+   if(time(NULL)>1433714400)pz_aenderungen_aktivieren=1;
 #endif
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
@@ -9975,8 +9902,36 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             retvals->pz_methode=8;
          }
 #endif
-         if(strcmp(kto,"0000060000")<0)  /* Kontonummern unter 60 000: keine Prüfzifferberechnung oder falsch??? */
-            RETURN(INVALID_KTO);
+
+           /* Kontonummern unter 60 000: keine Prüfzifferberechnung oder falsch???
+            *
+            * Die Beschreibung in der PDF-Datei sagt nichts darüber aus, was mit Kontonummern
+            * unter 60 000 ist. Ich bekam jetzt zwei Emails, bei denen reale Konten in diesem
+            * Bereich existieren; ein kleiner Test mit verschiedenen "Konkurrenzprodukten"
+            * ergibt folgendes Bild:
+            *
+            *    ckonto.de: ok
+            *    ktoblzcheck: ok
+            *    kontonummern.de: ok, ohne Prüfzifferberechnung
+            *    iban-rechner.de: ok, ohne Prüfzifferberechnung
+            *    VR-IBAN-Konverter: ok
+            *    SEPA-Account-Konverter (Sparkasse): ok
+            *
+            *    BAV: falsch
+            *    bankleitzahlen.de: Prüffehler.
+            *    bankdatencheck.de: nicht gültig
+            *
+            * Die Mehrheit der Programme sieht die Konten als richtig an (bzw. ohne
+            * Prüfzifferberechnung als gültig). Daher - und vor allem auch aufgrund der vorhandenen
+            * realen Konten - wird der Rückgabewert für diesen Kontenkreis von INVALID_KTO auf
+            * OK_NO_CHK geändert.
+            *
+            * Markus Malkusch hat nach einer kurzen Rückfrage auch den BAV umgestellt, daß die Konten
+            * ohne Prüfung als richtig angesehen werden.
+            */
+
+         if(strcmp(kto,"0000060000")<0)RETURN(OK_NO_CHK);
+
 #ifdef __ALPHA
          pz = ((kto[0]<'5') ? (kto[0]-'0')*2 : (kto[0]-'0')*2-9)
             +  (kto[1]-'0')
@@ -10300,14 +10255,6 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
                 * zurückgegeben.
                 */
                return FALSE;
-#if 0
-                  /* alte Version */
-#if BAV_KOMPATIBEL
-               return BAV_FALSE;
-#else
-               pz=0;
-#endif
-#endif
          }
          CHECK_PZ10;
 
@@ -10861,29 +10808,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             pz=0;
          else
             pz=11-pz;
-         CHECK_PZX8;
-            /* evl. wurde eine Unterkontonummer weggelassen => nur 8-stellige
-             * Kontonummer; neuer Versuch mit den Stellen ab der 3. Stelle
-             */
-         if(kto_len==8){
-            pz = (kto[2]-'0') * 8
-               + (kto[3]-'0') * 7
-               + (kto[4]-'0') * 6
-               + (kto[5]-'0') * 5
-               + (kto[6]-'0') * 4
-               + (kto[7]-'0') * 3
-               + (kto[8]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ10;
-         }
-         else
-            return FALSE;
-
+         CHECK_PZ8;
 
 /*  Berechnung nach der Methode 29 +§§§4 */
 /*
@@ -11105,29 +11030,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             pz=0;
          else
             pz=11-pz;
-         CHECK_PZX8;
-
-            /* evl. wurde eine Unterkontonummer weggelassen => nur 8-stellige
-             * Kontonummer; neuer Versuch mit den Stellen ab der 3. Stelle
-             */
-         if(kto_len==8){
-            pz = (kto[2]-'0') * 7
-               + (kto[3]-'0') * 9
-               + (kto[4]-'0') * 10
-               + (kto[5]-'0') * 5
-               + (kto[6]-'0') * 8
-               + (kto[7]-'0') * 4
-               + (kto[8]-'0') * 2;
-
-            MOD_11_352;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ10;
-         }
-         else
-            return FALSE;
+         CHECK_PZ8;
 
 /*  Berechnung nach der Methode 35 +§§§4 */
 /*
@@ -19222,9 +19125,9 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * #       1. Stelle von links   Zahl (Konstante)                       #
  * #        der 10-stelligen                                            #
  * #        Kontonummer                                                 #
- * #                 0                  4363380                         #                                                                                                   #
- * #                 1                  4363381                         #                                                                                           #
- * #                 2                  4363382                         #                                                                                           #
+ * #                 0                  4363380                         #
+ * #                 1                  4363381                         #
+ * #                 2                  4363382                         #
  * #                 3                  4363383                         #
  * #                 4                  4363384                         #
  * #                 5                  4363385                         #
@@ -20220,6 +20123,83 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          if(pz==10)return FALSE;
          CHECK_PZ10;
 
+/* Berechnung nach der Methode E2 +§§§4 */
+/*
+ * ######################################################################
+ * #               Berechnung nach der Methode E2                       #
+ * ######################################################################
+ * # Modulus 10, Gewichtung 1, 2, 1, 2, 1, 2, 1, 2                      #
+ * #                                                                    #
+ * # Die Kontonummer ist 10-stellig, ggf. ist die Kontonummer für die   #
+ * # Prüfzifferberechnung durch linksbündige Auffüllung mit Nullen      #
+ * # 10-stellig darzustellen. Die 10. Stelle der Kontonummer ist die    #
+ * # Prüfziffer.                                                        #
+ * #                                                                    #
+ * # Kontonummern, die an der 1. Stelle von links der 10-stelligen      #
+ * # Kontonummer den Wert 6, 7, 8 oder 9 beinhalten, sind falsch.       #
+ * #                                                                    #
+ * # Kontonummern, die an der 1. Stelle von links der 10-stelligen      #
+ * # Kontonummer den Wert 0, 1, 2, 3, 4 oder 5 beinhalten, sind wie     #
+ * # folgt zu prüfen:                                                   #
+ * #                                                                    #
+ * # Für die Berechnung der Prüfziffer werden die Stellen 2 bis 9 der   #
+ * # Kontonummer von links verwendet. Diese Stellen sind links um       #
+ * # eine Zahl (Konstante) gemäß der folgenden Tabelle zu ergänzen.     #
+ * #                                                                    #
+ * #   1. Stelle von links   Zahl (Konstante)                           #
+ * #    der 10-stelligen                                                #
+ * #    Kontonummer                                                     #
+ * #         0               4383200                                    #
+ * #         1               4383201                                    #
+ * #         2               4383202                                    #
+ * #         3               4383203                                    #
+ * #         4               4383204                                    #
+ * #         5               4383205                                    #
+ * #                                                                    #
+ * # Die Berechnung und mögliche Ergebnisse entsprechen der             #
+ * # Methode 00.                                                        #
+ * ######################################################################
+ * # Anmerkung zur Berechnung (MP): Die Methode entspricht (bis auf     #
+ * # die Konstante und die zugelassenen Anfangsziffern) genau der       #
+ * # Methode D1. die Berechnung ist daher auch analog. Die              #
+ * # zusätzliche feste Konstante wird im voraus berechnet und als       #
+ * # Initialwert für die Quersumme verwendet. Die Berechnung beginnt    #
+ * # allerdings - entgegen der Beschreibung - mit der ersten Stelle     #
+ * # der Kontonummer, da diese in der Konstanten enthalten ist.         #
+ * ######################################################################
+ */
+
+      case 142:
+#if DEBUG>0
+         if(retvals){
+            retvals->methode="E2";
+            retvals->pz_methode=142;
+         }
+#endif
+         if(*kto>'5')return INVALID_KTO;
+         pz=25;
+
+#ifdef __ALPHA
+         pz+= ((kto[0]<'5') ? (kto[0]-'0')*2 : (kto[0]-'0')*2-9)
+            +  (kto[1]-'0')
+            + ((kto[2]<'5') ? (kto[2]-'0')*2 : (kto[2]-'0')*2-9)
+            +  (kto[3]-'0')
+            + ((kto[4]<'5') ? (kto[4]-'0')*2 : (kto[4]-'0')*2-9)
+            +  (kto[5]-'0')
+            + ((kto[6]<'5') ? (kto[6]-'0')*2 : (kto[6]-'0')*2-9)
+            +  (kto[7]-'0')
+            + ((kto[8]<'5') ? (kto[8]-'0')*2 : (kto[8]-'0')*2-9);
+#else
+         pz+=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0')+(kto[7]-'0');
+         if(kto[0]<'5')pz+=(kto[0]-'0')*2; else pz+=(kto[0]-'0')*2-9;
+         if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
+         if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
+         if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
+         if(kto[8]<'5')pz+=(kto[8]-'0')*2; else pz+=(kto[8]-'0')*2-9;
+#endif
+         MOD_10_80;   /* pz%=10 */
+         if(pz)pz=10-pz;
+         CHECK_PZ10;
 
 /* nicht abgedeckte Fälle +§§§3 */
 /*
@@ -20335,7 +20315,6 @@ DLL_EXPORT int kto_check_blz(char *blz,char *kto)
 #if DEBUG>0    /* es werden einige Funktionen benutzt, die nur in der Debug-Variante enthalten sind */
 DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,const char **bic,int *regel,RETVAL *retvals)
 {
-#if USE_IBAN_RULES
    char *blz_o,buffer[32],kto_o[16],*blz_n,*kto_n,*ptr,*dptr;
    const char *bicp;
    int ret,ret_regel,r;
@@ -20383,11 +20362,6 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
    }
    else  /* BLZ und Kto gleich */
       return ret;
-#else
-   if(regel)*regel=0;
-   if(retvals)*retvals=NULL;
-   return kto_check_regel(blz,kto);
-#endif
 }
 
 #else   /* !DEBUG */
@@ -20396,7 +20370,6 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
 
 DLL_EXPORT int kto_check_regel(char *blz,char *kto)
 {
-#if USE_IBAN_RULES
    char *blz_o,blz_n[10],kto_o[16],kto_n[16],*ptr,*dptr;
    const char *bicp;
    int ret,ret_regel,regel;
@@ -20424,9 +20397,6 @@ DLL_EXPORT int kto_check_regel(char *blz,char *kto)
    }
    else  /* BLZ und Kto gleich */
       return ret;
-#else
-   return kto_check_blz(blz,kto);
-#endif
 }
 
 /* Funktion kto_check_pz() +§§§1 */
@@ -20471,287 +20441,6 @@ DLL_EXPORT int kto_check_pz(char *pz,char *kto,char *blz)
 #endif
 }
 
-/* Funktion kto_check_blz_x() +§§§1 */
-/* ###########################################################################
- * # Die Funktion kto_check_blz_x() ist eine Hilfsfunktion für die Funktion  #
- * # iban_gen(). Diese Funktion bestimmt, ob für ein angegebenes Konto evl.  #
- * # ein Unterkonto weggelassen wurde (betrifft die Methode 13, 26, 50, 63,  #
- * # 76 und C7; ansonsten entspricht sie der Funktion kto_check_blz().       #
- * #                                                                         #
- * # Parameter:                                                              #
- * #    blz:        Bankleitzahl (immer 8-stellig)                           #
- * #    kto:        Kontonummer                                              #
- * #    uk_cnt:     Rückgabewert: Anzahl weggelassener Unterkontostellen     #
- * #                                                                         #
- * # Copyright (C) 2010 Michael Plugge <m.plugge@hs-mannheim.de>             #
- * ###########################################################################
- */
-
-static int kto_check_blz_x(char *blz,char *kto,int *uk_cnt)
-{
-   char *ptr,*dptr,xkto[32];
-   int i,p1=0,kto_len,pz,fuehrende_nullen;
-   int idx,pz_methode,untermethode=0;
-   RETVAL *retvals=NULL;
-
-   if(!blz || !kto)return MISSING_PARAMETER;
-   *uk_cnt=0;
-   if(init_status!=7){
-      if(init_status&24)INITIALIZE_WAIT;
-      if(init_status<7)return LUT2_NOT_INITIALIZED;
-   }
-   if((idx=lut_index(blz))<0)return idx;
-   pz_methode=pz_methoden[idx];
-
-   memset(xkto,'0',12);
-   for(ptr=kto;*ptr=='0' || *ptr==' ' || *ptr=='\t';ptr++);
-   for(kto_len=0;*ptr && *ptr!=' ' && *ptr!='\t';kto_len++,ptr++);
-   dptr=xkto+10;
-   *dptr--=0;
-   if(kto_len<1 || kto_len>10)return INVALID_KTO_LENGTH;
-   for(ptr--,i=kto_len;i-->0;*dptr--= *ptr--);
-   kto=xkto;
-   for(fuehrende_nullen=i=0;i<3;i++)if(kto[i]=='0')fuehrende_nullen++; else break;
-
-   switch(pz_methode){
-      case 13:
-            /* Methode 13a */
-         pz =(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
-         if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
-         if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-         if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-         MOD_10_80;   /* pz%=10 */
-         if(pz)pz=10-pz;
-         CHECK_PZX8;
-         if(fuehrende_nullen<2)return FALSE;   /* Methode 13b nur möglich, falls 1. und 2. Stelle '0' sind */
-
-            /* Methode 13b: 2-stelliges Unterkonto weggelassen */
-         *uk_cnt=2;
-         pz =(kto[3]-'0')+(kto[5]-'0')+(kto[7]-'0');
-         if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-         if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-         if(kto[8]<'5')pz+=(kto[8]-'0')*2; else pz+=(kto[8]-'0')*2-9;
-
-         MOD_10_80;   /* pz%=10 */
-         if(pz)pz=10-pz;
-         CHECK_PZ10;
-
-      case 26:
-         if(fuehrende_nullen>=2){
-               /* Unterkontonummer ausgelassen */
-            *uk_cnt=2;
-            pz = (kto[2]-'0') * 2
-               + (kto[3]-'0') * 7
-               + (kto[4]-'0') * 6
-               + (kto[5]-'0') * 5
-               + (kto[6]-'0') * 4
-               + (kto[7]-'0') * 3
-               + (kto[8]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ10;
-         }
-         else{
-            *uk_cnt=-1; /* Unterkonto angegeben */
-            pz = (kto[0]-'0') * 2
-               + (kto[1]-'0') * 7
-               + (kto[2]-'0') * 6
-               + (kto[3]-'0') * 5
-               + (kto[4]-'0') * 4
-               + (kto[5]-'0') * 3
-               + (kto[6]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ8;
-         }
-
-      case 50:
-            /* Methode 50a */
-         pz = (kto[0]-'0') * 7
-            + (kto[1]-'0') * 6
-            + (kto[2]-'0') * 5
-            + (kto[3]-'0') * 4
-            + (kto[4]-'0') * 3
-            + (kto[5]-'0') * 2;
-
-         MOD_11_176;   /* pz%=11 */
-         if(pz<=1)
-            pz=0;
-         else
-            pz=11-pz;
-         CHECK_PZX7;
-
-            /* Methode 50b 
-             *
-             * es ist eine reale Kontonummer bekannt, bei der rechts nur eine
-             * Null weggelassen wurde; daher wird die Berechnung für die
-             * Methode 50b leicht modifiziert, so daß eine, zwei oder drei
-             * Stellen der Unterkontonummer 000 weggelassen werden können.
-             */
-         if(kto[0]=='0' && kto[1]=='0' && kto[2]=='0'){
-            *uk_cnt=3;
-            pz = (kto[3]-'0') * 7
-               + (kto[4]-'0') * 6
-               + (kto[5]-'0') * 5
-               + (kto[6]-'0') * 4
-               + (kto[7]-'0') * 3
-               + (kto[8]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ10;
-         }
-         else if(kto[0]=='0' && kto[1]=='0' && kto[9]=='0'){
-            *uk_cnt=2;
-            pz = (kto[2]-'0') * 7
-               + (kto[3]-'0') * 6
-               + (kto[4]-'0') * 5
-               + (kto[5]-'0') * 4
-               + (kto[6]-'0') * 3
-               + (kto[7]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ9;
-         }
-         else if(kto[0]=='0' && kto[8]=='0' && kto[9]=='0'){
-            *uk_cnt=1;
-            pz = (kto[1]-'0') * 7
-               + (kto[2]-'0') * 6
-               + (kto[3]-'0') * 5
-               + (kto[4]-'0') * 4
-               + (kto[5]-'0') * 3
-               + (kto[6]-'0') * 2;
-
-            MOD_11_176;   /* pz%=11 */
-            if(pz<=1)
-               pz=0;
-            else
-               pz=11-pz;
-            CHECK_PZ8;
-         }
-         return FALSE;
-
-      case 63:
-         if(*kto!='0')return INVALID_KTO;
-         if(*(kto+1)=='0' && *(kto+2)=='0'){ /* wahrscheinlich Unterkonto weggelassen */
-            *uk_cnt=2;
-            pz=(kto[3]-'0')+(kto[5]-'0')+(kto[7]-'0');
-            if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-            if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-            if(kto[8]<'5')pz+=(kto[8]-'0')*2; else pz+=(kto[8]-'0')*2-9;
-            MOD_10_80;   /* pz%=10 */
-            if(pz)pz=10-pz;
-            CHECK_PZX10;
-         }
-         pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
-         if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
-         if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-         if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-         MOD_10_80;   /* pz%=10 */
-         if(pz)pz=10-pz;
-         CHECK_PZ8;
-
-      case 76:
-               /* Methode 76a */
-         if((p1= *kto)=='1' || p1=='2' || p1=='3' || p1=='5')return INVALID_KTO;
-         pz = (kto[1]-'0') * 7
-            + (kto[2]-'0') * 6
-            + (kto[3]-'0') * 5
-            + (kto[4]-'0') * 4
-            + (kto[5]-'0') * 3
-            + (kto[6]-'0') * 2;
-
-         MOD_11_176;   /* pz%=11 */
-         CHECK_PZX8;
-
-               /* Methode 76b */
-         if(kto[0]!='0' || kto[1]!='0')return FALSE;
-         if((p1=kto[2])=='1' || p1=='2' || p1=='3' || p1=='5')return INVALID_KTO;
-         *uk_cnt=2;
-         pz = (kto[3]-'0') * 7
-            + (kto[4]-'0') * 6
-            + (kto[5]-'0') * 5
-            + (kto[6]-'0') * 4
-            + (kto[7]-'0') * 3
-            + (kto[8]-'0') * 2;
-
-         MOD_11_176;   /* pz%=11 */
-         if(pz==10)return INVALID_KTO;
-         CHECK_PZ10;
-
-      case 127:
-         if(*kto=='0'){ /* bei Methode 63 sind 10-stellige Kontonummern falsch */
-            if(*(kto+1)=='0' && *(kto+2)=='0'){
-
-               /* Methode C7c */
-
-               /* wahrscheinlich Unterkonto weggelassen; das kommt wohl eher
-                * vor als 7-stellige Nummern (Hinweis T.F.); stimmt auch mit
-                * http://www.kontonummern.de/check.php überein.
-               */
-               *uk_cnt=2;
-               pz=(kto[3]-'0')+(kto[5]-'0')+(kto[7]-'0');
-               if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-               if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-               if(kto[8]<'5')pz+=(kto[8]-'0')*2; else pz+=(kto[8]-'0')*2-9;
-               MOD_10_80;   /* pz%=10 */
-               if(pz)pz=10-pz;
-               CHECK_PZX10;
-               *uk_cnt=0; /* Bedingung nicht erfüllt, Unterkto. zurücksetzen */
-            }
-               /* Methode C7a */
-            pz=(kto[1]-'0')+(kto[3]-'0')+(kto[5]-'0');
-            if(kto[2]<'5')pz+=(kto[2]-'0')*2; else pz+=(kto[2]-'0')*2-9;
-            if(kto[4]<'5')pz+=(kto[4]-'0')*2; else pz+=(kto[4]-'0')*2-9;
-            if(kto[6]<'5')pz+=(kto[6]-'0')*2; else pz+=(kto[6]-'0')*2-9;
-            MOD_10_80;   /* pz%=10 */
-            if(pz)pz=10-pz;
-            CHECK_PZX8;
-         }
-
-            /* Methode C7b */
-            /* Variante 2 */
-         pz = (kto[0]-'0') * 4
-            + (kto[1]-'0') * 3
-            + (kto[2]-'0') * 2
-            + (kto[3]-'0') * 7
-            + (kto[4]-'0') * 6
-            + (kto[5]-'0') * 5
-            + (kto[6]-'0') * 4
-            + (kto[7]-'0') * 3
-            + (kto[8]-'0') * 2;
-
-         MOD_11_176;   /* pz%=11 */
-         if(pz<=1)
-            pz=0;
-         else
-            pz=11-pz;
-         CHECK_PZ10;
-
-      default:
-         *uk_cnt=-2;
-#if DEBUG>0
-         return kto_check_int(blz,pz_methode,kto,untermethode,NULL);
-#else
-         return kto_check_int(blz,pz_methode,kto);
-#endif
-   }
-}
 
 /* Funktion kto_check_blz_dbg() +§§§1 */
 /* ###########################################################################
@@ -21194,18 +20883,22 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 4:                              /* Datum der Prüfziffermethode */
 #if 1
          if(pz_aenderungen_aktivieren)
-            return "08.09.2014";
+            return "08.06.2015";
          else
-            return "09.06.2014 (Aenderungen vom 08.09.2014 enthalten aber noch nicht aktiviert)";
+            return "09.03.2015 (Aenderungen vom 08.06.2015 enthalten aber noch nicht aktiviert)";
 #else
-         return "08.09.2014";
+         return "08.06.2015";
 #endif
       case 5:
-        return "08.09.2014";
+        return "09.03.2015";
       case 6:
-        return "1. September 2014";            /* Klartext-Datum der Bibliotheksversion */
+        return "4. April 2015";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "final";            /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "beta";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+      case 8:
+        return "5";             /* Hauptversionszahl */
+      case 9:
+        return "6";             /* Unterversionszahl */
    }
 }
 
@@ -21812,9 +21505,6 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
    char c,check[128],iban[128],kto_n[16],blz_n[12],*ptr,*dptr;
    const char *bic;
    int j,ret,ret_regel,blz_i,flags,regel;
-#if !USE_IBAN_RULES
-   int uk_cnt=-1;
-#endif
    UINT4 zahl,rest;
 
    if(bicp)*bicp=NULL;
@@ -21845,7 +21535,6 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
    blz_i=b8[I blz[0]]+b7[I blz[1]]+b6[I blz[2]]+b5[I blz[3]]+b4[I blz[4]]+b3[I blz[5]]+b2[I blz[6]]+b1[I blz[7]];
 
       /* BLZ und Kontonummer in eigenen Speicherbereich kopieren, Konto links mit Nullen füllen */
-#if USE_IBAN_RULES
    for(ptr=blz,dptr=blz_n;(*dptr++=*ptr++););
    for(ptr=kto;*ptr;ptr++);   /* Ende von kto suchen */
    ptr--;
@@ -21886,16 +21575,6 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
       ret_regel=OK;
    }
    if(ret_regel==OK_IBAN_WITHOUT_KC_TEST || ret_regel==OK_KTO_REPLACED_NO_PZ)flags|=1; /* kein Test der Bankverbindung */
-#else
-   ret_regel=OK;
-   if(!(flags&2) && own_iban){
-         /* testen, ob die BLZ in der "Verbotsliste" steht */
-      if(bsearch(&blz_i,own_iban,own_iban_cnt,sizeof(int),cmp_int)){
-         if(retval)*retval=NO_OWN_IBAN_CALCULATION;
-         return NULL;
-      }
-   }
-#endif
 
       /* IBAN-Regel 0000 00: BLZ durch Nachfolge-BLZ ersetzen, falls eine
        * solche existiert. Für einige Konten wird die BLZ auch in den
@@ -21934,53 +21613,10 @@ DLL_EXPORT char *iban_bic_gen(char *blz,char *kto,const char **bicp,char *blz2,c
 
       /* erstmal das Konto testen */
    if(!(flags&1)){  /* Test der Bankverbindung */
-#if USE_IBAN_RULES
       if((ret=kto_check_blz(blz,kto))<=0){   /* Konto fehlerhaft */
          if(retval)*retval=ret;
          return NULL;
       }
-#else
-      if((ret=kto_check_blz_x(blz,kto,&uk_cnt))<=0){  /* Konto fehlerhaft */
-         if(retval)*retval=ret;
-         return NULL;
-      }
-
-         /* bei einigen Methoden (13, 26, 50, 63, 76 und C7) kann u.U. ein
-          * Unterkonto weggelassen worden sein. Näheres dazu in der Funktion
-          * kto_check_blz_x().
-          *
-          * *** (alter Code, mit den IBAN-Regeln ist dieser Kommentar nicht mehr aktuell) ***
-          * Falls dies der Fall war (uk_cnt>0) wird es hier wieder an der
-          * richtigen Stelle eingefügt; es wird allerdings als Fehler angesehen
-          * (mit dem Fehlercode OK_UNTERKONTO_ATTACHED). Falls ein Unterkonto
-          * möglich bzw. angegeben ist, ist das normalerweise ein Zeichen dafür
-          * daß das betreffende Institut einer Selbstberechnung nicht zugestimmt
-          * hat; es wird dann nur eine Warnung ausgegeben (OK_UNTERKONTO_POSSIBLE
-          * bzw. OK_UNTERKONTO_GIVEN), aber diese Werte sind größer als 0 und
-          * werden insofern nicht als Fehler gerechnet. Das Ergebnis kann
-          * allerdings u.U. falsch sein und sollte mit Vorsicht benutzt werden.
-          */
-      if(uk_cnt>0){
-         for(ptr=kto,dptr=kto_n;(*dptr=*ptr++);dptr++);
-         *dptr++='0';
-         if(uk_cnt>1)*dptr++='0';
-         if(uk_cnt>2)*dptr++='0';
-         *dptr=0;
-         if((ret=kto_check_blz(blz,kto_n))>0){   /* Unterkonto muß angehängt werden */
-            kto=kto_n;
-            ret_regel=OK_UNTERKONTO_ATTACHED;
-         }
-      }
-      else if(!uk_cnt){
-         ret_regel=OK_UNTERKONTO_POSSIBLE;
-      }
-      else if(uk_cnt==-1){
-         ret_regel=OK_UNTERKONTO_GIVEN;
-      }
-      else{ /* uk_cnt==-2 */
-         ret_regel=OK;
-      }
-#endif
    }
    else
       if(ret_regel!=OK_IBAN_WITHOUT_KC_TEST && ret_regel!=OK_KTO_REPLACED_NO_PZ)ret_regel=LUT2_KTO_NOT_CHECKED;
@@ -24020,6 +23656,7 @@ DLL_EXPORT int lut_suche(int such_id,char *such_cmd,UINT4 *such_cnt,UINT4 **fili
       if(ret==KEY_NOT_FOUND)key_not_found=1;
    }
    for(s=s1=s2=NULL,typ=SUCHE_STD,ptr=such_cmd;*ptr;ptr++){
+
       if(*ptr=='+'){
          if(typ==SUCHE_STD)
             s=lut_suche_multiple_or(s,&s1,NULL);
@@ -25839,7 +25476,7 @@ static int convert_encoding(char **data,UINT4 *len)
 DLL_EXPORT const char *pz2str(int pz,int *ret)
 {
    if(ret){
-      if(pz%1000>=142)
+      if(pz%1000>=143)
          *ret=NOT_DEFINED;
       else
          *ret=OK;
@@ -25987,6 +25624,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       case 139: return "D9";
       case 140: return "E0";
       case 141: return "E1";
+      case 142: return "E2";
       case 1013: return "13a";
       case 1049: return "49a";
       case 1050: return "50a";

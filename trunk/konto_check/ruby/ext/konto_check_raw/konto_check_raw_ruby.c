@@ -4350,11 +4350,11 @@ void Init_konto_check_raw()
 /*
  * This is a C/Ruby library to check the validity of German Bank Account
  * Numbers. All currently defined test methods by Deutsche Bundesbank
- * (00 to E1) are implemented.
+ * (00 to E2) are implemented.
  *
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
- * and this version (V. 5.5 from 2014-09-01):
+ * and this version (V. 5.6 from 2015-04-04):
  *
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
