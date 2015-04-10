@@ -1,4 +1,4 @@
-important changes in version 5.4:
+important changes in version 5.5:
    - bug fix in functions bic_check() and ci_check()
    - the functions rebuild_blzfile() and pz_aenderungen_enable() are available for ruby
 
