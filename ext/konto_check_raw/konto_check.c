@@ -48,11 +48,11 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.6 (beta)"
+#define VERSION "5.6 (final)"
 #define VERSION_MAJOR 5
 #define VERSION_MINOR 6
 #endif
-#define VERSION_DATE "2015-04-04"
+#define VERSION_DATE "2015-05-13"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -11448,7 +11448,37 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             pz=0;
          else
             pz=11-pz;
-         CHECK_PZ10;
+         CHECK_PZX10;
+
+            /* Noch ein Sonderfall aus der IBAN-Regel 49 (WGZ-Bank, diese Prüfziffermethode
+             * wird nur von der Bank verwendet). Bei Konten mit einer '9' an der 5. Stelle
+             * oder 10-stellige Konten die mit '9' beginnen (diese sind schon herumgedreht)
+             * wird die Ausnahme aus IBAN-Regel 49 angewendet:
+             *
+             *    Für Kontonummern mit einer '9' an der 5. Stelle muss die
+             *    Kontonummer, auf deren Basis die IBAN ermittelt wird, abweichend
+             *    berechnet werden. Die ersten 4 Stellen (inkl. aufgefüllter
+             *    Nullen) müssen ans Ende gestellt werden, so dass die Kontonummer
+             *    dann immer mit der '9' anfängt.
+             *    
+             *    Beispiel:
+             *    
+             *    Kontonummer alt:	0001991182
+             *    Kontonummer für die Berechnung der IBAN:	9911820001
+             *    
+             *    Diese neu ermittelte Kontonummer hat keine Prüfziffer, die
+             *    daher auch nicht geprüft werden darf. Ansonsten kann mit
+             *    dieser Kontonummer die IBAN mit der Standard-IBAN-Regel
+             *    ermittelt werden. 
+             *
+             * Das Verhalten mit der führenden '9' ist nicht in der IBAN-Regel angegeben,
+             * wurde aber aufgrund realer Kontodaten gefunden und durch eine Nachfrage bei
+             * der Bank bestätigt (Vielen Dank an Stefan Banse für den Hinweis).
+             */
+         if(*kto=='9' || *(kto+4)=='9')
+            return OK_NO_CHK;
+         else
+            return FALSE;
 
 /*  Berechnung nach der Methode 45 +§§§4 */
 /*
@@ -20890,11 +20920,11 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          return "08.06.2015";
 #endif
       case 5:
-        return "09.03.2015";
+        return "08.06.2015";
       case 6:
-        return "4. April 2015";            /* Klartext-Datum der Bibliotheksversion */
+        return "13. Mai 2015";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
-        return "beta";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
+        return "final";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
       case 8:
         return "5";             /* Hauptversionszahl */
       case 9:
@@ -21314,7 +21344,7 @@ DLL_EXPORT const char *iban2bic(char *iban,int *retval,char *blz,char *kto)
        * iban_bic_gen() genommen, ansonsten der aus lut_bic().
        */
    if(retval)*retval=OK;
-   if((j=lut_index(blz2))<=0){
+   if((j=lut_index(blz2))<0){
       if(retval)*retval=j;
       return "";
    }
@@ -21977,7 +22007,7 @@ DLL_EXPORT int iban_check(char *iban,int *retval)
              * falls nicht, Fehlermeldung/Warnung.
              */
          j=lut_index(blz2);
-         if(j>0){
+         if(j>=0){
             if((ret=iban_init())<OK)return ret;  /* alle notwendigen Blocks kontrollieren, evl. nachladen */
             uk=uk_pz_methoden[pz_methoden[j]];
             nachfolge=nachfolge_blz[startidx[j]];
