@@ -1,3 +1,6 @@
+important changes in version 5.7:
+   - bug fix in method 90 (method 90g was excluded)
+
 important changes in version 5.6:
    - new check method E2
    - changes in check methods 08, 28, 34, 44 (more details in the source code)
