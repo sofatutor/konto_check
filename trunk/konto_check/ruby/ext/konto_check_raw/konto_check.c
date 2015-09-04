@@ -48,11 +48,11 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.7 (final)"
+#define VERSION "5.8 (final)"
 #define VERSION_MAJOR 5
-#define VERSION_MINOR 7
+#define VERSION_MINOR 8
 #endif
-#define VERSION_DATE "2015-05-26"
+#define VERSION_DATE "2015-08-22"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -103,8 +103,8 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die Änderungen zum Juni 2015 zu aktivieren */
-static int pz_aenderungen_aktivieren_2015_06;
+   /* Flag, um die Änderungen zum September 2015 zu aktivieren */
+static int pz_aenderungen_aktivieren_2015_09;
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
     * Funktionen mittels perror() zusätzliche Debuginfos ausgegeben. Die
@@ -9266,8 +9266,8 @@ static void init_atoi_table(void)
    unsigned long l;
 
 #if 1
-      /* Änderungen zum 9.6.2014 aktivieren */
-   if(time(NULL)>1433714400)pz_aenderungen_aktivieren_2015_06=1;
+      /* Änderungen zum 07.09.2015 aktivieren */
+   if(time(NULL)>1441576800 ||0)pz_aenderungen_aktivieren_2015_09=1;
 #endif
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
@@ -15025,8 +15025,18 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 /*  Berechnung nach der Methode 87 +§§§4 */
 /*
  * ######################################################################
- * #          Berechnung nach der Methode 87 (geändert zum 6.9.04)      #
+ * #          Berechnung nach der Methode 87 (geändert zum 7.9.15)      #
  * ######################################################################
+ * #                                                                    #
+ * # Die Kontonummer ist durch linksbündige Nullenauffüllung 10-stellig #
+ * # darzustellen. Der zur Prüfzifferberechnung heranzuziehende Teil    #
+ * # befindet sich bei der Methode A und D in den Stellen 4 bis 9 der   #
+ * # Kontonummer und bei den Methoden B und C in Stellen 5 - 9, die     #
+ * # Prüfziffer in Stelle 10 der Kontonummer. Ergibt die erste          #
+ * # Berechnung der Prüfziffer nach der Methode A einen Prüfziffer-     #
+ * # fehler, so sind weitere Berechnungen mit den anderen Methoden      #
+ * # vorzunehmen.                                                       #
+ * #                                                                    #
  * # Ausnahme:                                                          #
  * # Ist nach linksbündiger Auffüllung mit Nullen auf 10 Stellen die    #
  * # 3. Stelle der Kontonummer = 9 (Sachkonten), so erfolgt die         #
@@ -15059,18 +15069,28 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # verbleibende Rest wird vom Divisor (7) subtrahiert. Das            #
  * # Ergebnis ist die Prüfziffer. Verbleibt nach der Division kein      #
  * # Rest, ist die Prüfziffer = 0.                                      #
+ * #                                                                    #
+ * # Methode D:                                                         #
+ * # Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7                            #
+ * # Die Stellen 4 bis 9 werden von rechts nach links mit den Ziffern   #
+ * # 2, 3, 4, 5, 6, 7 multipliziert. Die weitere Berechnung und         #
+ * # mögliche Ergebnisse entsprechen dem Verfahren 06.                  #
  * ######################################################################
  */
 
       case 87:
 
-                /* Ausnahme, Variante 1 */
+                /* Ausnahme, Variante 1
+                 * Die Untermethoden für die Sachkonten verschieben sich mit
+                 * der Änderung zum September 2015 (Einführung von Methode D)
+                 * leider auf E und F (statt vorher D und E).
+                 */
          if(*(kto+2)=='9'){   /* Berechnung wie in Verfahren 51 */
 #if DEBUG>0
-      case 4087:
+      case 5087:
          if(retvals){
-            retvals->methode="87d";
-            retvals->pz_methode=4087;
+            retvals->methode="87e";
+            retvals->pz_methode=5087;
          }
 #endif
             pz =         9 * 8
@@ -15090,10 +15110,10 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 
             /* Ausnahme, Variante 2 */
 #if DEBUG>0
-      case 5087:
+      case 6087:
          if(retvals){
-            retvals->methode="87e";
-            retvals->pz_methode=5087;
+            retvals->methode="87f";
+            retvals->pz_methode=6087;
          }
 #endif
                pz = (kto[0]-'0') * 10
@@ -15259,10 +15279,31 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             retvals->pz_pos=10;
          }
 #endif
-         if(pz==*(kto+9)-'0')
-            return OK;
+         if(pz==*(kto+9)-'0')return OK;
+
+#if DEBUG>0
+      case 4087:
+         if(retvals){
+            retvals->methode="87d";
+            retvals->pz_methode=4087;
+         }
+#endif
+            /* die neue Untermethode wird erst ab 7. September 2015 gültig */
+         if(!pz_aenderungen_aktivieren_2015_09)return UNDEFINED_SUBMETHOD;
+
+         pz = (kto[3]-'0') * 7
+            + (kto[4]-'0') * 6
+            + (kto[5]-'0') * 5
+            + (kto[6]-'0') * 4
+            + (kto[7]-'0') * 3
+            + (kto[8]-'0') * 2;
+
+         MOD_11_176;   /* pz%=11 */
+         if(pz<=1)
+            pz=0;
          else
-            return FALSE;
+            pz=11-pz;
+         CHECK_PZ10;
 
 
 /*  Berechnung nach der Methode 88 +§§§4 */
@@ -20457,7 +20498,6 @@ DLL_EXPORT int kto_check_pz(char *pz,char *kto,char *blz)
 #endif
 }
 
-
 /* Funktion kto_check_blz_dbg() +§§§1 */
 /* ###########################################################################
  * # Die Funktion kto_check_blz_dbg() ist die Debug-Version von              #
@@ -20898,23 +20938,23 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          return __DATE__ ", " __TIME__;    /* Compilierdatum und -zeit */
       case 4:                              /* Datum der Prüfziffermethode */
 #if 1
-         if(pz_aenderungen_aktivieren_2015_06)
-            return "08.06.2015";
+         if(pz_aenderungen_aktivieren_2015_09)
+            return "07.09.2015";
          else
-            return "09.03.2015 (Aenderungen vom 08.06.2015 enthalten aber noch nicht aktiviert)";
+            return "08.06.2015 (Aenderungen vom 07.09.2015 enthalten aber noch nicht aktiviert)";
 #else
-         return "08.06.2015";
+         return "07.09.2015";
 #endif
       case 5:
-        return "08.06.2015";
+        return "07.09.2015";
       case 6:
-        return "26. Mai 2015";            /* Klartext-Datum der Bibliotheksversion */
+        return "22. August 2015";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "final";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
       case 8:
         return "5";             /* Hauptversionszahl */
       case 9:
-        return "7";             /* Unterversionszahl */
+        return "8";             /* Unterversionszahl */
    }
 }
 
@@ -21194,10 +21234,7 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
       if(ret<=0)RETURN(ret);
    }
    else  /* set-Parameter 1 oder 2: LUT-Datei als Eingabedatei */
-      if(set<0)   /* set darf nur 0, 1 oder 2 sein; 0 wurde schon behandelt */
-         set=1;
-      else if(set>2)
-         set=2;
+      if(set>2)set=2;   /* set darf nur 0, 1 oder 2 sein; 0 wurde schon behandelt, negative Werte gibt es nicht (UINT4 Parameter) */
       if((ret=kto_check_init_p(inputname,9,set,0))<=0)RETURN(ret);
 
    if(!(out=fopen(outputname,"w"))){
@@ -25821,6 +25858,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       case 5090: return "90e";
       case 5104: return "A4e";
       case 6051: return "51f";
+      case 6087: return "87f";
       case 6090: return "90f";
       case 7090: return "90g";
       default:   return "???";
@@ -25940,7 +25978,7 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 /* Funktion pz_aenderungen_enable() +§§§1 */
 /* ###########################################################################
  * # Die Funktion pz_aenderungen_enable() dient dazu, den Status des Flags   #
- * # pz_aenderungen_aktivieren_2015_06 abzufragen bzw. zu setzen. Falls die Variable #
+ * # pz_aenderungen_aktivieren_2015_09 abzufragen bzw. zu setzen. Falls die Variable #
  * # set 1 ist, werden die Änderungen aktiviert, falls sie 0 ist, werden     #
  * # die Änderungen deaktiviert. Bei allen anderen Werten wird das aktuelle  #
  * # Flag nicht verändert, sondern nur der Status zurückgegeben.             #
@@ -25956,8 +25994,8 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 
 DLL_EXPORT int pz_aenderungen_enable(int set)
 {
-   if(set==0 || set==1)pz_aenderungen_aktivieren_2015_06=set;
-   return pz_aenderungen_aktivieren_2015_06;
+   if(set==0 || set==1)pz_aenderungen_aktivieren_2015_09=set;
+   return pz_aenderungen_aktivieren_2015_09;
 }
 
 #if DEBUG>0
