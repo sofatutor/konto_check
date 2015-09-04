@@ -32,7 +32,7 @@ begin
     gem.homepage = "http://kontocheck.sourceforge.net"
     gem.authors = ["Provideal Systems GmbH","Jan Schwenzien","Michael Plugge"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
-    gem.version = "5.7.0"
+    gem.version = "5.8.0"
     gem.extra_rdoc_files = [
       "LICENSE",
       "README.textile",

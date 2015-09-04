@@ -1760,6 +1760,9 @@ static VALUE load_bank_data(VALUE self, VALUE path_rb)
  * für BIC, BLZ und Kontonummer nil zurückgegeben.
  *
  * ====Mögliche Statuscodes:
+ * *  -130  (IBAN_CHKSUM_OK_RULE_IGNORED "Die IBAN-Prüfsumme stimmt, es wurde allerdings eine IBAN-Regel nicht beachtet (wahrscheinlich falsch)"
+ * *  -124  (NO_IBAN_CALCULATION)        "Für die Bankverbindung ist keine IBAN-Berechnung erlaubt"
+ * *  -121  (INVALID_IBAN_LENGTH)        "Die Länge der IBAN für das angegebene Länderkürzel ist falsch"
  * *   -68  (IBAN2BIC_ONLY_GERMAN)       "Die Funktion iban2bic() arbeitet nur mit deutschen Bankleitzahlen"
  * *   -46  (LUT2_BIC_NOT_INITIALIZED)   "Das Feld BIC wurde nicht initialisiert"
  * *   -40  (LUT2_NOT_INITIALIZED)       "die Programmbibliothek wurde noch nicht initialisiert"
@@ -4354,7 +4357,7 @@ void Init_konto_check_raw()
  *
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
- * and this version (V. 5.7 from 2015-05-26):
+ * and this version (V. 5.8 from 2015-08-22):
  *
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
