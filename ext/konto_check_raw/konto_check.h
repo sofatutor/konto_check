@@ -9,7 +9,7 @@
  * #  Verwendung in anderen Programmen bzw. Programmiersprachen benutzt     #
  * #  werden.                                                               #
  * #                                                                        #
- * #  Copyright (C) 2002-2015 Michael Plugge <m.plugge@hs-mannheim.de>      #
+ * #  Copyright (C) 2002-2016 Michael Plugge <m.plugge@hs-mannheim.de>      #
  * #                                                                        #
  * #  Dieses Programm ist freie Software; Sie dürfen es unter den           #
  * #  Bedingungen der GNU Lesser General Public License, wie von der Free   #
@@ -76,7 +76,10 @@
  * einige Arrays damit initialisiert werden.
  */
 
-#define DEFAULT_ENCODING 1
+#ifndef DEFAULT_ENCODING
+#  define DEFAULT_ENCODING 1
+#endif
+
 #define KEEP_RAW_DATA    1
 
 /* 
@@ -327,6 +330,8 @@ extern const char *lut2_feld_namen[256];
  */
 
 #undef FALSE
+#define INVALID_REGULAR_EXPRESSION_CNT        -152
+#define INVALID_REGULAR_EXPRESSION            -151
 #define INVALID_HANDLE                        -150
 #define INVALID_BIQ_INDEX                     -149
 #define ARRAY_INDEX_OUT_OF_RANGE              -148

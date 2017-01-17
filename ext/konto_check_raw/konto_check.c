@@ -13,7 +13,7 @@
  * #  wurden aus der aktuellen BLZ-Datei der Deutschen Bundesbank           #
  * #  übernommen.                                                           #
  * #                                                                        #
- * #  Copyright (C) 2002-2015 Michael Plugge <m.plugge@hs-mannheim.de>      #
+ * #  Copyright (C) 2002-2017 Michael Plugge <m.plugge@hs-mannheim.de>      #
  * #                                                                        #
  * #  Dieses Programm ist freie Software; Sie dürfen es unter den           #
  * #  Bedingungen der GNU Lesser General Public License, wie von der Free   #
@@ -48,11 +48,11 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "5.8 (final)"
+#define VERSION "5.9 (final)"
 #define VERSION_MAJOR 5
-#define VERSION_MINOR 8
+#define VERSION_MINOR 9
 #endif
-#define VERSION_DATE "2015-08-22"
+#define VERSION_DATE "2016-11-13"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -103,8 +103,8 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die Änderungen zum September 2015 zu aktivieren */
-static int pz_aenderungen_aktivieren_2015_09;
+   /* Flag, um die Änderungen zum Dezember 2016 zu aktivieren */
+static int pz_aenderungen_aktivieren_2016_12;
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
     * Funktionen mittels perror() zusätzliche Debuginfos ausgegeben. Die
@@ -3801,7 +3801,7 @@ DLL_EXPORT int kto_check_init(char *lut_name,int *required,int **status,int set,
             if(!(blz=(int *)calloc(lut2_cnt_hs+1,sizeof(int)))
                   || (!startidx && !(startidx=(int *)calloc(lut2_cnt_hs,sizeof(int))))  /* Index der Hauptstelle in den großen Arrays */
                   || (!hs_idx && !(hs_idx=(int *)calloc(lut2_cnt,sizeof(int))))   /* reziprok zu startidx */
-                  || !(hash=(short int *)calloc(sizeof(short),HASH_BUFFER_SIZE)))
+                  || !(hash=(short int *)calloc(HASH_BUFFER_SIZE,sizeof(short))))
                lut2_block_status[typ]=lut2_block_status[typ1]=ERROR_MALLOC;
             else{
                for(i=0,eptr=data+len;ptr<eptr && i<lut2_cnt_hs;i++){
@@ -8048,8 +8048,16 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
          /* Deutsche Bundesbank */
       case 42:
 
-            /* nur 8-stellige Konten sind zur IBAN-Berechnung freigegeben */
-         if(*kto!='0' || kto[1]!='0')return NO_IBAN_CALCULATION;
+            /* ab Dezember 2016 sind auch 10-stellige Konten der Form nnn4400001 bis nnn4499999 zulässig */
+         if(k1>=10 && pz_aenderungen_aktivieren_2016_12){ /* 10-stellige Kontonummern ab Dezember 2016 */
+            if(kto[3]=='4' && kto[4]=='4' && (kto[5]!='0' || kto[6]!='0' ||  kto[7]!='0' || kto[8]!='0' || kto[9]!='0'))
+               return OK;
+            else
+               return NO_IBAN_CALCULATION;
+         }
+
+            /* ansonsten sind nur noch 8-stellige Konten freigegeben */
+         if(k1!=0 || k2<10000000)return NO_IBAN_CALCULATION;
 
             /* Konten ohne IBAN-Berechnung:  nnn 0 0000 bis nnn 0 0999 */
          if(kto[5]=='0' && kto[6]=='0')return NO_IBAN_CALCULATION;
@@ -9265,10 +9273,8 @@ static void init_atoi_table(void)
    int i,ziffer;
    unsigned long l;
 
-#if 1
-      /* Änderungen zum 07.09.2015 aktivieren */
-   if(time(NULL)>1441576800 ||0)pz_aenderungen_aktivieren_2015_09=1;
-#endif
+      /* Änderungen zum 05.12.2016 aktivieren */
+   if(time(NULL)>1480892400 ||0)pz_aenderungen_aktivieren_2016_12=1;
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
     * angesehen(!), da die Stellenzuordnung sonst nicht mehr stimmt. Ausnahme:
@@ -13721,15 +13727,18 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 /*  Berechnung nach der Methode 74 +§§§4 */
 /*
  * ######################################################################
- * #    Berechnung nach der Methode 74 (geändert zum 4.6.2007)          #
+ * #    Berechnung nach der Methode 74 (geändert zum 5.12.2016)         #
  * ######################################################################
  * # Modulus 10, Gewichtung 2, 1, 2, 1, 2 ff.                           #
  * # Die Kontonummer (2- bis 10-stellig) ist durch linksbündige         #
  * # Nullenauffüllung 10-stellig darzustellen. Die 10. Stelle ist       #
- * # per Definition die Prüfziffer. Die für die Berechnung              #
- * # relevanten Stellen werden von rechts nach links mit den Ziffern    #
- * # 2, 1, 2, 1, 2 ff. multipliziert. Die weitere Berechnung und die    #
- * # Ergebnisse entsprechen dem Verfahren 00.                           #
+ * # per Definition die Prüfziffer.                                     #
+ * #                                                                    #
+ * # Variante 1:                                                        #
+ * # Die für die Berechnung relevanten Stellen werden von rechts nach   #
+ * # links mit den Ziffern  2, 1, 2, 1, 2 ff. multipliziert. Die        #
+ * # weitere Berechnung und die  Ergebnisse entsprechen dem Verfahren   #
+ * # 00.                                                                #
  * #                                                                    #
  * # Ausnahme:                                                          #
  * # Bei 6-stelligen Kontonummern ist folgende Besonderheit zu          #
@@ -13738,8 +13747,16 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
  * # einen Prüfziffernfehler, so ist eine weitere Berechnung            #
  * # vorzunehmen. Hierbei ist die Summe der Produkte auf die nächste    #
  * # Halbdekade hochzurechnen. Die Differenz ist die Prüfziffer.        #
+ * #                                                                    #
+ * # Führt die Berechnung nach Variante 1 zu einem Prüfzifferfehler,    #
+ * # so ist nach Variante 2 zu prüfen.                                  #
+ * #                                                                    #
+ * # Variante 2:                                                        #
+ * # Modulus 11, Gewichtung 2, 3, 4, 5, 6, 7, 2, 3, 4                   #
+ * # Gewichtung und Berechnung erfolgen nach der Methode 04.            #
  * ######################################################################
  */
+
       case 74:
          if(kto[0]=='0' && kto[1]=='0' && kto[2]=='0' && kto[3]=='0' && kto[4]=='0'
                && kto[5]=='0' && kto[6]=='0' && kto[7]=='0' && kto[8]=='0')return INVALID_KTO;
@@ -13822,7 +13839,31 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             CHECK_PZ10;
          }
          else
-            return FALSE;
+            if(!pz_aenderungen_aktivieren_2016_12)return FALSE;
+
+#if DEBUG>0
+      case 3074:
+         if(retvals){
+            retvals->methode="74c";
+            retvals->pz_methode=3074;
+         }
+#endif
+            /* die neue Untermethode wird erst ab 5. Dezember 2016 gültig */
+         if(!pz_aenderungen_aktivieren_2016_12)return UNDEFINED_SUBMETHOD;   /* die Änderung ist noch nicht gültig */
+         pz = (kto[0]-'0') * 4
+            + (kto[1]-'0') * 3
+            + (kto[2]-'0') * 2
+            + (kto[3]-'0') * 7
+            + (kto[4]-'0') * 6
+            + (kto[5]-'0') * 5
+            + (kto[6]-'0') * 4
+            + (kto[7]-'0') * 3
+            + (kto[8]-'0') * 2;
+
+         MOD_11_176;   /* pz%=11 */
+         if(pz)pz=11-pz;
+         INVALID_PZ10;
+         CHECK_PZ10;
 
 /*  Berechnung nach der Methode 75 +§§§4 */
 /*
@@ -15288,9 +15329,6 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
             retvals->pz_methode=4087;
          }
 #endif
-            /* die neue Untermethode wird erst ab 7. September 2015 gültig */
-         if(!pz_aenderungen_aktivieren_2015_09)return UNDEFINED_SUBMETHOD;
-
          pz = (kto[3]-'0') * 7
             + (kto[4]-'0') * 6
             + (kto[5]-'0') * 5
@@ -16031,7 +16069,7 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
 #endif
                for(p1=0,ptr=kto+4,i=0;i<5;ptr--,i++)
                   p1+=(*ptr-'0')*w93[i];
-                  *(kto+9)= *(kto+5);  /* Prüfziffer nach Stelle 10 */
+               *(kto+9)= *(kto+5);  /* Prüfziffer nach Stelle 10 */
             }
          }
 #endif
@@ -20938,23 +20976,23 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
          return __DATE__ ", " __TIME__;    /* Compilierdatum und -zeit */
       case 4:                              /* Datum der Prüfziffermethode */
 #if 1
-         if(pz_aenderungen_aktivieren_2015_09)
-            return "07.09.2015";
+         if(pz_aenderungen_aktivieren_2016_12)
+            return "05.12.2016";
          else
-            return "08.06.2015 (Aenderungen vom 07.09.2015 enthalten aber noch nicht aktiviert)";
+            return "07.09.2015 (Aenderungen vom 05.12.2016 enthalten aber noch nicht aktiviert)";
 #else
-         return "07.09.2015";
+         return "05.12.2016";
 #endif
       case 5:
-        return "07.09.2015";
+        return "05.12.2016";
       case 6:
-        return "22. August 2015";            /* Klartext-Datum der Bibliotheksversion */
+        return "13. November 2016";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "final";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
       case 8:
         return "5";             /* Hauptversionszahl */
       case 9:
-        return "8";             /* Unterversionszahl */
+        return "9";             /* Unterversionszahl */
    }
 }
 
@@ -21235,7 +21273,7 @@ DLL_EXPORT int rebuild_blzfile(char *inputname,char *outputname,UINT4 set)
    }
    else  /* set-Parameter 1 oder 2: LUT-Datei als Eingabedatei */
       if(set>2)set=2;   /* set darf nur 0, 1 oder 2 sein; 0 wurde schon behandelt, negative Werte gibt es nicht (UINT4 Parameter) */
-      if((ret=kto_check_init_p(inputname,9,set,0))<=0)RETURN(ret);
+   if((ret=kto_check_init_p(inputname,9,set,0))<=0)RETURN(ret);
 
    if(!(out=fopen(outputname,"w"))){
       PRINT_VERBOSE_DEBUG_FILE("fopen");
@@ -23047,11 +23085,12 @@ static int binary_search(char *a,char **base,int *sort_a,int cnt,int *unten,int 
          l=x+1;
       x=(l+r)/2;
    }
-   if(y){
+   if(y){   /* Suchwort im kompletten Bereich nicht gefunden */
       *unten=*anzahl=0;
       return KEY_NOT_FOUND;
    }
 
+      /* Grenzen nach unten und oben bestimmen */
    for(l=x;l>=0 && !(*fkt)(a,base[sort_a[l]]);l--);
    l++;
    *unten=l;
@@ -23486,7 +23525,7 @@ static int *lut_suche_multiple_and(int *such_array,int *start1,int cnt1,int *sta
 
    if(cnt)*cnt=lut2_cnt;
    if(!such_array){
-      if(!(such_array=(int *)calloc(sizeof(int),lut2_cnt))){
+      if(!(such_array=(int *)calloc(lut2_cnt,sizeof(int)))){
          if(retval)*retval=ERROR_MALLOC;
          return NULL;
       }
@@ -23551,8 +23590,8 @@ DLL_EXPORT int lut_suche_init(int uniq)
    int i,id;
    LUT_SUCHE_ARR *a;
 
-   if(!(a=(LUT_SUCHE_ARR *)calloc(sizeof(LUT_SUCHE_ARR),1)))return ERROR_MALLOC;
-   if(!lut_suche_arr && !(lut_suche_arr=(LUT_SUCHE_ARR **)calloc(sizeof(LUT_SUCHE_ARR*),last_lut_suche_idx=100)))return ERROR_MALLOC;
+   if(!(a=(LUT_SUCHE_ARR *)calloc(1,sizeof(LUT_SUCHE_ARR))))return ERROR_MALLOC;
+   if(!lut_suche_arr && !(lut_suche_arr=(LUT_SUCHE_ARR **)calloc(last_lut_suche_idx=100,sizeof(LUT_SUCHE_ARR*))))return ERROR_MALLOC;
    for(i=id=0;i<last_lut_suche_idx;i++)if(!lut_suche_arr[i]){  /* freien Index suchen */
       id=i;
       break;
@@ -23764,6 +23803,41 @@ DLL_EXPORT int lut_suche(int such_id,char *such_cmd,UINT4 *such_cnt,UINT4 **fili
    else
       return OK;
 }
+#if 0
+/* Funktion lut_suche_namen_re() +§§§2 */
+DLL_EXPORT int lut_suche_namen_re(char *such_str,int *anzahl,int **start_idx,int **zweigstellen_base,
+      char ***base_name,int **blz_base)
+//#error lut_suche_namen_re hier; zunächst mal die Suche nach Namen, dann erst Volltext etc.
+{
+   if(anzahl)*anzahl=0;
+   if((init_status&7)<7)return LUT2_NOT_INITIALIZED;
+   if(lut_id_status==FALSE)return LUT1_FILE_USED;
+   if(!name)return LUT2_NAME_NOT_INITIALIZED;   
+   if(base_name)*base_name=name;
+   {
+typedef struct{
+   char *pbuffer;
+   int *cnt1;
+   int *cnt2;
+   int *special;
+   char *regexp;
+   int caseless;
+   int pcre;
+   int re_last_index;
+} MATCH_CTX;
+
+      char *buf;
+      int i,j;
+      MATCH_CTX mctx;
+
+      buf=calloc(500,sizeof(int));
+      for (i=j=0;i<500;i++)if(match(such_str,base_name[i],&mctx))buf[j++]=i;
+   }
+
+fprintf(stderr,"Suchstring: %s\n",such_str);
+//   return suche_str(such_str,anzahl,start_idx,zweigstellen_base,blz_base,&name,&sort_name,qcmp_name,LUT2_NAME_SORT);
+}
+#endif
 
 /* Funktion lut_suche_multiple() +§§§2 */
 DLL_EXPORT int lut_suche_multiple(char *such_str,int uniq,char *such_cmd,UINT4 *anzahl,UINT4 **zweigstellen,UINT4 **blz)
@@ -23805,8 +23879,9 @@ DLL_EXPORT int lut_suche_multiple(char *such_str,int uniq,char *such_cmd,UINT4 *
       }
       else
          idx=j;
+//#error volltext_zeichen() nur bei suche_volltext???
       while(volltext_zeichen(UCPP &ptr))ptr++;
-      typ=LUT_SUCHE_VOLLTEXT;
+      typ=LUT_SUCHE_VOLLTEXT; /* Default-Einstellung */
       i1=i2=0;
       if(*ptr=='-'){    /* Bereich (für numerische Suche) angegeben */
          pi2=++ptr;
@@ -25812,6 +25887,7 @@ DLL_EXPORT const char *pz2str(int pz,int *ret)
       case 3057: return "57c";
       case 3068: return "68c";
       case 3073: return "73c";
+      case 3074: return "74c";
       case 3075: return "75c";
       case 3080: return "80c";
       case 3081: return "81c";
@@ -25978,7 +26054,7 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 /* Funktion pz_aenderungen_enable() +§§§1 */
 /* ###########################################################################
  * # Die Funktion pz_aenderungen_enable() dient dazu, den Status des Flags   #
- * # pz_aenderungen_aktivieren_2015_09 abzufragen bzw. zu setzen. Falls die Variable #
+ * # pz_aenderungen_aktivieren_2016_12 abzufragen bzw. zu setzen. Falls die Variable #
  * # set 1 ist, werden die Änderungen aktiviert, falls sie 0 ist, werden     #
  * # die Änderungen deaktiviert. Bei allen anderen Werten wird das aktuelle  #
  * # Flag nicht verändert, sondern nur der Status zurückgegeben.             #
@@ -25994,8 +26070,8 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 
 DLL_EXPORT int pz_aenderungen_enable(int set)
 {
-   if(set==0 || set==1)pz_aenderungen_aktivieren_2015_09=set;
-   return pz_aenderungen_aktivieren_2015_09;
+   if(set==0 || set==1)pz_aenderungen_aktivieren_2016_12=set;
+   return pz_aenderungen_aktivieren_2016_12;
 }
 
 #if DEBUG>0
@@ -26213,7 +26289,7 @@ static int kc_ptr2id(char *ptr,int *handle,int release_mem)
 
    *handle=-1; /* für evl. malloc-Fehler vorbelegen */
    if(!h_cnt){
-      if(!(handle_ptr=(char **)calloc(sizeof(char*),HANDLE_CNT_INCREMENT)) || !(handle_free=(int*)calloc(sizeof(int),HANDLE_CNT_INCREMENT)))return ERROR_MALLOC;
+      if(!(handle_ptr=(char **)calloc(HANDLE_CNT_INCREMENT,sizeof(char*))) || !(handle_free=(int*)calloc(HANDLE_CNT_INCREMENT,sizeof(int))))return ERROR_MALLOC;
       h_cnt=HANDLE_CNT_INCREMENT;
    }
    if(!release_mem)  /* Handle für fixen String, suchen ob er schon vergeben wurde */

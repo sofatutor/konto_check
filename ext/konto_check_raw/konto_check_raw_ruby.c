@@ -4357,7 +4357,7 @@ void Init_konto_check_raw()
  *
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
- * and this version (V. 5.8 from 2015-08-22):
+ * and this version (V. 5.9 from 2016-11-02):
  *
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
@@ -4539,6 +4539,10 @@ void Init_konto_check_raw()
    rb_define_module_function(KontoCheck,"load_bank_data",load_bank_data,1);
 
       /* Rückgabewerte der konto_check Bibliothek */
+      /* (-152) Ungültiger Zähler in regulärem Ausdruck (innerhalb von {}) */
+   rb_define_const(KontoCheck,"INVALID_REGULAR_EXPRESSION_CNT",INT2FIX(INVALID_REGULAR_EXPRESSION_CNT));
+      /* (-151) Ungültiger regulärer Ausdruck (enthält zwei Zeichen aus [+?*] nacheinander) */
+   rb_define_const(KontoCheck,"INVALID_REGULAR_EXPRESSION",INT2FIX(INVALID_REGULAR_EXPRESSION));
       /* (-150) Ungültiges Handle angegeben */
    rb_define_const(KontoCheck,"INVALID_HANDLE",INT2FIX(INVALID_HANDLE));
       /* (-149) Ungültiger Index für die biq_*() Funktionen */
