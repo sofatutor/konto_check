@@ -1,6 +1,5 @@
 /* vim: ft=c:set si:set fileencoding=iso-8859-1
  */
-#line 9 "konto_check_h.lx"
 
 /*
  * ##########################################################################
@@ -484,7 +483,6 @@ extern const char *lut2_feld_namen[256];
 #define OK_KTO_REPLACED_NO_PZ                   24
 #define OK_UNTERKONTO_ATTACHED                  25
 #define OK_SHORT_BIC_USED                       26
-#line 279 "konto_check_h.lx"
 
 #define MAX_BLZ_CNT 30000  /* maximale Anzahl BLZ's in generate_lut() */
 
