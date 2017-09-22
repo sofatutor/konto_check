@@ -1227,7 +1227,7 @@ static VALUE rebuild_blzfile_rb(int argc,VALUE* argv,VALUE self)
  * Rückgabe:      aktueller Status des Flags
  */
 
-static int pz_aenderungen_enable_rb(int argc,VALUE *argv)
+static VALUE pz_aenderungen_enable_rb(int argc,VALUE *argv,VALUE self)
 {
    int mode;
    VALUE mode_rb=Qnil;
@@ -4353,11 +4353,11 @@ void Init_konto_check_raw()
 /*
  * This is a C/Ruby library to check the validity of German Bank Account
  * Numbers. All currently defined test methods by Deutsche Bundesbank
- * (00 to E3) are implemented.
+ * (00 to E4) are implemented.
  *
  * <b>ATTENTION:</b> There are a few important changes in the API between
  * version 0.0.2 (version by Peter Horn/Provideal), version 0.0.6 (jeanmartin)
- * and this version (V. 6.00 from 2017-06-13):
+ * and this version (V. 6.01 from 2017-08-13):
  *
  * * The function KontoCheck::load_bank_data() is no longer used; it is
  *   replaced by KontoCheck::init() and KontoCheck::generate_lutfile().
