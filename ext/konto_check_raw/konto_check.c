@@ -48,11 +48,11 @@
 
 /* Definitionen und Includes  */
 #ifndef VERSION
-#define VERSION "6.01 (final)"
+#define VERSION "6.02 (final)"
 #define VERSION_MAJOR 6
-#define VERSION_MINOR 01
+#define VERSION_MINOR 02
 #endif
-#define VERSION_DATE "2017-08-13"
+#define VERSION_DATE "2017-11-26"
 
 #ifndef INCLUDE_KONTO_CHECK_DE
 #define INCLUDE_KONTO_CHECK_DE 1
@@ -103,8 +103,8 @@ static lzo_align_t __LZO_MMODEL wrkmem[LZO1X_1_MEM_COMPRESS];
 #define KONTO_CHECK_VARS
 #include "konto_check.h"
 
-   /* Flag, um die Änderungen zum September 2017 zu aktivieren */
-static int pz_aenderungen_aktivieren_2017_09;
+   /* Flag, um die Änderungen zum Dezember 2017 zu aktivieren */
+static int pz_aenderungen_aktivieren_2017_12;
 
    /* falls die Variable verbose_debug gesetzt wird, werden bei einigen
     * Funktionen mittels perror() zusätzliche Debuginfos ausgegeben. Die
@@ -8155,140 +8155,6 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
       case 45:
 
             /* ab September 2017 entfällt die Regel 45, bleibt jedoch frei */
-         if(pz_aenderungen_aktivieren_2017_09)return OK;
-
-            /* Einer nach der Standard IBAN-Regel ermittelten IBAN ist stets
-             * der BIC ESSEDE5FXXX zuzuordnen.
-             */
-         if(version<1){
-               *bicp="ESSEDE5FXXX";
-               return OK_BLZ_REPLACED;
-         }
-         else switch(b){   /* Ab Dezember 2013 wird eine Liste von BLZs angegeben */
-            case 50210130:
-            case 50210131:
-            case 50210132:
-            case 50210133:
-            case 50210134:
-            case 50210135:
-            case 50210136:
-            case 50210137:
-            case 50210138:
-            case 50210139:
-            case 50210140:
-            case 50210141:
-            case 50210142:
-            case 50210143:
-            case 50210144:
-            case 50210145:
-            case 50210146:
-            case 50210147:
-            case 50210148:
-            case 50210149:
-            case 50210150:
-            case 50210151:
-            case 50210152:
-            case 50210153:
-            case 50210154:
-            case 50210155:
-            case 50210156:
-            case 50210157:
-            case 50210158:
-            case 50210159:
-            case 50210160:
-            case 50210161:
-            case 50210162:
-            case 50210163:
-            case 50210164:
-            case 50210165:
-            case 50210166:
-            case 50210167:
-            case 50210168:
-            case 50210169:
-            case 50210170:
-            case 50210171:
-            case 50210172:
-            case 50210173:
-            case 50210174:
-            case 50210175:
-            case 50210176:
-            case 50210177:
-            case 50210178:
-            case 50210179:
-            case 50210180:
-            case 50210181:
-            case 50210182:
-            case 50210183:
-            case 50210184:
-            case 50210185:
-            case 50210186:
-            case 50210187:
-            case 50210188:
-            case 50210189:
-            case 50510120:
-            case 50510121:
-            case 50510122:
-            case 50510123:
-            case 50510124:
-            case 50510125:
-            case 50510126:
-            case 50510127:
-            case 50510128:
-            case 50510129:
-            case 50510130:
-            case 50510131:
-            case 50510132:
-            case 50510133:
-            case 50510134:
-            case 50510135:
-            case 50510136:
-            case 50510137:
-            case 50510138:
-            case 50510139:
-            case 50510140:
-            case 50510141:
-            case 50510142:
-            case 50510143:
-            case 50510144:
-            case 50510145:
-            case 50510146:
-            case 50510147:
-            case 50510148:
-            case 50510149:
-            case 50510150:
-            case 50510151:
-            case 50510152:
-            case 50510153:
-            case 50510154:
-            case 50510155:
-            case 50510156:
-            case 50510157:
-            case 50510158:
-            case 50510159:
-            case 50510160:
-            case 50510161:
-            case 50510162:
-            case 50510163:
-            case 50510164:
-            case 50510165:
-            case 50510166:
-            case 50510167:
-            case 50510168:
-            case 50510169:
-            case 50510170:
-            case 50510171:
-            case 50510172:
-            case 50510173:
-            case 50510174:
-            case 50510175:
-            case 50510176:
-            case 50510177:
-            case 50510178:
-            case 50510179:
-            case 50510180:
-               *bicp="ESSEDE5FXXX";
-               return OK_BLZ_REPLACED;
-         }
          return OK;
 
 
@@ -8526,9 +8392,12 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
 
          /* Iban-Regel 0056.00 +§§§3 */
          /* Iban-Regel 0056.01 (ab September 2017) +§§§3 */
+         /* Iban-Regel 0056.01 (ab Dezember 2017) BLZ 51410111 ungültig +§§§3 */
+
+
          /* SEB AG */
       case 56:
-         if(!pz_aenderungen_aktivieren_2017_09 || (pz_aenderungen_aktivieren_2017_09 && version<1)){
+         if(version<1){
 
                /* Spendenkonten: nur mit festgelegten IBANs -> Konto und evl. BLZ/BIC anpassen */
             if(k1==0)switch(k2){
@@ -8580,6 +8449,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
          }
 
             /* für die folgenden BLZs sind nur zehnstelllige Kontonummern erlaubt: */
+         if(pz_aenderungen_aktivieren_2017_12 && b==51410111)return INVALID_BLZ; /* die BLZ wird ab Dezember 2017 ungültig */
          switch(b){
             case 10010111:
             case 13010111:
@@ -8619,7 +8489,7 @@ static int iban_regel_cvt(char *blz,char *kto,const char **bicp,int regel_versio
             case 50510111:
             case 51010111:
             case 51310111:
-            case 51410111:
+            case 51410111:    /* wird ab Dezember 2017 ungültig */
             case 52010111:
             case 54210111:
             case 55010111:
@@ -9175,8 +9045,8 @@ static void init_atoi_table(void)
    int i,ziffer;
    unsigned long l;
 
-      /* Änderungen zum 04.09.2017 aktivieren */
-   if(time(NULL)>1504476000 ||0)pz_aenderungen_aktivieren_2017_09=1;
+      /* Änderungen zum 04.12.2017 aktivieren */
+   if(time(NULL)>1512342000 ||0)pz_aenderungen_aktivieren_2017_12=1;
 
    /* ungültige Ziffern; Blanks und Tabs werden ebenfalls als ungültig
     * angesehen(!), da die Stellenzuordnung sonst nicht mehr stimmt. Ausnahme:
@@ -18374,7 +18244,6 @@ static int kto_check_int(char *x_blz,int pz_methode,char *kto)
          }
 #endif
             /* Variante 3, gültig ab September 2017 */
-         if(!pz_aenderungen_aktivieren_2017_09)return UNDEFINED_SUBMETHOD;
          pz = (kto[0]-'0') * 4
             + (kto[1]-'0') * 3
             + (kto[2]-'0') * 2
@@ -20548,7 +20417,7 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
 {
    char *blz_o,buffer[32],kto_o[16],*blz_n,*kto_n,*ptr,*dptr;
    const char *bicp;
-   int ret,ret_regel,r;
+   int ret,ret_regel,r,i;
 
    if(regel)*regel=0;
    if(blz2 && kto2){
@@ -20560,7 +20429,8 @@ DLL_EXPORT int kto_check_regel_dbg(char *blz,char *kto,char *blz2,char *kto2,con
       kto_n=buffer+10;
    }
    memcpy(blz_n,blz,9);
-   for(ptr=kto;*ptr;ptr++);   /* Ende von kto suchen */
+   for(ptr=kto,i=0;*ptr && i++<10;ptr++);   /* Ende von kto suchen (maximal 10 Stellen) */
+   if(*ptr)return INVALID_KTO_LENGTH;
    ptr--;
    memcpy(kto_n,"0000000000",10);
    kto_n[10]=0;
@@ -20603,10 +20473,11 @@ DLL_EXPORT int kto_check_regel(char *blz,char *kto)
 {
    char *blz_o,blz_n[10],kto_o[16],kto_n[16],*ptr,*dptr;
    const char *bicp;
-   int ret,ret_regel,regel;
+   int ret,ret_regel,regel,i;
 
    memcpy(blz_n,blz,9);
-   for(ptr=kto;*ptr;ptr++);   /* Ende von kto suchen */
+   for(ptr=kto,i=0;*ptr && i++<10;ptr++);   /* Ende von kto suchen (maximal 10 Stellen) */
+   if(*ptr)return INVALID_KTO_LENGTH;
    ptr--;
    memcpy(kto_n,"0000000000",10);
    kto_n[10]=0;
@@ -21111,20 +20982,20 @@ DLL_EXPORT const char *get_kto_check_version_x(int mode)
       case 3:
          return __DATE__ ", " __TIME__;    /* Compilierdatum und -zeit */
       case 4:                              /* Datum der Prüfziffermethode */
-         if(pz_aenderungen_aktivieren_2017_09)
-            return "04.09.2017";
+         if(pz_aenderungen_aktivieren_2017_12)
+            return "04.12.2017";
          else
-            return "05.06.2017 (Aenderungen vom 04.09.2017 enthalten aber noch nicht aktiviert)";
+            return "04.09.2017 (Aenderungen vom 04.12.2017 enthalten aber noch nicht aktiviert)";
       case 5:
-        return "04.09.2017";
+        return "04.12.2017";
       case 6:
-        return "13. August 2017";            /* Klartext-Datum der Bibliotheksversion */
+        return "26. November 2017";            /* Klartext-Datum der Bibliotheksversion */
       case 7:
         return "final";              /* Versions-Typ der Bibliotheksversion (development, beta, final) */
       case 8:
         return "6";             /* Hauptversionszahl */
       case 9:
-        return "01";             /* Unterversionszahl */
+        return "02";             /* Unterversionszahl */
    }
 }
 
@@ -26194,7 +26065,7 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 /* Funktion pz_aenderungen_enable() +§§§1 */
 /* ###########################################################################
  * # Die Funktion pz_aenderungen_enable() dient dazu, den Status des Flags   #
- * # pz_aenderungen_aktivieren_2017_09 abzufragen bzw. zu setzen. Falls die Variable #
+ * # pz_aenderungen_aktivieren_2017_12 abzufragen bzw. zu setzen. Falls die Variable #
  * # set 1 ist, werden die Änderungen aktiviert, falls sie 0 ist, werden     #
  * # die Änderungen deaktiviert. Bei allen anderen Werten wird das aktuelle  #
  * # Flag nicht verändert, sondern nur der Status zurückgegeben.             #
@@ -26210,8 +26081,8 @@ DLL_EXPORT int lut_keine_iban_berechnung(char *iban_blacklist,char *lutfile,int 
 
 DLL_EXPORT int pz_aenderungen_enable(int set)
 {
-   if(set==0 || set==1)pz_aenderungen_aktivieren_2017_09=set;
-   return pz_aenderungen_aktivieren_2017_09;
+   if(set==0 || set==1)pz_aenderungen_aktivieren_2017_12=set;
+   return pz_aenderungen_aktivieren_2017_12;
 }
 
 #if DEBUG>0
