@@ -1,3 +1,20 @@
+This is a fork from https://sourceforge.net/p/kontocheck/code/HEAD/tree/trunk/konto_check/ruby/ which has been created
+because the current version of the gem on rubygems and in the original svn repository does not compile with extensions
+on newer Linux distributions such as Linux 16.04/18.04 or debian jessie/stretch and the original gem authors do not fix
+the issue or answer to bug tickets right now.
+
+The code changes needed in order to achieve the gem to compile again are minimal, but we cannot guarantee the code to
+keep working as designed, so please DO NOT USE THIS PATCH ON PRODUCTION.
+
+In order to compile the gem on linux and use it in your local bundle, run the following commands from your project root:
+
+<pre>
+gem install specific_install && gem specific_install -l https://github.com/sofatutor/konto_check.git &&\
+gem install gem-compiler && gem compile `gem env home`/cache/konto_check-6.02.0.gem && mv konto_check-6.02.0-*.gem vendor/cache
+</pre>
+
+---
+
 h1. KontoCheck
 
 Check whether a certain bic/account-no-combination can possibly be valid for a German bank,
