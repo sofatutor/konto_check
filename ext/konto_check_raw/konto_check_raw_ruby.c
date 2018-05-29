@@ -810,7 +810,7 @@ static VALUE lut_blocks_rb(int argc,VALUE* argv,VALUE self)
  */
 static VALUE lut_blocks1_rb(int argc,VALUE* argv,VALUE self)
 {
-   rb_scan_args(argc,argv,"0",NULL);
+   // rb_scan_args(argc,argv,"0",NULL);
    return INT2FIX(lut_blocks(0,NULL,NULL,NULL));
 }
 
