@@ -9,8 +9,7 @@ keep working as designed, so please DO NOT USE THIS PATCH ON PRODUCTION.
 In order to compile the gem on linux and use it in your local bundle, run the following commands from your project root:
 
 <pre>
-gem install specific_install && gem specific_install -l https://github.com/sofatutor/konto_check.git &&\
-gem install gem-compiler && gem compile `gem env home`/cache/konto_check-6.02.0.gem && mv konto_check-6.02.0-*.gem vendor/cache
+if [ ! -d "../konto_check" ] ; then git clone http://github.com/sofatutor/konto_check.git ../konto_check ; fi && cd ../konto_check && gem build konto_check.gemspec && cd - && gem install gem-compiler && gem compile ../konto_check/konto_check-6.02.0.gem && mv konto_check-6.02.0-*.gem vendor/cache
 </pre>
 
 ---
